@@ -1,5 +1,6 @@
 package com.hcmute.devhire.entities;
 
+import com.hcmute.devhire.Utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,8 +23,9 @@ public class MemberVip extends BaseEntity {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
-    private String status;
+    private Status status;
 
     @Column(name = "sign_day")
     private Date signDay;

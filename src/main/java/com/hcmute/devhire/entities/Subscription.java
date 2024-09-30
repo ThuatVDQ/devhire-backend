@@ -1,5 +1,6 @@
 package com.hcmute.devhire.entities;
 
+import com.hcmute.devhire.Utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,14 +28,16 @@ public class Subscription extends BaseEntity {
     @Column(name = "price")
     private Double price;
 
-    @Column(name = "description")
+    @Lob
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "amount")
     private int amount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
-    private String status;
+    private Status status;
 
     @OneToMany(mappedBy = "subscription",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MemberVip> memberVips;

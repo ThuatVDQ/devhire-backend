@@ -26,7 +26,8 @@ public class Company extends BaseEntity {
     @Column(name="logo", length = 255)
     private String logo;
 
-    @Column(name="description")
+    @Lob
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name="scale")
@@ -47,12 +48,11 @@ public class Company extends BaseEntity {
     @Column(name="status", length = 20)
     private String status;
 
-    @Column(name="created_by")
-    private Long createdBy;
+    @OneToOne
+    @JoinColumn(name = "created_by")
+    private User createdBy;
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Job> jobs;
 
-    @OneToOne
-    private User user;
 }

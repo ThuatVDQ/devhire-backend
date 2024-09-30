@@ -1,6 +1,8 @@
 package com.hcmute.devhire.entities;
 
 import com.hcmute.devhire.Utils.Currency;
+import com.hcmute.devhire.Utils.JobStatus;
+import com.hcmute.devhire.Utils.JobType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,14 +25,16 @@ public class Job extends BaseEntity {
     @Column(name = "title", length = 255)
     private String title;
 
-    @Column(name = "description")
+    @Lob
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "slots")
     private int slots;
 
-    @Column(name = "type", length = 20)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private JobType type;
 
     @Column(name = "experience", length = 50)
     private String experience;
@@ -51,10 +55,12 @@ public class Job extends BaseEntity {
     @Column(name = "salary_end")
     private Double salaryEnd;
 
-    @Column(name = "requirement")
+    @Lob
+    @Column(name = "requirement", columnDefinition = "TEXT")
     private String requirement;
 
-    @Column(name = "benefit")
+    @Lob
+    @Column(name = "benefit", columnDefinition = "TEXT")
     private String benefit;
 
     @Column(name = "deadline")
@@ -69,11 +75,9 @@ public class Job extends BaseEntity {
     @Column(name = "views")
     private int views;
 
-    @Column(name = "status", length = 20)
-    private String status;
-
-    @Column(name = "created_by")
-    private Long createdBy;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private JobStatus status;
 
     @ManyToOne
     @JoinColumn(name = "company_id", referencedColumnName = "id")

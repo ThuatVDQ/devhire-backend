@@ -1,5 +1,6 @@
 package com.hcmute.devhire.entities;
 
+import com.hcmute.devhire.Utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,8 +37,13 @@ public class User extends BaseEntity {
     @Column(name = "avatar_url", length = 255)
     private String avatarUrl;
 
+    @Lob
+    @Column(name = "introduction", columnDefinition = "TEXT")
+    private String introduction;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
-    private String status;
+    private Status status;
 
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
