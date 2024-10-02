@@ -1,4 +1,4 @@
-package com.hcmute.devhire.Utils;
+package com.hcmute.devhire.utils;
 
 public enum JobType {
     PARTIME, FULLTIME, INTERNSHIP

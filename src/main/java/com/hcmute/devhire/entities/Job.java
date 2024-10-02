@@ -1,8 +1,8 @@
 package com.hcmute.devhire.entities;
 
-import com.hcmute.devhire.Utils.Currency;
-import com.hcmute.devhire.Utils.JobStatus;
-import com.hcmute.devhire.Utils.JobType;
+import com.hcmute.devhire.utils.Currency;
+import com.hcmute.devhire.utils.JobStatus;
+import com.hcmute.devhire.utils.JobType;
 import jakarta.persistence.*;
 import lombok.*;
 

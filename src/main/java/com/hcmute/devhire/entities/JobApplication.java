@@ -1,6 +1,6 @@
 package com.hcmute.devhire.entities;
 
-import com.hcmute.devhire.Utils.JobApplicationStatus;
+import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

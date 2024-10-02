@@ -1,10 +1,8 @@
 package com.hcmute.devhire.entities;
 
-import com.hcmute.devhire.Utils.Status;
+import com.hcmute.devhire.utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Date;
 
 @Entity
 @Table(name = "user")
