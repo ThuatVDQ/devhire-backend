@@ -1,7 +1,9 @@
 package com.hcmute.devhire.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "job_skill")
+@Builder
 public class JobSkill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,5 +23,6 @@ public class JobSkill {
 
     @ManyToOne
     @JoinColumn(name = "job_id", referencedColumnName = "id")
+    @JsonBackReference
     private Job job;
 }

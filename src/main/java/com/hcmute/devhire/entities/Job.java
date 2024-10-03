@@ -1,5 +1,6 @@
 package com.hcmute.devhire.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.hcmute.devhire.utils.Currency;
 import com.hcmute.devhire.utils.JobStatus;
 import com.hcmute.devhire.utils.JobType;
@@ -84,9 +85,11 @@ public class Job extends BaseEntity {
     private Company company;
 
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<JobAddress> jobAddresses;
 
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<JobSkill> jobSkills;
 
     @ManyToOne
