@@ -1,7 +1,9 @@
 package com.hcmute.devhire.components;
 
 import com.hcmute.devhire.entities.User;
+import io.jsonwebtoken.io.Encoders;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Claims;
@@ -10,6 +12,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +20,7 @@ import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
-public class JwtUtils {
+public class JwtUtil {
     @Value("${jwt.expiration}")
     private int expiration;
     @Value("${jwt.secretKey}")
@@ -26,6 +29,7 @@ public class JwtUtils {
     public String generateToken(User user) {
         //properties -> claims
         Map<String, Object> claims = new HashMap<>();
+        //this.generateSecretKey();
         claims.put("phone", user.getPhone());
         try {
             return Jwts.builder()
@@ -44,6 +48,14 @@ public class JwtUtils {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+    private String generateSecretKey() {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] key = new byte[32];
+        secureRandom.nextBytes(key);
+
+        return Encoders.BASE64.encode(key);
+    }
+
     private Claims extractAllClaims(String token) {
         try {
             return Jwts.parserBuilder()
@@ -63,8 +75,15 @@ public class JwtUtils {
     }
 
     //check expiration
-    private Boolean isTokenExpired(String token) {
+    private boolean isTokenExpired(String token) {
         Date expirationDate = this.extractClaim(token, Claims::getExpiration);
         return expirationDate.before(new Date());
+    }
+    public String extractPhone(String token) {
+        return this.extractClaim(token, Claims::getSubject);
+    }
+    public boolean validateToken(String token, UserDetails userDetails) {
+        String phone = this.extractPhone(token);
+        return (phone.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }

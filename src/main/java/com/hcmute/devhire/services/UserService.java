@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import com.hcmute.devhire.components.JwtUtils;
+import com.hcmute.devhire.components.JwtUtil;
 
 
 import java.util.Optional;
@@ -25,7 +25,7 @@ public class UserService implements IUserService{
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final JwtUtils jwtUtils;
+    private final JwtUtil jwtUtil;
     @Override
     @Transactional
     public User createUser(UserDTO userDTO) throws Exception {
@@ -70,6 +70,6 @@ public class UserService implements IUserService{
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(phone, password);
         //authenticate with java spring security
         authenticationManager.authenticate(authenticationToken);
-        return jwtUtils.generateToken(user.get());
+        return jwtUtil.generateToken(user.get());
     }
 }
