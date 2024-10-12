@@ -1,5 +1,6 @@
 package com.hcmute.devhire.components;
 
+import com.hcmute.devhire.entities.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,7 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 final String token = authorizationHeader.substring(7);
                 final String phone = jwtUtil.extractPhone(token);
                 if (phone != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = (UserDetails) userDetailsService.loadUserByUsername(phone);
+                    User userDetails = (User) userDetailsService.loadUserByUsername(phone);
                     if (jwtUtil.validateToken(token, userDetails)) {
                         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities()
