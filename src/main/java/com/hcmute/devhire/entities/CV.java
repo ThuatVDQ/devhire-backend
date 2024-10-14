@@ -18,4 +18,7 @@ public class CV extends BaseEntity {
 
     @Column(name = "cv_url", length = 255)
     private String cvUrl;
+
+    @Column(name = "user_id")
+    private Long userId;
 }

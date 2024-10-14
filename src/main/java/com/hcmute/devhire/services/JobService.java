@@ -65,4 +65,9 @@ public class JobService implements IJobService{
     public Page<Job> getAllJobs(PageRequest pageRequest) {
         return jobRepository.findAll(pageRequest);
     }
+
+    @Override
+    public Job findById(Long jobId) {
+        return jobRepository.findById(jobId).orElse(null);
+    }
 }

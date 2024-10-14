@@ -42,6 +42,20 @@ public class JobApplicationService implements IJobApplicationService{
 
         return jobApplicationRepository.save(jobApplication);
     }
+
+    @Override
+    public JobApplicationDTO getJobApplication(Long jobApplicationId) throws DataNotFoundException {
+        JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId)
+                .orElseThrow(() ->
+                        new DataNotFoundException("Job application not found with id: " + jobApplicationId));
+        return JobApplicationDTO.builder()
+                .status(jobApplication.getStatus().name())
+                .jobId(jobApplication.getJob().getId())
+                .userId(jobApplication.getUser().getId())
+                .cvId(jobApplication.getCv().getId())
+                .build();
+    }
+
     @Override
     public List<JobApplication> findByJobId(Long jobId) {
         return jobApplicationRepository.findByJobId(jobId);
