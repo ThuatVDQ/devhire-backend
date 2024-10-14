@@ -37,7 +37,7 @@ public class JobApplicationController {
     @PostMapping("/apply/{jobId}")
     public ResponseEntity<?> applyJob(
             @PathVariable("jobId") Long jobId,
-            @RequestBody Long userId
+            @RequestParam Long userId
             ) {
         try {
             User existUser = userService.findById(userId);
@@ -62,7 +62,7 @@ public class JobApplicationController {
 
     @PostMapping(value = "/apply/upload-cv/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadCV(
-            @ModelAttribute("file") MultipartFile file,
+            @RequestParam("file") MultipartFile file,
             @PathVariable("userId") Long userId
     ) throws Exception {
         try {
@@ -117,37 +117,4 @@ public class JobApplicationController {
 
         return uniqueFilename;
     }
-
-    @PostMapping(value = "/upload-cv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> upload(
-            @ModelAttribute("file") MultipartFile file
-    ) throws Exception {
-        try {
-            if (file == null || file.isEmpty()) {
-                return ResponseEntity.badRequest().body("No file uploaded");
-            }
-
-            // Kiểm tra kích thước file
-            if (file.getSize() > 10 * 1024 * 1024) { // >10mb
-                return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                        .body("File is too large! Maximum size is 10MB");
-            }
-
-            // Kiểm tra định dạng file
-            String contentType = file.getContentType();
-            if (contentType == null ||
-                    (!contentType.startsWith("image/") && !contentType.equals("application/pdf"))) {
-                return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                        .body("File must be an image or a PDF");
-            }
-
-            // Lưu file và lưu vào database
-            String filename = storeFile(file);
-
-            return ResponseEntity.ok().body(filename);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
 }

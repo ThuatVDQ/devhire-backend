@@ -20,8 +20,12 @@ public class WebSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeRequests(requests -> requests
-                        .requestMatchers("**").permitAll()
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers(
+                                "**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
                 );
         return http.build();
     }

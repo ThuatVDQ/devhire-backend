@@ -38,7 +38,7 @@ public class JobApplicationService implements IJobApplicationService{
         jobApplication.setJob(job);
         jobApplication.setUser(user);
         jobApplication.setCv(cv);
-        jobApplication.setStatus(JobApplicationStatus.valueOf(jobApplicationDTO.getStatus()));
+        jobApplication.setStatus(JobApplicationStatus.IN_PROGRESS);
 
         return jobApplicationRepository.save(jobApplication);
     }
