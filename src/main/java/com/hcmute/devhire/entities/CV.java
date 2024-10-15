@@ -3,6 +3,10 @@ package com.hcmute.devhire.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Entity
 @Table(name = "cv")
 @Getter
@@ -19,6 +23,10 @@ public class CV extends BaseEntity {
     @Column(name = "cv_url", length = 255)
     private String cvUrl;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private User user;
+
+    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<JobApplication> jobApplications;
 }

@@ -3,6 +3,8 @@ package com.hcmute.devhire.DTOs;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,4 +33,6 @@ public class JobApplicationDTO {
 
     @JsonProperty("cv_url")
     private String cvUrl;
+
+    private LocalDateTime applyDate;
 }

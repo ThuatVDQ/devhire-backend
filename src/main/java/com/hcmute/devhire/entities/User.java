@@ -42,9 +42,6 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "avatar_url", length = 255)
     private String avatarUrl;
 
-    @Column(name = "cv_url", length = 255)
-    private String cvUrl;
-
     @Lob
     @Column(name = "introduction", columnDefinition = "TEXT")
     private String introduction;
@@ -56,6 +53,9 @@ public class User extends BaseEntity implements UserDetails {
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<JobApplication> jobApplications;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -3,16 +3,14 @@ package com.hcmute.devhire.services;
 import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.entities.Category;
 import com.hcmute.devhire.entities.Job;
-import com.hcmute.devhire.entities.JobAddress;
-import com.hcmute.devhire.entities.JobSkill;
+import com.hcmute.devhire.entities.Address;
+import com.hcmute.devhire.entities.Skill;
 import com.hcmute.devhire.repositories.JobRepository;
 import com.hcmute.devhire.utils.Currency;
 import com.hcmute.devhire.utils.EnumUtil;
 import com.hcmute.devhire.utils.JobStatus;
 import com.hcmute.devhire.utils.JobType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,9 +30,9 @@ public class JobService implements IJobService{
 
         Category category = categoryService.findById(jobDTO.getCategory().getId());
 
-        List<JobAddress> jobAddresses = jobAddressService.createJobAddresses(jobDTO.getJobAddresses());
+        List<Address> addresses = jobAddressService.createJobAddresses(jobDTO.getJobAddresses());
 
-        List<JobSkill> jobSkills = jobSkillService.createJobSkills(jobDTO.getJobSkills());
+        List<Skill> skills = jobSkillService.createJobSkills(jobDTO.getJobSkills());
 
         Job newJob = Job.builder()
                 .title(jobDTO.getTitle())
@@ -52,12 +50,12 @@ public class JobService implements IJobService{
                 .slots(jobDTO.getSlots())
                 .status(status)
                 .category(category)
-                .jobAddresses(jobAddresses)
-                .jobSkills(jobSkills)
+                .addresses(addresses)
+                .skills(skills)
                 .build();
 
-        jobAddresses.forEach(address -> address.setJob(newJob));
-        jobSkills.forEach(skill -> skill.setJob(newJob));
+        addresses.forEach(address -> address.setJob(newJob));
+        skills.forEach(skill -> skill.setJob(newJob));
         return jobRepository.save(newJob);
     }
 

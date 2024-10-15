@@ -29,6 +29,7 @@ public class JobApplication extends BaseEntity {
     @JoinColumn(name = "job_id", referencedColumnName = "id")
     private Job job;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "cv_id", nullable = false)
     private CV cv;
 }

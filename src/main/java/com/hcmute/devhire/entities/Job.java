@@ -86,13 +86,17 @@ public class Job extends BaseEntity {
 
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<JobAddress> jobAddresses;
+    private List<Address> addresses;
 
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<JobSkill> jobSkills;
+    private List<Skill> skills;
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
+
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<JobApplication> jobApplications;
 }
