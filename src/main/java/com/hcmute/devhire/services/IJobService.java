@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface IJobService {
     Job createJob(JobDTO jobDTO);
-    Page<Job> getAllJobs(PageRequest pageRequest);
+    List<Job> getAllJobs();
     Job findById(Long jobId);
 }

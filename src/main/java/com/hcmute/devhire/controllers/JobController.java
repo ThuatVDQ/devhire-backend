@@ -21,13 +21,9 @@ public class JobController {
     private final JobService jobService;
 
     @GetMapping("")
-    public ResponseEntity<?> getAllJobs(@RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "10") int limit) {
-        PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("id").ascending());
-        Page<Job> jobPage = jobService.getAllJobs(pageRequest);
-        int totalPages = jobPage.getTotalPages();
-        List<Job> jobs = jobPage.getContent();
-        return ResponseEntity.ok(Collections.singletonList(JobListResponse.builder().jobs(jobs).totalPages(totalPages).build()));
+    public ResponseEntity<?> getAllJobs() {
+        List<Job> jobs = jobService.getAllJobs();
+        return ResponseEntity.ok(jobs);
     }
 
     @PostMapping("")

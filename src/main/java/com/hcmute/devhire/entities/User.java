@@ -42,6 +42,9 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "avatar_url", length = 255)
     private String avatarUrl;
 
+    @Column(name = "cv_url", length = 255)
+    private String cvUrl;
+
     @Lob
     @Column(name = "introduction", columnDefinition = "TEXT")
     private String introduction;

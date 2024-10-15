@@ -62,8 +62,8 @@ public class JobService implements IJobService{
     }
 
     @Override
-    public Page<Job> getAllJobs(PageRequest pageRequest) {
-        return jobRepository.findAll(pageRequest);
+    public List<Job> getAllJobs() {
+        return jobRepository.findAll();
     }
 
     @Override
