@@ -15,9 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -38,7 +36,6 @@ public class WebSecurityConfig {
                 );
         return http.build();
     }
-
     // Fix the CORS errors
     @Bean
     public FilterRegistrationBean simpleCorsFilter() {
