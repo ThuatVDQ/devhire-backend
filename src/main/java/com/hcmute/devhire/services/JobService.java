@@ -1,15 +1,12 @@
 package com.hcmute.devhire.services;
 
+import com.hcmute.devhire.DTOs.ApplyJobRequestDTO;
+import com.hcmute.devhire.DTOs.JobApplicationDTO;
 import com.hcmute.devhire.DTOs.JobDTO;
-import com.hcmute.devhire.entities.Category;
-import com.hcmute.devhire.entities.Job;
-import com.hcmute.devhire.entities.Address;
-import com.hcmute.devhire.entities.Skill;
+import com.hcmute.devhire.entities.*;
+import com.hcmute.devhire.repositories.JobApplicationRepository;
 import com.hcmute.devhire.repositories.JobRepository;
-import com.hcmute.devhire.utils.Currency;
-import com.hcmute.devhire.utils.EnumUtil;
-import com.hcmute.devhire.utils.JobStatus;
-import com.hcmute.devhire.utils.JobType;
+import com.hcmute.devhire.utils.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +18,9 @@ public class JobService implements IJobService{
     private final CategoryService categoryService;
     private final JobAddressService jobAddressService;
     private final JobSkillService jobSkillService;
-
+    private final IUserService userService;
+    private final ICVService cvService;
+    private final JobApplicationRepository jobApplicationRepository;
     @Override
     public Job createJob(JobDTO jobDTO) {
         JobType jobType = EnumUtil.getEnumFromString(JobType.class, jobDTO.getType());
@@ -52,10 +51,10 @@ public class JobService implements IJobService{
                 .category(category)
                 .addresses(addresses)
                 .skills(skills)
+                .addresses(addresses)
+                .skills(skills)
                 .build();
 
-        addresses.forEach(address -> address.setJob(newJob));
-        skills.forEach(skill -> skill.setJob(newJob));
         return jobRepository.save(newJob);
     }
 
@@ -67,5 +66,24 @@ public class JobService implements IJobService{
     @Override
     public Job findById(Long jobId) {
         return jobRepository.findById(jobId).orElse(null);
+    }
+
+    @Override
+    public JobApplication applyForJob(Long jobId, ApplyJobRequestDTO applyJobRequestDTO) throws Exception {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
+        User user = userService.findById(applyJobRequestDTO.getUserId());
+
+        CV cv = cvService.findById(applyJobRequestDTO.getCvId())
+                .orElseThrow(() -> new Exception("CV not found with id: " + applyJobRequestDTO.getCvId()));
+
+        JobApplication jobApplication = JobApplication
+                .builder()
+                .job(job)
+                .cv(cv)
+                .user(user)
+                .status(JobApplicationStatus.IN_PROGRESS)
+                .build();
+        return jobApplicationRepository.save(jobApplication);
     }
 }

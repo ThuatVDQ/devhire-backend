@@ -20,28 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JobApplicationService implements IJobApplicationService{
     private final JobApplicationRepository jobApplicationRepository;
-    private final JobRepository jobRepository;
-    private final UserRepository userRepository;
-    private final CVRepository cvRepository;
-    @Override
-    public JobApplication applyJob(JobApplicationDTO jobApplicationDTO) throws Exception {
-        User user = userRepository.findById(jobApplicationDTO.getUserId())
-                .orElseThrow(() ->
-                        new DataNotFoundException("User not found with id: " + jobApplicationDTO.getUserId()));
-        Job job = jobRepository.findById(jobApplicationDTO.getJobId())
-                .orElseThrow(() ->
-                        new DataNotFoundException("Job not found with id: " + jobApplicationDTO.getJobId()));
-        CV cv = cvRepository.findById(jobApplicationDTO.getCvId())
-                .orElseThrow(() ->
-                        new DataNotFoundException("CV not found with id: " + jobApplicationDTO.getCvId()));
-        JobApplication jobApplication = new JobApplication();
-        jobApplication.setJob(job);
-        jobApplication.setUser(user);
-        jobApplication.setCv(cv);
-        jobApplication.setStatus(JobApplicationStatus.IN_PROGRESS);
 
-        return jobApplicationRepository.save(jobApplication);
-    }
 
     @Override
     public JobApplicationDTO getJobApplication(Long jobApplicationId) throws DataNotFoundException {

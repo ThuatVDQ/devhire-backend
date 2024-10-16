@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -21,8 +23,10 @@ public class Skill {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "job_id", referencedColumnName = "id")
-    @JsonBackReference
-    private Job job;
+//    @ManyToOne
+//    @JoinColumn(name = "job_id", referencedColumnName = "id")
+//    @JsonBackReference
+//    private Job job;
+    @ManyToMany(mappedBy = "skills", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Job> jobs;
 }

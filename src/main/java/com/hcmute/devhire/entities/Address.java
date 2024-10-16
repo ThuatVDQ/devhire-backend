@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
-@Table(name = "job_address")
+@Table(name = "address")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -17,10 +19,12 @@ public class Address extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "job_id", referencedColumnName = "id")
-    @JsonBackReference
-    private Job job;
+//    @ManyToOne
+//    @JoinColumn(name = "job_id", referencedColumnName = "id")
+//    @JsonBackReference
+//    private Job job;
+    @ManyToMany(mappedBy = "addresses", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Job> jobs;
 
     @Column(name = "country", length = 50)
     private String country;

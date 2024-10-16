@@ -14,6 +14,5 @@ public interface IJobApplicationService {
     void deleteByJobId(Long jobId);
     void deleteByUserId(Long userId);
 
-    JobApplication applyJob(JobApplicationDTO jobApplicationDTO) throws Exception;
     JobApplicationDTO getJobApplication(Long jobApplicationId) throws DataNotFoundException;
 }
