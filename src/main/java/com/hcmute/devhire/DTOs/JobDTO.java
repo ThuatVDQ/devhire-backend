@@ -36,6 +36,6 @@ public class JobDTO {
     private String status;
 
     private CategoryDTO category;
-    private List<JobAddressDTO> jobAddresses;
-    private List<JobSkillDTO> jobSkills;
+    private List<AddressDTO> jobAddresses;
+    private List<SkillDTO> jobSkills;
 }

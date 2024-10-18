@@ -6,6 +6,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class JobSkillDTO {
+public class SkillDTO {
     private String name;
 }

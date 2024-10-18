@@ -10,7 +10,10 @@ import com.hcmute.devhire.utils.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class JobService implements IJobService{
@@ -21,6 +24,8 @@ public class JobService implements IJobService{
     private final IUserService userService;
     private final ICVService cvService;
     private final JobApplicationRepository jobApplicationRepository;
+    private final IAddressService addressService;
+    private final ISkillService skillService;
     @Override
     public Job createJob(JobDTO jobDTO) {
         JobType jobType = EnumUtil.getEnumFromString(JobType.class, jobDTO.getType());
@@ -29,9 +34,11 @@ public class JobService implements IJobService{
 
         Category category = categoryService.findById(jobDTO.getCategory().getId());
 
-        List<Address> addresses = jobAddressService.createJobAddresses(jobDTO.getJobAddresses());
+        List<Address> addresses = jobDTO.getJobAddresses().stream()
+                .map(addressService::createAddress).collect(Collectors.toList());
 
-        List<Skill> skills = jobSkillService.createJobSkills(jobDTO.getJobSkills());
+        List<Skill> skills = jobDTO.getJobSkills().stream()
+                .map(skillService::createSkill).collect(Collectors.toList());
 
         Job newJob = Job.builder()
                 .title(jobDTO.getTitle())

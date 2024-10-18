@@ -5,7 +5,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class JobAddressDTO {
+public class AddressDTO {
     private String country;
     private String city;
     private String district;
