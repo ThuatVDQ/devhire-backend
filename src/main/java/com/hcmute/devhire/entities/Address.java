@@ -1,6 +1,7 @@
 package com.hcmute.devhire.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,8 +24,9 @@ public class Address extends BaseEntity {
 //    @JoinColumn(name = "job_id", referencedColumnName = "id")
 //    @JsonBackReference
 //    private Job job;
-    @ManyToMany(mappedBy = "addresses", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Job> jobs;
+    @OneToMany(mappedBy = "address")
+    @JsonManagedReference
+    private List<JobAddress> jobAddresses;
 
     @Column(name = "country", length = 50)
     private String country;

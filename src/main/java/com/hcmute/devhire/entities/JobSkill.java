@@ -19,9 +19,11 @@ public class JobSkill {
 
     @ManyToOne
     @JoinColumn(name = "job_id", nullable = false)
+    @JsonBackReference
     private Job job;
 
     @ManyToOne
     @JoinColumn(name = "skill_id", nullable = false)
+    @JsonBackReference
     private Skill skill;
 }

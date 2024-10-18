@@ -49,10 +49,10 @@ public class JobController {
         return ResponseEntity.ok(newJob);
     }
 
-    @PostMapping("/{jobId}/apply")
+    @PostMapping(value = "/{jobId}/apply", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> applyJob(
             @PathVariable("jobId") Long jobId,
-            @RequestBody ApplyJobRequestDTO applyJobRequestDTO,
+            @RequestParam("userId") Long userId,
             @RequestParam("file") MultipartFile file
     ) {
         try {
@@ -73,9 +73,14 @@ public class JobController {
                 return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                         .body("File must be an image or a PDF");
             }
-            CVDTO cvDTO = cvService.uploadCV(applyJobRequestDTO.getUserId(), file);
+
+            CVDTO cvDTO = cvService.uploadCV(userId, file);
             CV cv = cvService.createCV(cvDTO);
-            applyJobRequestDTO.setCvId(cv.getId());
+            ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
+                    .userId(userId)
+                    .cvId(cv.getId())
+                    .jobId(jobId)
+                    .build();
 
             JobApplication jobApplication = jobService.applyForJob(jobId, applyJobRequestDTO);
             return ResponseEntity.ok().body("Applied successfully");

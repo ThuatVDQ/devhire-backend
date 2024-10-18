@@ -17,9 +17,11 @@ public class JobAddress {
 
     @ManyToOne
     @JoinColumn(name = "job_id", nullable = false)
+    @JsonBackReference
     private Job job;
 
     @ManyToOne
     @JoinColumn(name = "address_id", nullable = false)
+    @JsonBackReference
     private Address address;
 }

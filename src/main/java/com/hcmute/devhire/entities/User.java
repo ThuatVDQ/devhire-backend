@@ -1,5 +1,6 @@
 package com.hcmute.devhire.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.hcmute.devhire.utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -55,6 +56,7 @@ public class User extends BaseEntity implements UserDetails {
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<JobApplication> jobApplications;
 
     @Override

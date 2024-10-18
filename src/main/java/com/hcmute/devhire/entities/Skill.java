@@ -1,6 +1,7 @@
 package com.hcmute.devhire.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,7 @@ public class Skill {
 //    @JoinColumn(name = "job_id", referencedColumnName = "id")
 //    @JsonBackReference
 //    private Job job;
-    @ManyToMany(mappedBy = "skills", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Job> jobs;
+    @OneToMany(mappedBy = "skill")
+    @JsonManagedReference
+    private List<JobSkill> jobSkills;
 }

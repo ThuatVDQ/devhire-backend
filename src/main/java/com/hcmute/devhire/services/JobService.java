@@ -35,10 +35,10 @@ public class JobService implements IJobService{
         Category category = categoryService.findById(jobDTO.getCategory().getId());
 
         List<Address> addresses = jobDTO.getJobAddresses().stream()
-                .map(addressService::createAddress).collect(Collectors.toList());
+                .map(addressService::createAddress).toList();
 
         List<Skill> skills = jobDTO.getJobSkills().stream()
-                .map(skillService::createSkill).collect(Collectors.toList());
+                .map(skillService::createSkill).toList();
 
         Job newJob = Job.builder()
                 .title(jobDTO.getTitle())
@@ -56,10 +56,6 @@ public class JobService implements IJobService{
                 .slots(jobDTO.getSlots())
                 .status(status)
                 .category(category)
-                .addresses(addresses)
-                .skills(skills)
-                .addresses(addresses)
-                .skills(skills)
                 .build();
 
         return jobRepository.save(newJob);

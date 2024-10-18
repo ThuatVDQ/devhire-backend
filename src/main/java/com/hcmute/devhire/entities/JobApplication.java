@@ -1,5 +1,6 @@
 package com.hcmute.devhire.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,13 +24,16 @@ public class JobApplication extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonBackReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "job_id", referencedColumnName = "id")
+    @JsonBackReference
     private Job job;
 
     @ManyToOne
     @JoinColumn(name = "cv_id", nullable = false)
+    @JsonBackReference
     private CV cv;
 }
