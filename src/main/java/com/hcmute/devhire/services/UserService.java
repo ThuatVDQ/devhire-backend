@@ -77,4 +77,21 @@ public class UserService implements IUserService{
     public User findById(Long id) throws Exception {
         return userRepository.findById(id).orElseThrow(() -> new Exception("User not found"));
     }
+
+    @Override
+    public UserDTO getProfile(String phone) throws Exception {
+        User user = userRepository.findByPhone(phone).orElseThrow(() -> new Exception("User not found"));
+        return UserDTO.builder()
+                .fullName(safeGet(user.getFullName()))
+                .phone(safeGet(user.getPhone()))
+                .email(safeGet(user.getEmail()))
+                .avatarUrl(safeGet(user.getAvatarUrl()))
+                .introduction(safeGet(user.getIntroduction()))
+                .gender(safeGet(user.getGender()))
+                .status(user.getStatus() != null ? user.getStatus().name() : "UNKNOWN")
+                .build();
+    }
+    private String safeGet(String value) {
+        return value != null ? value : "";
+    }
 }

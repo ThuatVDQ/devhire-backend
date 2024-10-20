@@ -56,6 +56,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return;
         }
     }
     private boolean isBypassToken(@NotNull HttpServletRequest request) {

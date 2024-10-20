@@ -10,4 +10,5 @@ public interface IUserService {
     User createUser(UserDTO userDTO) throws Exception;
     String login(String phone, String password, Long roleId) throws Exception;
     User findById(Long id) throws Exception;
+    UserDTO getProfile(String phone) throws Exception;
 }

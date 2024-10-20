@@ -1,5 +1,7 @@
 package com.hcmute.devhire.DTOs;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.hcmute.devhire.utils.Status;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -9,6 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
+
     @JsonProperty("full_name")
     private String fullName;
 
@@ -23,6 +26,14 @@ public class UserDTO {
     @JsonProperty("retype_password")
     private String retypePassword;
 
+    private String gender;
+
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
+
+    private String introduction;
+
+    private String status;
     @JsonProperty("role_id")
     @NotNull(message = "Role ID is required")
     private Long roleId;
