@@ -2,6 +2,7 @@ package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.UserDTO;
 import com.hcmute.devhire.DTOs.UserLoginDTO;
+import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.LoginResponse;
 import com.hcmute.devhire.services.IUserService;
@@ -14,6 +15,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @RestController
@@ -21,30 +24,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final IUserService userService;
+    private final FileUtil fileUtil;
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
         try {
-            // Lấy thông tin xác thực hiện tại từ SecurityContextHolder
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String phone = null;
 
             if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                phone = userDetails.getUsername(); // Số điện thoại được sử dụng làm username
+                phone = userDetails.getUsername();
             }
 
-            // Kiểm tra nếu không tìm thấy thông tin người dùng
             if (phone == null) {
                 return ResponseEntity.status(401).body("Unauthorized: No user found.");
             }
 
-            // Lấy thông tin người dùng từ cơ sở dữ liệu dựa trên số điện thoại
             UserDTO userDTO = userService.getProfile(phone);
             if (userDTO == null) {
                 return ResponseEntity.status(404).body("User not found");
             }
 
-            // Bạn có thể trả về thông tin người dùng trực tiếp hoặc thông qua DTO
             return ResponseEntity.ok(userDTO);
 
         } catch (Exception e) {
@@ -93,5 +93,12 @@ public class UserController {
                     .build()
             );
         }
+    }
+    @PostMapping("/uploadAvatar")
+    public ResponseEntity<?> uploadAvatar(
+            @RequestParam("file") MultipartFile file
+    ) {
+
+        return ResponseEntity.ok("Upload avatar successfully");
     }
 }

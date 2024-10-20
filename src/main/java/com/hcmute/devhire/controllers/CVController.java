@@ -1,6 +1,7 @@
 package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.CVDTO;
+import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.CV;
 import com.hcmute.devhire.services.CVService;
 import com.hcmute.devhire.services.ICVService;
@@ -24,6 +25,7 @@ import java.util.UUID;
 @RequestMapping("/api/cv")
 public class CVController {
     private final ICVService cvService;
+    private final FileUtil fileUtil;
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadCV(
             @RequestParam("file") MultipartFile file,
@@ -35,15 +37,13 @@ public class CVController {
             }
 
             // Kiểm tra kích thước file
-            if (file.getSize() > 10 * 1024 * 1024) { // >10mb
+            if (fileUtil.isFileSizeValid(file)) { // >10mb
                 return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                         .body("File is too large! Maximum size is 10MB");
             }
 
             // Kiểm tra định dạng file
-            String contentType = file.getContentType();
-            if (contentType == null ||
-                    (!contentType.startsWith("image/") && !contentType.equals("application/pdf"))) {
+            if (fileUtil.isImageOrPdfFormatValid(file)) {
                 return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                         .body("File must be an image or a PDF");
             }
