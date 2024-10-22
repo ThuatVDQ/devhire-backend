@@ -6,6 +6,7 @@ import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.repositories.RoleRepository;
 import com.hcmute.devhire.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -128,6 +129,21 @@ public class UserService implements IUserService{
                 .status(user.getStatus() != null ? user.getStatus().name() : "UNKNOWN")
                 .build();
     }
+
+    @Override
+    public User updateAvatar(String username, String avatarUrl) throws EntityNotFoundException {
+        User user = username.contains("@")
+                ? userRepository.findByEmail(username).orElseThrow(() -> new EntityNotFoundException("User not found"))
+                : userRepository.findByPhone(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (!avatarUrl.equals(user.getAvatarUrl())) {
+            user.setAvatarUrl(avatarUrl);
+            userRepository.save(user);
+        }
+
+        return user;
+    }
+
     private String safeGet(String value) {
         return value != null ? value : "";
     }

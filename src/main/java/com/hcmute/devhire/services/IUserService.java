@@ -3,6 +3,7 @@ package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.UserDTO;
 import com.hcmute.devhire.entities.User;
+import jakarta.persistence.EntityNotFoundException;
 
 import java.util.Optional;
 
@@ -12,5 +13,5 @@ public interface IUserService {
     User findById(Long id) throws Exception;
     UserDTO findByUsername(String username) throws Exception;
     UserDTO getProfile(String phone) throws Exception;
-
+    User updateAvatar(String username, String avatarUrl) throws EntityNotFoundException;
 }

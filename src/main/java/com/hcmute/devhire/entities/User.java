@@ -69,11 +69,10 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public String getUsername() {
-        if (email.contains("@")) {
-            return email;
-        } else {
+        if (phone != null) {
             return phone;
         }
+        return email;
     }
     @Override
     public boolean isAccountNonExpired() {

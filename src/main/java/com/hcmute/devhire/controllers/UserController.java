@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -28,19 +29,10 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String phone = null;
 
-            if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                phone = userDetails.getUsername();
-            }
+            String username = getAuthenticatedUsername();
 
-            if (phone == null) {
-                return ResponseEntity.status(401).body("Unauthorized: No user found.");
-            }
-
-            UserDTO userDTO = userService.getProfile(phone);
+            UserDTO userDTO = userService.getProfile(username);
             if (userDTO == null) {
                 return ResponseEntity.status(404).body("User not found");
             }
@@ -51,6 +43,7 @@ public class UserController {
             return ResponseEntity.status(500).body("An error occurred: " + e.getMessage());
         }
     }
+
     @PostMapping("/signup")
     public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
         try {
@@ -105,8 +98,37 @@ public class UserController {
     @PostMapping("/uploadAvatar")
     public ResponseEntity<?> uploadAvatar(
             @RequestParam("file") MultipartFile file
-    ) {
+    ) throws IOException {
+        String username = getAuthenticatedUsername();
+
+        if (username == null) {
+            return ResponseEntity.status(401).body("Unauthorized: No user found.");
+        }
+
+        if (!fileUtil.isImageFormatValid(file)) {
+            return ResponseEntity.badRequest().body("Invalid image format");
+        }
+        String filename;
+        try {
+            filename = fileUtil.storeFile(file);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error occurred while saving file: " + e.getMessage());
+        }
+
+        try {
+            User user = userService.updateAvatar(username, filename);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to update avatar: " + e.getMessage());
+        }
 
         return ResponseEntity.ok("Upload avatar successfully");
+    }
+    private String getAuthenticatedUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            return userDetails.getUsername();
+        }
+        return null;
     }
 }

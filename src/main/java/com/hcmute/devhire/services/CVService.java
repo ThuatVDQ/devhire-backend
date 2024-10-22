@@ -1,6 +1,7 @@
 package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.CVDTO;
+import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.CV;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.repositories.CVRepository;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class CVService implements ICVService{
     private final CVRepository cvRepository;
     private final IUserService userService;
+    private final FileUtil fileUtil;
     @Override
     public CV createCV(CVDTO cvDTO) throws Exception {
         User user = userService.findById(cvDTO.getUserId());
@@ -45,28 +47,11 @@ public class CVService implements ICVService{
     @Override
     public CVDTO uploadCV(Long userId, MultipartFile file) throws IOException {
         // Lưu file và lưu vào database
-        String filename = storeFile(file);
+        String filename = fileUtil.storeFile(file);
         return CVDTO.builder()
                 .userId(userId)
                 .cvUrl(filename)
                 .build();
     }
-    private String storeFile(MultipartFile file) throws IOException {
-        if (file.getOriginalFilename() == null) {
-            throw new IOException("Invalid image format");
-        }
-        String filename = StringUtils.cleanPath(file.getOriginalFilename());
 
-        String uniqueFilename = UUID.randomUUID().toString() + "_" + filename;
-        Path uploadDir = Paths.get("uploads");
-
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-
-        Path destination = Paths.get(uploadDir.toString(), uniqueFilename);
-        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-
-        return uniqueFilename;
-    }
 }
