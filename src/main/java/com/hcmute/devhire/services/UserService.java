@@ -29,19 +29,27 @@ public class UserService implements IUserService{
     @Override
     @Transactional
     public User createUser(UserDTO userDTO) throws Exception {
-        String phone= userDTO.getPhone();
+        String phone = userDTO.getPhone();
+        String email = userDTO.getEmail();
 
-        if(userRepository.existByPhoneNumber(phone)) {
+        if (phone != null && !phone.isEmpty() && userRepository.existByPhoneNumber(phone)) {
             throw new DataIntegrityViolationException("Phone number already exists");
         }
+
+        if (email != null && !email.isEmpty() && userRepository.existByEmail(email)) {
+            throw new DataIntegrityViolationException("Email already exists");
+        }
+
         Role role = roleRepository.findById(
                 userDTO.getRoleId()).orElseThrow(() -> new Exception("Role not found"));
+
         if (role.getName().toUpperCase().equals(Role.ADMIN)) {
             throw new Exception("Cannot create admin user");
         }
         User newUser = User.builder()
                 .fullName(userDTO.getFullName())
-                .phone(userDTO.getPhone())
+                .phone(userDTO.getPhone() != null ? userDTO.getPhone() : "")
+                .email(userDTO.getEmail() != null ? userDTO.getEmail() : "")
                 .password(userDTO.getPassword())
                 .build();
 
@@ -55,27 +63,56 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public String login(String phone, String password, Long roleId) throws Exception {
-        Optional<User> user = userRepository.findByPhone(phone);
-        if (user.isEmpty()) {
-            throw new Exception("Invalid phone number or password");
+    public String login(String username, String password, Long roleId) throws Exception {
+        Optional<User> user;
+        if (username.contains("@")) {
+            user = Optional.ofNullable(userRepository.findByEmail(username)
+                    .orElseThrow(() -> new Exception("Email not found")));
+        } else {
+            user = Optional.ofNullable(userRepository.findByPhone(username)
+                    .orElseThrow(() -> new Exception("Phone number not found")));
         }
+
         User existingUser = user.get();
-        //check password
 
         if (!passwordEncoder.matches(password, existingUser.getPassword())) {
             throw new Exception("Invalid phone number or password");
         }
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(phone, password);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
         //authenticate with java spring security
         authenticationManager.authenticate(authenticationToken);
-        return jwtUtil.generateToken(user.get());
+        return jwtUtil.generateToken(existingUser);
     }
 
     @Override
     public User findById(Long id) throws Exception {
         return userRepository.findById(id).orElseThrow(() -> new Exception("User not found"));
+    }
+
+    @Override
+    public UserDTO findByUsername(String username) throws Exception {
+        Optional<User> userOptional;
+
+        if (username.contains("@")) {
+            userOptional = userRepository.findByEmail(username);
+        } else {
+            userOptional = userRepository.findByPhone(username);
+        }
+
+        if (userOptional.isEmpty()) {
+            throw new Exception("User not found with username: " + username);
+        }
+
+        User user = userOptional.get();
+
+        return UserDTO.builder()
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .avatarUrl(user.getAvatarUrl())
+                .roleId(user.getRole().getId())
+                .build();
     }
 
     @Override

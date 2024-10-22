@@ -41,9 +41,9 @@ public class JwtFilter extends OncePerRequestFilter {
             final String authorizationHeader = request.getHeader("Authorization");
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 final String token = authorizationHeader.substring(7);
-                final String phone = jwtUtil.extractPhone(token);
-                if (phone != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    User userDetails = (User) userDetailsService.loadUserByUsername(phone);
+                final String username = jwtUtil.extractUsername(token);
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    User userDetails = (User) userDetailsService.loadUserByUsername(username);
                     if (jwtUtil.validateToken(token, userDetails)) {
                         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities()
@@ -52,11 +52,10 @@ public class JwtFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     }
                 }
-                filterChain.doFilter(request, response);
             }
+            filterChain.doFilter(request, response);
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-            return;
         }
     }
     private boolean isBypassToken(@NotNull HttpServletRequest request) {

@@ -29,12 +29,15 @@ public class JwtUtil {
     public String generateToken(User user) {
         //properties -> claims
         Map<String, Object> claims = new HashMap<>();
-        //this.generateSecretKey();
+        String subject = user.getPhone() != null && !user.getPhone().isEmpty() ? user.getPhone() : user.getEmail();
+
+        // Thêm các thuộc tính cần thiết vào claims
         claims.put("phone", user.getPhone());
+        claims.put("email", user.getEmail());
         try {
             return Jwts.builder()
                     .setClaims(claims)
-                    .setSubject(user.getPhone())
+                    .setSubject(subject)
                     .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000L))
                     .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                     .compact();
@@ -79,11 +82,11 @@ public class JwtUtil {
         Date expirationDate = this.extractClaim(token, Claims::getExpiration);
         return expirationDate.before(new Date());
     }
-    public String extractPhone(String token) {
+    public String extractUsername(String token) {
         return this.extractClaim(token, Claims::getSubject);
     }
     public boolean validateToken(String token, UserDetails userDetails) {
-        String phone = this.extractPhone(token);
-        return (phone.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        String username = this.extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }

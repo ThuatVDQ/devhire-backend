@@ -75,14 +75,17 @@ public class UserController {
     ) {
         try {
             String token = userService.login(
-                    userLoginDTO.getPhone(),
+                    userLoginDTO.getUsername(),
                     userLoginDTO.getPassword(),
                     userLoginDTO.getRoleId() == null ? 1 : userLoginDTO.getRoleId());
+            UserDTO userDTO = userService.findByUsername(userLoginDTO.getUsername());
 
             return ResponseEntity.ok(LoginResponse
                     .builder()
                     .message("Login successfully")
                     .token(token)
+                    .avatarUrl(safeGet(userDTO.getAvatarUrl()))
+                    .roleId(userDTO.getRoleId())
                     .build()
             );
         } catch (Exception e) {
@@ -90,9 +93,14 @@ public class UserController {
                     .builder()
                     .message("Login failed: " + e.getMessage())
                     .token(null)
+                    .avatarUrl(null)
+                    .roleId(null)
                     .build()
             );
         }
+    }
+    private String safeGet(String value) {
+        return value != null ? value : "";
     }
     @PostMapping("/uploadAvatar")
     public ResponseEntity<?> uploadAvatar(

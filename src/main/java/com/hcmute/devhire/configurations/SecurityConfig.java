@@ -20,9 +20,17 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     @Bean
     public UserDetailsService userDetailsService() {
-        return phoneNumber -> userRepository
-                .findByPhone(phoneNumber)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with phone number: " + phoneNumber));
+        return username -> {
+            if (username.contains("@")) {
+                return userRepository
+                        .findByEmail(username)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+            } else {
+                return userRepository
+                        .findByPhone(username)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found with phone number: " + username));
+            }
+        };
     }
 
     @Bean
