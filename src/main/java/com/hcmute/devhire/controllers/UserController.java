@@ -70,14 +70,13 @@ public class UserController {
             String token = userService.login(
                     userLoginDTO.getUsername(),
                     userLoginDTO.getPassword(),
-                    userLoginDTO.getRoleId() == null ? 1 : userLoginDTO.getRoleId());
+                    userLoginDTO.getRoleId() == null ? 3 : userLoginDTO.getRoleId());
             UserDTO userDTO = userService.findByUsername(userLoginDTO.getUsername());
 
             return ResponseEntity.ok(LoginResponse
                     .builder()
                     .message("Login successfully")
                     .token(token)
-                    .avatarUrl(safeGet(userDTO.getAvatarUrl()))
                     .roleId(userDTO.getRoleId())
                     .build()
             );
@@ -86,14 +85,10 @@ public class UserController {
                     .builder()
                     .message("Login failed: " + e.getMessage())
                     .token(null)
-                    .avatarUrl(null)
                     .roleId(null)
                     .build()
             );
         }
-    }
-    private String safeGet(String value) {
-        return value != null ? value : "";
     }
     @PostMapping("/uploadAvatar")
     public ResponseEntity<?> uploadAvatar(
@@ -122,6 +117,22 @@ public class UserController {
         }
 
         return ResponseEntity.ok("Upload avatar successfully");
+    }
+    @PutMapping("/deleteAvatar")
+    public ResponseEntity<?> deleteAvatar() {
+        String username = getAuthenticatedUsername();
+
+        if (username == null) {
+            return ResponseEntity.status(401).body("Unauthorized: No user found.");
+        }
+
+        try {
+            User user = userService.updateAvatar(username, null);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to delete avatar: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok("Delete avatar successfully");
     }
     private String getAuthenticatedUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

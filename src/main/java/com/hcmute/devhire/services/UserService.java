@@ -136,6 +136,11 @@ public class UserService implements IUserService{
                 ? userRepository.findByEmail(username).orElseThrow(() -> new EntityNotFoundException("User not found"))
                 : userRepository.findByPhone(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
+        if (avatarUrl == null) {
+            user.setAvatarUrl("");
+            userRepository.save(user);
+            return user;
+        }
         if (!avatarUrl.equals(user.getAvatarUrl())) {
             user.setAvatarUrl(avatarUrl);
             userRepository.save(user);

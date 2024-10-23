@@ -17,8 +17,11 @@ public class LoginResponse {
     @JsonProperty("token")
     private String token;
 
-    @JsonProperty("avatar_url")
-    private String avatarUrl;
+//    @JsonProperty("full_name")
+//    private String fullName;
+//
+//    @JsonProperty("avatar_url")
+//    private String avatarUrl;
 
     @JsonProperty("role_id")
     private Long roleId;
