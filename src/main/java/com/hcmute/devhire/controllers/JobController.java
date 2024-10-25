@@ -32,8 +32,8 @@ public class JobController {
     private final FileUtil fileUtil;
     @GetMapping("")
     public ResponseEntity<?> getAllJobs() {
-        List<Job> jobs = jobService.getAllJobs();
-        return ResponseEntity.ok(jobs);
+        List<JobDTO> jobDTOS = jobService.getAllJobs();
+        return ResponseEntity.ok(jobDTOS);
     }
     @GetMapping("/{jobId}")
     public ResponseEntity<?> getJob(

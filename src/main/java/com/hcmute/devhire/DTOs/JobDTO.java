@@ -14,6 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class JobDTO {
+
+    private Long id;
     @NotBlank(message = "Title cannot be blank")
     private String title;
 

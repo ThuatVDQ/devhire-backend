@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface IJobService {
     Job createJob(JobDTO jobDTO, String username) throws Exception;
-    List<Job> getAllJobs();
+    List<JobDTO> getAllJobs();
     Job findById(Long jobId) throws Exception;
     JobApplication applyForJob(Long jobId, ApplyJobRequestDTO applyJobRequestDTO) throws Exception;
 }

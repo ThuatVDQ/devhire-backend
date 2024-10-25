@@ -1,5 +1,6 @@
 package com.hcmute.devhire.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.hcmute.devhire.utils.Currency;
 import com.hcmute.devhire.utils.JobStatus;
@@ -82,6 +83,7 @@ public class Job extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "company_id", referencedColumnName = "id")
+    @JsonBackReference
     private Company company;
 //
 //    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

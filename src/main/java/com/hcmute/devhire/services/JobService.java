@@ -89,8 +89,26 @@ public class JobService implements IJobService{
     }
 
     @Override
-    public List<Job> getAllJobs() {
-        return jobRepository.findAll();
+    public List<JobDTO> getAllJobs() {
+        List<Job> jobs = jobRepository.findAll();
+        return jobs.stream().map(job -> JobDTO.builder()
+                .id(job.getId())
+                .title(job.getTitle())
+                .description(job.getDescription())
+                .salaryStart(job.getSalaryStart())
+                .salaryEnd(job.getSalaryEnd())
+                .type(job.getType().name())
+                .currency(job.getCurrency().name())
+                .experience(job.getExperience())
+                .position(job.getPosition())
+                .level(job.getLevel())
+                .requirement(job.getRequirement())
+                .benefit(job.getBenefit())
+                .deadline(job.getDeadline())
+                .slots(job.getSlots())
+                .status(job.getStatus().name())
+                .build()
+        ).toList();
     }
 
     @Override

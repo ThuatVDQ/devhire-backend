@@ -1,5 +1,6 @@
 package com.hcmute.devhire.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -53,6 +54,7 @@ public class Company extends BaseEntity {
     private User createdBy;
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Job> jobs;
 
 }
