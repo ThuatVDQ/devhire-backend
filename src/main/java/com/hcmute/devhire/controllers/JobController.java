@@ -2,9 +2,7 @@ package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.components.FileUtil;
-import com.hcmute.devhire.entities.CV;
-import com.hcmute.devhire.entities.Job;
-import com.hcmute.devhire.entities.JobApplication;
+import com.hcmute.devhire.entities.*;
 import org.springframework.validation.FieldError;
 import com.hcmute.devhire.services.ICVService;
 import com.hcmute.devhire.services.IJobService;
@@ -22,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,7 +41,39 @@ public class JobController {
     ) {
         try {
             Job job = jobService.findById(jobId);
-            return ResponseEntity.ok(job);
+
+            List<AddressDTO> addressDTOs = job.getJobAddresses().stream()
+                    .map(jobAddress -> AddressDTO.builder()
+                            .city(jobAddress.getAddress().getCity())
+                            .district(jobAddress.getAddress().getDistrict())
+                            .street(jobAddress.getAddress().getStreet())
+                            .build())
+                    .toList();
+
+            List<SkillDTO> skillDTOs = job.getJobSkills().stream()
+                    .map(jobSkill -> SkillDTO.builder()
+                            .name(jobSkill.getSkill().getName())
+                            .build())
+                    .toList();
+            JobDTO jobDTO = JobDTO.builder()
+                    .title(job.getTitle())
+                    .description(job.getDescription())
+                    .salaryStart(job.getSalaryStart())
+                    .salaryEnd(job.getSalaryEnd())
+                    .type(job.getType().name())
+                    .currency(job.getCurrency().name())
+                    .experience(job.getExperience())
+                    .position(job.getPosition())
+                    .level(job.getLevel())
+                    .requirement(job.getRequirement())
+                    .benefit(job.getBenefit())
+                    .deadline(job.getDeadline())
+                    .slots(job.getSlots())
+                    .status(job.getStatus().name())
+                    .addresses(addressDTOs)
+                    .skills(skillDTOs)
+                    .build();
+            return ResponseEntity.ok(jobDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

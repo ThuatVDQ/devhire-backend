@@ -2,6 +2,7 @@ package com.hcmute.devhire.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -13,47 +14,47 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class JobDTO {
-    @NotNull(message = "Title cannot be null")
+    @NotBlank(message = "Title cannot be blank")
     private String title;
 
-    @NotNull(message = "Description cannot be null")
+    @NotBlank(message = "Description cannot be blank")
     private String description;
 
-    @NotNull(message = "Salary start cannot be null")
+    @NotBlank(message = "Salary start cannot be blank")
     @JsonProperty("salary_start")
     private double salaryStart;
 
-    @NotNull(message = "Salary end cannot be null")
+    @NotBlank(message = "Salary end cannot be blank")
     @JsonProperty("salary_end")
     private double salaryEnd;
 
-    @NotNull(message = "Type cannot be null")
+    @NotBlank(message = "Type cannot be blank")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private String type;
 
-    @NotNull(message = "Currency cannot be null")
+    @NotBlank(message = "Currency cannot be blank")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private String currency;
 
-    @NotNull(message = "Experience cannot be null")
+    @NotBlank(message = "Experience cannot be blank")
     private String experience;
 
-    @NotNull(message = "Position cannot be null")
+    @NotBlank(message = "Position cannot be blank")
     private String position;
 
-    @NotNull(message = "Level cannot be null")
+    @NotBlank(message = "Level cannot be blank")
     private String level;
 
-    @NotNull(message = "Requirement cannot be null")
+    @NotBlank(message = "Requirement cannot be blank")
     private String requirement;
 
-    @NotNull(message = "Benefit cannot be null")
+    @NotBlank(message = "Benefit cannot be blank")
     private String benefit;
 
-    @NotNull(message = "Deadline cannot be null")
+    @NotBlank(message = "Deadline cannot be blank")
     private Date deadline;
 
-    @NotNull(message = "Slots cannot be null")
+    @NotBlank(message = "Slots cannot be blank")
     private int slots;
     private int applyNumber;
     private int likeNumber;
@@ -65,6 +66,6 @@ public class JobDTO {
     private CompanyDTO company;
     private CategoryDTO category;
 
-    private List<AddressDTO> jobAddresses;
-    private List<SkillDTO> jobSkills;
+    private List<AddressDTO> addresses;
+    private List<SkillDTO> skills;
 }

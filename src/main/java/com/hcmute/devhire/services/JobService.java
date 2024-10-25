@@ -63,7 +63,7 @@ public class JobService implements IJobService{
                     .company(company)
                     .build();
             Job savedJob = jobRepository.save(newJob);
-            List<Address> addresses = jobDTO.getJobAddresses().stream()
+            List<Address> addresses = jobDTO.getAddresses().stream()
                     .map(addressService::createAddress).toList();
 
             addresses.forEach(address -> {
@@ -73,7 +73,7 @@ public class JobService implements IJobService{
                         .build();
                 jobAddressRepository.save(jobAddress);
             });
-            List<Skill> skills = jobDTO.getJobSkills().stream()
+            List<Skill> skills = jobDTO.getSkills().stream()
                     .map(skillService::createSkill).toList();
             skills.forEach(skill -> {
                 JobSkill jobSkill = JobSkill.builder()
