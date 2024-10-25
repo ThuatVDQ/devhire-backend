@@ -59,11 +59,9 @@ public class JobDTO {
     private int likeNumber;
     private int views;
 
-    @NotNull(message = "Status cannot be null")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private String status;
 
-    @NotNull(message = "Company cannot be null")
     private CompanyDTO company;
     private CategoryDTO category;
 

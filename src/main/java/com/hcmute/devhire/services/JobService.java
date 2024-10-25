@@ -32,53 +32,60 @@ public class JobService implements IJobService{
     private final ISkillService skillService;
     private final ICompanyService companyService;
     @Override
-    public Job createJob(JobDTO jobDTO, String username) {
-        JobType jobType = EnumUtil.getEnumFromString(JobType.class, jobDTO.getType());
-        Currency currency = EnumUtil.getEnumFromString(Currency.class, jobDTO.getCurrency());
-        JobStatus status = EnumUtil.getEnumFromString(JobStatus.class, "CLOSED");
+    public Job createJob(JobDTO jobDTO, String username) throws Exception {
+        try {
+            JobType jobType = EnumUtil.getEnumFromString(JobType.class, jobDTO.getType());
+            Currency currency = EnumUtil.getEnumFromString(Currency.class, jobDTO.getCurrency());
+            JobStatus status = EnumUtil.getEnumFromString(JobStatus.class, "CLOSED");
 
-        Category category = categoryService.findById(jobDTO.getCategory().getId());
+            Category category = categoryService.findById(jobDTO.getCategory().getId());
 
-        Company company = companyService.findByUser(username);
-        Job newJob = Job.builder()
-                .title(jobDTO.getTitle())
-                .description(jobDTO.getDescription())
-                .salaryStart(jobDTO.getSalaryStart())
-                .salaryEnd(jobDTO.getSalaryEnd())
-                .type(jobType)
-                .currency(currency)
-                .experience(jobDTO.getExperience())
-                .position(jobDTO.getPosition())
-                .level(jobDTO.getLevel())
-                .requirement(jobDTO.getRequirement())
-                .benefit(jobDTO.getBenefit())
-                .deadline(jobDTO.getDeadline())
-                .slots(jobDTO.getSlots())
-                .status(status)
-                .category(category)
-                .company(company)
-                .build();
-        Job savedJob = jobRepository.save(newJob);
-        List<Address> addresses = jobDTO.getJobAddresses().stream()
-                .map(addressService::createAddress).toList();
-
-        addresses.forEach(address -> {
-            JobAddress jobAddress = JobAddress.builder()
-                    .job(savedJob)
-                    .address(address)
+            Company company = companyService.findByUser(username);
+            if (company == null) {
+                throw new Exception("Company not found");
+            }
+            Job newJob = Job.builder()
+                    .title(jobDTO.getTitle())
+                    .description(jobDTO.getDescription())
+                    .salaryStart(jobDTO.getSalaryStart())
+                    .salaryEnd(jobDTO.getSalaryEnd())
+                    .type(jobType)
+                    .currency(currency)
+                    .experience(jobDTO.getExperience())
+                    .position(jobDTO.getPosition())
+                    .level(jobDTO.getLevel())
+                    .requirement(jobDTO.getRequirement())
+                    .benefit(jobDTO.getBenefit())
+                    .deadline(jobDTO.getDeadline())
+                    .slots(jobDTO.getSlots())
+                    .status(status)
+                    .category(category)
+                    .company(company)
                     .build();
-            jobAddressRepository.save(jobAddress);
-        });
-        List<Skill> skills = jobDTO.getJobSkills().stream()
-                .map(skillService::createSkill).toList();
-        skills.forEach(skill -> {
-            JobSkill jobSkill = JobSkill.builder()
-                    .job(savedJob)
-                    .skill(skill)
-                    .build();
-            jobSkillRepository.save(jobSkill);
-        });
-        return savedJob;
+            Job savedJob = jobRepository.save(newJob);
+            List<Address> addresses = jobDTO.getJobAddresses().stream()
+                    .map(addressService::createAddress).toList();
+
+            addresses.forEach(address -> {
+                JobAddress jobAddress = JobAddress.builder()
+                        .job(savedJob)
+                        .address(address)
+                        .build();
+                jobAddressRepository.save(jobAddress);
+            });
+            List<Skill> skills = jobDTO.getJobSkills().stream()
+                    .map(skillService::createSkill).toList();
+            skills.forEach(skill -> {
+                JobSkill jobSkill = JobSkill.builder()
+                        .job(savedJob)
+                        .skill(skill)
+                        .build();
+                jobSkillRepository.save(jobSkill);
+            });
+            return savedJob;
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
     }
 
     @Override

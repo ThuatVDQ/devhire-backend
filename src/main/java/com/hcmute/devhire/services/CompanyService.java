@@ -40,6 +40,5 @@ public class CompanyService implements ICompanyService {
     @Override
     public Company findByUser(String username) {
         return companyRepository.findByUser(username);
-
     }
 }

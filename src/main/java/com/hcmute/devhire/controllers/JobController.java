@@ -68,16 +68,12 @@ public class JobController {
         if (username == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not retrieve authenticated username");
         }
-        if (jobDTO.getCompany() == null || jobDTO.getCompany().getId() == null) {
-            return ResponseEntity.badRequest().body("Company is required");
-        }
+
         try {
             Job newJob = jobService.createJob(jobDTO, username);
             return ResponseEntity.ok(newJob);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
         } catch (Exception ex) {
-            return ResponseEntity.badRequest().body("An error occurred while creating the job");
+            return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
 
