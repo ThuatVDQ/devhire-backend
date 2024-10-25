@@ -6,6 +6,8 @@ import com.hcmute.devhire.repositories.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AddressService implements IAddressService {
@@ -19,6 +21,12 @@ public class AddressService implements IAddressService {
                 .district(addressDTO.getDistrict())
                 .street(addressDTO.getStreet())
                 .build();
+
         return addressRepository.save(address);
+    }
+
+    @Override
+    public Address findById(Long addressId) {
+        return addressRepository.findById(addressId).orElse(null);
     }
 }

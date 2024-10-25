@@ -1,13 +1,17 @@
 package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.ApplyJobRequestDTO;
+import com.hcmute.devhire.DTOs.CompanyDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
 import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.entities.*;
+import com.hcmute.devhire.repositories.JobAddressRepository;
 import com.hcmute.devhire.repositories.JobApplicationRepository;
 import com.hcmute.devhire.repositories.JobRepository;
+import com.hcmute.devhire.repositories.JobSkillRepository;
 import com.hcmute.devhire.utils.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -19,27 +23,23 @@ import java.util.stream.Collectors;
 public class JobService implements IJobService{
     private final JobRepository jobRepository;
     private final CategoryService categoryService;
-    private final JobAddressService jobAddressService;
-    private final JobSkillService jobSkillService;
+    private final JobAddressRepository jobAddressRepository;
+    private final JobSkillRepository jobSkillRepository;
     private final IUserService userService;
     private final ICVService cvService;
     private final JobApplicationRepository jobApplicationRepository;
     private final IAddressService addressService;
     private final ISkillService skillService;
+    private final ICompanyService companyService;
     @Override
-    public Job createJob(JobDTO jobDTO) {
+    public Job createJob(JobDTO jobDTO, String username) {
         JobType jobType = EnumUtil.getEnumFromString(JobType.class, jobDTO.getType());
         Currency currency = EnumUtil.getEnumFromString(Currency.class, jobDTO.getCurrency());
         JobStatus status = EnumUtil.getEnumFromString(JobStatus.class, "CLOSED");
 
         Category category = categoryService.findById(jobDTO.getCategory().getId());
 
-        List<Address> addresses = jobDTO.getJobAddresses().stream()
-                .map(addressService::createAddress).toList();
-
-        List<Skill> skills = jobDTO.getJobSkills().stream()
-                .map(skillService::createSkill).toList();
-
+        Company company = companyService.findByUser(username);
         Job newJob = Job.builder()
                 .title(jobDTO.getTitle())
                 .description(jobDTO.getDescription())
@@ -56,9 +56,29 @@ public class JobService implements IJobService{
                 .slots(jobDTO.getSlots())
                 .status(status)
                 .category(category)
+                .company(company)
                 .build();
+        Job savedJob = jobRepository.save(newJob);
+        List<Address> addresses = jobDTO.getJobAddresses().stream()
+                .map(addressService::createAddress).toList();
 
-        return jobRepository.save(newJob);
+        addresses.forEach(address -> {
+            JobAddress jobAddress = JobAddress.builder()
+                    .job(savedJob)
+                    .address(address)
+                    .build();
+            jobAddressRepository.save(jobAddress);
+        });
+        List<Skill> skills = jobDTO.getJobSkills().stream()
+                .map(skillService::createSkill).toList();
+        skills.forEach(skill -> {
+            JobSkill jobSkill = JobSkill.builder()
+                    .job(savedJob)
+                    .skill(skill)
+                    .build();
+            jobSkillRepository.save(jobSkill);
+        });
+        return savedJob;
     }
 
     @Override
@@ -67,8 +87,8 @@ public class JobService implements IJobService{
     }
 
     @Override
-    public Job findById(Long jobId) {
-        return jobRepository.findById(jobId).orElse(null);
+    public Job findById(Long jobId) throws Exception {
+        return jobRepository.findById(jobId).orElseThrow(() -> new Exception("Job not found"));
     }
 
     @Override

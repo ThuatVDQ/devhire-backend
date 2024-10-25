@@ -11,8 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import java.util.List;
 
 public interface IJobService {
-    Job createJob(JobDTO jobDTO);
+    Job createJob(JobDTO jobDTO, String username);
     List<Job> getAllJobs();
-    Job findById(Long jobId);
+    Job findById(Long jobId) throws Exception;
     JobApplication applyForJob(Long jobId, ApplyJobRequestDTO applyJobRequestDTO) throws Exception;
 }

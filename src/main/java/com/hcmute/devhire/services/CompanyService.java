@@ -36,4 +36,10 @@ public class CompanyService implements ICompanyService {
         companies = companyRepository.findAll(pageRequest);
         return companies;
     }
+
+    @Override
+    public Company findByUser(String username) {
+        return companyRepository.findByUser(username);
+
+    }
 }

@@ -10,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class CompanyDTO {
+    private Long id;
     @JsonProperty("tax_code")
     private String taxCode;
 
@@ -27,4 +28,5 @@ public class CompanyDTO {
     @JsonProperty("web_url")
     private String webUrl;
     private String status;
+    private UserDTO createBy;
 }

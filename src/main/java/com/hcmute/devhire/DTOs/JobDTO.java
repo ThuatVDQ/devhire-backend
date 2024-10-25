@@ -35,6 +35,7 @@ public class JobDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private String status;
 
+    private CompanyDTO company;
     private CategoryDTO category;
     private List<AddressDTO> jobAddresses;
     private List<SkillDTO> jobSkills;

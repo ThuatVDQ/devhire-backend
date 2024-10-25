@@ -9,4 +9,5 @@ import org.springframework.data.domain.Pageable;
 public interface ICompanyService {
     Company createCompany(CompanyDTO companyDTO);
     Page<Company> getAllCompanies(PageRequest pageRequest);
+    Company findByUser(String username);
 }

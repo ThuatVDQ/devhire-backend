@@ -11,6 +11,7 @@ import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.services.ICVService;
 import com.hcmute.devhire.services.IJobService;
+import com.hcmute.devhire.services.IUserService;
 import com.hcmute.devhire.services.JobService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,16 +42,34 @@ import java.util.UUID;
 public class JobController {
     private final IJobService jobService;
     private final ICVService cvService;
+    private final IUserService userService;
     private final FileUtil fileUtil;
     @GetMapping("")
     public ResponseEntity<?> getAllJobs() {
         List<Job> jobs = jobService.getAllJobs();
         return ResponseEntity.ok(jobs);
     }
+    @GetMapping("/{jobId}")
+    public ResponseEntity<?> getJob(
+            @PathVariable("jobId") Long jobId
+    ) {
+        try {
+            Job job = jobService.findById(jobId);
+            return ResponseEntity.ok(job);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @PostMapping("")
-    public ResponseEntity<?> createJob(@RequestBody JobDTO jobDTO) {
-        Job newJob = jobService.createJob(jobDTO);
+    public ResponseEntity<?> createJob(@RequestBody JobDTO jobDTO) throws Exception {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = null;
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
+        }
+
+        Job newJob = jobService.createJob(jobDTO, username);
         return ResponseEntity.ok(newJob);
     }
 
