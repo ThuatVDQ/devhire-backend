@@ -1,18 +1,17 @@
 package com.hcmute.devhire.controllers;
 
-import com.hcmute.devhire.DTOs.ApplyJobRequestDTO;
-import com.hcmute.devhire.DTOs.CVDTO;
-import com.hcmute.devhire.DTOs.JobApplicationDTO;
-import com.hcmute.devhire.DTOs.JobDTO;
+import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.CV;
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.JobApplication;
+import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.services.ICVService;
 import com.hcmute.devhire.services.IJobService;
 import com.hcmute.devhire.services.IUserService;
 import com.hcmute.devhire.services.JobService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -62,21 +61,35 @@ public class JobController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createJob(@RequestBody JobDTO jobDTO) throws Exception {
+    public ResponseEntity<?> createJob(@Valid @RequestBody JobDTO jobDTO) throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        }
+
+        if (authentication.getPrincipal() instanceof UserDetails userDetails) {
             username = userDetails.getUsername();
         }
 
-        Job newJob = jobService.createJob(jobDTO, username);
-        return ResponseEntity.ok(newJob);
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not retrieve authenticated username");
+        }
+
+        try {
+            Job newJob = jobService.createJob(jobDTO, username);
+            return ResponseEntity.ok(newJob);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while creating the job");
+        }
     }
 
     @PostMapping(value = "/{jobId}/apply", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> applyJob(
             @PathVariable("jobId") Long jobId,
-            @RequestParam("userId") Long userId,
             @RequestParam("file") MultipartFile file
     ) {
         try {
@@ -84,20 +97,25 @@ public class JobController {
                 return ResponseEntity.badRequest().body("No file uploaded");
             }
 
-            if (fileUtil.isFileSizeValid(file)) { // >10mb
+            if (!fileUtil.isFileSizeValid(file)) { // >10mb
                 return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                         .body("File is too large! Maximum size is 10MB");
             }
 
-            if (fileUtil.isImageOrPdfFormatValid(file)) {
+            if (!fileUtil.isImageOrPdfFormatValid(file)) {
                 return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                         .body("File must be an image or a PDF");
             }
-
-            CVDTO cvDTO = cvService.uploadCV(userId, file);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = null;
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+                username = userDetails.getUsername();
+            }
+            UserDTO userDTO = userService.findByUsername(username);
+            CVDTO cvDTO = cvService.uploadCV(userDTO.getId(), file);
             CV cv = cvService.createCV(cvDTO);
             ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
-                    .userId(userId)
+                    .userId(userDTO.getId())
                     .cvId(cv.getId())
                     .jobId(jobId)
                     .build();
