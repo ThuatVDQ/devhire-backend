@@ -5,35 +5,23 @@ import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.CV;
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.JobApplication;
-import com.hcmute.devhire.entities.User;
-import com.hcmute.devhire.responses.JobListResponse;
+import org.springframework.validation.FieldError;
 import com.hcmute.devhire.services.ICVService;
 import com.hcmute.devhire.services.IJobService;
 import com.hcmute.devhire.services.IUserService;
-import com.hcmute.devhire.services.JobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -61,7 +49,11 @@ public class JobController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createJob(@Valid @RequestBody JobDTO jobDTO) throws Exception {
+    public ResponseEntity<?> createJob(@Valid @RequestBody JobDTO jobDTO, BindingResult result) throws Exception {
+        if(result.hasErrors()) {
+            List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;
 
@@ -76,14 +68,16 @@ public class JobController {
         if (username == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not retrieve authenticated username");
         }
-
+        if (jobDTO.getCompany() == null || jobDTO.getCompany().getId() == null) {
+            return ResponseEntity.badRequest().body("Company is required");
+        }
         try {
             Job newJob = jobService.createJob(jobDTO, username);
             return ResponseEntity.ok(newJob);
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+            return ResponseEntity.badRequest().body(ex.getMessage());
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while creating the job");
+            return ResponseEntity.badRequest().body("An error occurred while creating the job");
         }
     }
 

@@ -37,13 +37,13 @@ public class CVController {
             }
 
             // Kiểm tra kích thước file
-            if (fileUtil.isFileSizeValid(file)) { // >10mb
+            if (!fileUtil.isFileSizeValid(file)) { // >10mb
                 return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                         .body("File is too large! Maximum size is 10MB");
             }
 
             // Kiểm tra định dạng file
-            if (fileUtil.isImageOrPdfFormatValid(file)) {
+            if (!fileUtil.isImageOrPdfFormatValid(file)) {
                 return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                         .body("File must be an image or a PDF");
             }

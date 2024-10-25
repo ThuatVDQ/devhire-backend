@@ -8,6 +8,7 @@ import com.hcmute.devhire.responses.LoginResponse;
 import com.hcmute.devhire.services.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -89,6 +91,14 @@ public class UserController {
                     .build()
             );
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorizationHeader) {
+
+
+
+        return ResponseEntity.ok("Logout successfully");
     }
     @PostMapping("/uploadAvatar")
     public ResponseEntity<?> uploadAvatar(

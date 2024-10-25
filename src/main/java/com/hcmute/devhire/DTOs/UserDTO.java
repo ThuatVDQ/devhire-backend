@@ -12,6 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 public class UserDTO {
 
+    private Long id;
     @JsonProperty("full_name")
     private String fullName;
 

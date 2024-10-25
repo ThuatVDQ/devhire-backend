@@ -108,6 +108,7 @@ public class UserService implements IUserService{
         User user = userOptional.get();
 
         return UserDTO.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
@@ -152,4 +153,5 @@ public class UserService implements IUserService{
     private String safeGet(String value) {
         return value != null ? value : "";
     }
+
 }
