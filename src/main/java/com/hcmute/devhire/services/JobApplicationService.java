@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +37,18 @@ public class JobApplicationService implements IJobApplicationService{
     }
 
     @Override
-    public List<JobApplication> findByJobId(Long jobId) {
-        return jobApplicationRepository.findByJobId(jobId);
+    public List<JobApplicationDTO> findByJobId(Long jobId) {
+        List<JobApplication> jobApplications = jobApplicationRepository.findByJobId(jobId);
+        return jobApplications.stream().map(app -> JobApplicationDTO.builder()
+                .status(app.getStatus().name())
+                .jobId(app.getJob().getId())
+                .jobTitle(app.getJob().getTitle())
+                .fullName(app.getUser().getFullName())
+                .cvId(app.getCv().getId())
+                .cvUrl(app.getCv().getCvUrl())
+                .applyDate(app.getUpdatedAt())
+                .build()
+        ).collect(Collectors.toList());
     }
 
     @Override

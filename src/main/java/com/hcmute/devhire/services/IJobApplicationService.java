@@ -7,7 +7,7 @@ import com.hcmute.devhire.exceptions.DataNotFoundException;
 import java.util.List;
 
 public interface IJobApplicationService {
-    List<JobApplication> findByJobId(Long jobId);
+    List<JobApplicationDTO> findByJobId(Long jobId);
     List<JobApplication> findByUserId(Long userId);
     JobApplication findByJobIdAndUserId(Long jobId, Long userId);
     void deleteByJobIdAndUserId(Long jobId, Long userId);
