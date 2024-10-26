@@ -159,5 +159,27 @@ public class JobController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @GetMapping("/company")
+    public ResponseEntity<?> getJobsByRecruiterCompany() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = null;
 
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        }
+
+        try {
+
+            List<JobDTO> jobDTOS = jobService.getJobsByCompany(username);
+
+            if (jobDTOS.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No jobs found for the recruiter's company");
+            }
+            return ResponseEntity.ok(jobDTOS);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
 }

@@ -15,4 +15,6 @@ public interface IJobService {
     List<JobDTO> getAllJobs();
     Job findById(Long jobId) throws Exception;
     JobApplication applyForJob(Long jobId, ApplyJobRequestDTO applyJobRequestDTO) throws Exception;
+
+    List<JobDTO> getJobsByCompany(String username) throws Exception;
 }

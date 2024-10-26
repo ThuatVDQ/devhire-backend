@@ -1,9 +1,6 @@
 package com.hcmute.devhire.services;
 
-import com.hcmute.devhire.DTOs.ApplyJobRequestDTO;
-import com.hcmute.devhire.DTOs.CompanyDTO;
-import com.hcmute.devhire.DTOs.JobApplicationDTO;
-import com.hcmute.devhire.DTOs.JobDTO;
+import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.JobAddressRepository;
 import com.hcmute.devhire.repositories.JobApplicationRepository;
@@ -133,5 +130,41 @@ public class JobService implements IJobService{
                 .status(JobApplicationStatus.IN_PROGRESS)
                 .build();
         return jobApplicationRepository.save(jobApplication);
+    }
+
+    @Override
+    public List<JobDTO> getJobsByCompany(String username) throws Exception {
+        try {
+            // Tìm công ty dựa trên username
+            Company company = companyService.findByUser(username);
+            if (company == null) {
+                throw new Exception("Company not found");
+            }
+
+            // Tìm danh sách công việc dựa trên companyId
+            List<Job> jobs = jobRepository.findByCompanyId(company.getId());
+
+            // Map từ Job sang JobDTO
+            return jobs.stream().map(job -> JobDTO.builder()
+                    .id(job.getId())
+                    .title(job.getTitle())
+                    .salaryStart(job.getSalaryStart())
+                    .salaryEnd(job.getSalaryEnd())
+                    .type(job.getType().name())
+                    .currency(job.getCurrency().name())
+                    .deadline(job.getDeadline())
+                    .slots(job.getSlots())
+                    .status(job.getStatus().name())
+                    .applyNumber(job.getApplyNumber())
+                    .likeNumber(job.getLikeNumber())
+                    .category(job.getCategory() != null ?
+                            CategoryDTO.builder()
+                                    .name(job.getCategory().getName())
+                                    .build() : null)
+                    .build()
+            ).toList();
+        } catch (Exception e) {
+            throw new Exception("Error retrieving jobs for company: " + e.getMessage());
+        }
     }
 }
