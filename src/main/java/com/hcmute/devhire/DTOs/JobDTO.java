@@ -2,6 +2,8 @@ package com.hcmute.devhire.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -22,11 +24,12 @@ public class JobDTO {
     @NotBlank(message = "Description cannot be blank")
     private String description;
 
-    @NotBlank(message = "Salary start cannot be blank")
+    @NotNull(message = "Salary start cannot be blank")
+    @Min(value = 0, message = "Salary start must be greater than 0")
     @JsonProperty("salary_start")
     private double salaryStart;
 
-    @NotBlank(message = "Salary end cannot be blank")
+    @NotNull(message = "Salary start cannot be blank")
     @JsonProperty("salary_end")
     private double salaryEnd;
 
@@ -53,10 +56,10 @@ public class JobDTO {
     @NotBlank(message = "Benefit cannot be blank")
     private String benefit;
 
-    @NotBlank(message = "Deadline cannot be blank")
+    @NotNull(message = "Deadline cannot be blank")
     private Date deadline;
 
-    @NotBlank(message = "Slots cannot be blank")
+    @NotNull(message = "Slots cannot be blank")
     private int slots;
     private int applyNumber;
     private int likeNumber;

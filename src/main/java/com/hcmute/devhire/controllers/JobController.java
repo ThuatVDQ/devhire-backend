@@ -55,6 +55,17 @@ public class JobController {
                             .name(jobSkill.getSkill().getName())
                             .build())
                     .toList();
+            CompanyDTO companyDTO = null;
+            if (job.getCompany() == null) {
+                return ResponseEntity.badRequest().body("Company not found");
+            } else {
+               companyDTO = CompanyDTO.builder()
+                        .name(job.getCompany().getName() == null ? "" : job.getCompany().getName())
+                        .logo(job.getCompany().getLogo() == null ? "" : job.getCompany().getLogo())
+                        .address(job.getCompany().getAddress() == null ? "" : job.getCompany().getAddress())
+                        .webUrl(job.getCompany().getWebUrl() == null ? "" : job.getCompany().getWebUrl())
+                        .build();
+            }
             JobDTO jobDTO = JobDTO.builder()
                     .title(job.getTitle())
                     .description(job.getDescription())
@@ -72,6 +83,7 @@ public class JobController {
                     .status(job.getStatus().name())
                     .addresses(addressDTOs)
                     .skills(skillDTOs)
+                    .company(companyDTO)
                     .build();
             return ResponseEntity.ok(jobDTO);
         } catch (Exception e) {
