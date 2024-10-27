@@ -22,7 +22,12 @@ public class JobApplicationController {
     public ResponseEntity<?> getJobApplicationByJob(
             @PathVariable("jobId") Long jobId
     ) {
-        List<JobApplicationDTO> jobApplicationDTOS = jobApplicationService.findByJobId(jobId);
-        return ResponseEntity.ok(jobApplicationDTOS);
+        try {
+            List<JobApplicationDTO> jobApplicationDTOS = jobApplicationService.findByJobId(jobId);
+            return ResponseEntity.ok(jobApplicationDTOS);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
 }
