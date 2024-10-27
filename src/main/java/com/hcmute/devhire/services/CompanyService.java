@@ -31,12 +31,26 @@ public class CompanyService implements ICompanyService {
     }
 
     @Override
-    public Page<Company> getAllCompanies(PageRequest pageRequest) {
-        Page<Company> companies;
-        companies = companyRepository.findAll(pageRequest);
-        return companies;
+    public Page<CompanyDTO> getAllCompanies(PageRequest pageRequest) {
+        Page<Company> companies= companyRepository.findAll(pageRequest);
+        return companies.map(this::convertDTO);
     }
 
+    public CompanyDTO convertDTO(Company company) {
+        return CompanyDTO.builder()
+                .id(company.getId())
+                .name(company.getName())
+                .taxCode(company.getTaxCode())
+                .logo(company.getLogo())
+                .address(company.getAddress())
+                .description(company.getDescription())
+                .email(company.getEmail())
+                .phone(company.getPhone())
+                .webUrl(company.getWebUrl())
+                .scale(company.getScale())
+                .status(company.getStatus())
+                .build();
+    }
     @Override
     public Company findByUser(String username) {
         return companyRepository.findByUser(username);

@@ -1,5 +1,6 @@
 package com.hcmute.devhire.responses;
 
+import com.hcmute.devhire.DTOs.CompanyDTO;
 import com.hcmute.devhire.entities.Company;
 import lombok.*;
 
@@ -10,6 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class CompanyListResponse {
-    List<Company> companies;
+    List<CompanyDTO> companies;
     int totalPages;
+    int currentPage;
+    int pageSize;
+    Long totalElements;
 }

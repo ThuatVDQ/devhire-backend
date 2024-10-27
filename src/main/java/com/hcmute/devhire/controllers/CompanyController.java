@@ -4,6 +4,7 @@ import com.hcmute.devhire.DTOs.CompanyDTO;
 import com.hcmute.devhire.entities.Company;
 import com.hcmute.devhire.responses.CompanyListResponse;
 import com.hcmute.devhire.services.CompanyService;
+import com.hcmute.devhire.services.ICompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,24 +19,33 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/companies")
 public class CompanyController {
-    private final CompanyService companyService;
+    private final ICompanyService companyService;
     @GetMapping("")
     public ResponseEntity<?> getAllCompanies(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit
     ) {
-        PageRequest pageRequest = PageRequest.of(
-                page, limit,
-                Sort.by("id").ascending()
-        );
-        Page<Company> companyPage = companyService.getAllCompanies(pageRequest);
-        int totalPages = companyPage.getTotalPages();
-        List<Company> companies = companyPage.getContent();
-        return ResponseEntity.ok(Collections.singletonList(CompanyListResponse
-                .builder()
-                .companies(companies)
-                .totalPages(totalPages)
-                .build()));
+        if (page < 0 || limit <= 0) {
+            return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
+        }
+        try {
+            PageRequest pageRequest = PageRequest.of(
+                    page, limit,
+                    Sort.by("id").ascending()
+            );
+            Page<CompanyDTO> companyPage = companyService.getAllCompanies(pageRequest);
+            CompanyListResponse response = CompanyListResponse.builder()
+                    .companies(companyPage.getContent())
+                    .currentPage(page)
+                    .pageSize(limit)
+                    .totalPages(companyPage.getTotalPages())
+                    .totalElements(companyPage.getTotalElements())
+                    .build();
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("")
