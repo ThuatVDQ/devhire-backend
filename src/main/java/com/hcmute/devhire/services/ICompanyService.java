@@ -10,4 +10,5 @@ public interface ICompanyService {
     Company createCompany(CompanyDTO companyDTO, String username) throws Exception;
     Page<CompanyDTO> getAllCompanies(PageRequest pageRequest);
     Company findByUser(String username);
+    CompanyDTO getByUser(String username);
 }
