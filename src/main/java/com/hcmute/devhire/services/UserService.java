@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import com.hcmute.devhire.components.JwtUtil;
 
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -78,6 +79,9 @@ public class UserService implements IUserService{
 
         if (!passwordEncoder.matches(password, existingUser.getPassword())) {
             throw new Exception("Invalid phone number or password");
+        }
+        if (!Objects.equals(existingUser.getRole().getId(), roleId)) {
+            throw new Exception("Invalid role");
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
