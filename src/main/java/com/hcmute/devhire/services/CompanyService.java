@@ -55,4 +55,14 @@ public class CompanyService implements ICompanyService {
     public Company findByUser(String username) {
         return companyRepository.findByUser(username);
     }
+
+    @Override
+    public CompanyDTO getByUser(String username) {
+        Company company = companyRepository.findByUser(username);
+        if (company == null) {
+            return null;
+        }
+
+        return convertDTO(company);
+    }
 }

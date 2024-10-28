@@ -9,7 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -52,5 +56,30 @@ public class CompanyController {
     public ResponseEntity<?> createCompany(@RequestBody CompanyDTO companyDTO) {
         Company newCompany = companyService.createCompany(companyDTO);
         return ResponseEntity.ok(newCompany);
+    }
+
+    @GetMapping("/profile")
+    public  ResponseEntity<?> getByCreated(){
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = null;
+
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+                username = userDetails.getUsername();
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+            }
+
+            CompanyDTO companyDTO = companyService.getByUser(username);
+
+            if (companyDTO == null) {
+                return ResponseEntity.status(404).body("Company not found");
+            }
+
+            return ResponseEntity.ok(companyDTO);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred: " + e.getMessage());
+        }
     }
 }

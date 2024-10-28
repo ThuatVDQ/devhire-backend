@@ -10,4 +10,5 @@ public interface ICompanyService {
     Company createCompany(CompanyDTO companyDTO);
     Page<CompanyDTO> getAllCompanies(PageRequest pageRequest);
     Company findByUser(String username);
+    CompanyDTO getByUser(String username);
 }
