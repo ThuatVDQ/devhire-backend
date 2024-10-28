@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 public interface ICompanyService {
-    Company createCompany(CompanyDTO companyDTO);
+    Company createCompany(CompanyDTO companyDTO, String username) throws Exception;
     Page<CompanyDTO> getAllCompanies(PageRequest pageRequest);
     Company findByUser(String username);
 }

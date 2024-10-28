@@ -1,6 +1,7 @@
 package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.CompanyDTO;
+import com.hcmute.devhire.DTOs.UserDTO;
 import com.hcmute.devhire.entities.Company;
 import com.hcmute.devhire.repositories.CompanyRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,20 +13,29 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CompanyService implements ICompanyService {
     private final CompanyRepository companyRepository;
-
+    private final IUserService userService;
     @Override
-    public Company createCompany(CompanyDTO companyDTO) {
+    public Company createCompany(CompanyDTO companyDTO, String username) throws Exception {
+        UserDTO user = userService.findByUsername(username);
+        if (user == null) {
+            throw new Exception("User not found");
+        }
+        if (user.getRoleId() != 2) {
+            throw new Exception("User is not create a company");
+        }
+
         Company newCompany = Company.builder()
                 .name(companyDTO.getName())
                 .taxCode(companyDTO.getTaxCode())
-                .logo(companyDTO.getLogo())
+                .logo(companyDTO.getLogo() == null ? "" : companyDTO.getLogo())
                 .address(companyDTO.getAddress())
-                .description(companyDTO.getDescription())
+                .description(companyDTO.getDescription() == null ? "" : companyDTO.getDescription())
                 .email(companyDTO.getEmail())
                 .phone(companyDTO.getPhone())
-                .webUrl(companyDTO.getWebUrl())
-                .scale(companyDTO.getScale())
-                .status(companyDTO.getStatus())
+                .webUrl(companyDTO.getWebUrl() == null ? "" : companyDTO.getWebUrl())
+                .scale(companyDTO.getScale() == 0 ? 0 : companyDTO.getScale())
+                .status("ACTIVE")
+                .createdBy(userService.findById(user.getId()))
                 .build();
         return companyRepository.save(newCompany);
     }
@@ -49,6 +59,7 @@ public class CompanyService implements ICompanyService {
                 .webUrl(company.getWebUrl())
                 .scale(company.getScale())
                 .status(company.getStatus())
+                .totalJob(company.getJobs().size())
                 .build();
     }
     @Override

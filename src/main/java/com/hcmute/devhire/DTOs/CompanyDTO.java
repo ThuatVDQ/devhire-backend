@@ -11,7 +11,9 @@ import lombok.*;
 @Builder
 public class CompanyDTO {
     private Long id;
+
     @JsonProperty("tax_code")
+    @NotBlank(message = "Tax code is required")
     private String taxCode;
 
     @NotBlank(message = "Name is required")
@@ -21,12 +23,19 @@ public class CompanyDTO {
     private String logo;
     private String description;
     private int scale;
+
+    @NotBlank(message = "Email is required")
     private String email;
+
+    @NotBlank(message = "Phone is required")
     private String phone;
+
+    @NotBlank(message = "Address is required")
     private String address;
 
     @JsonProperty("web_url")
     private String webUrl;
     private String status;
     private UserDTO createBy;
+    private int totalJob;
 }
