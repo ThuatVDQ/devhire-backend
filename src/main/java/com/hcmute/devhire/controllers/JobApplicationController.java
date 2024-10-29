@@ -65,7 +65,7 @@ public class JobApplicationController {
             Resource resource = new FileSystemResource(zipPath.toFile());
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=all_cvs_for_job_" + jobId + ".zip");
-
+            headers.add("Access-Control-Expose-Headers", "Content-Disposition");
             return ResponseEntity.ok()
                     .headers(headers)
                     .contentLength(zipPath.toFile().length())
