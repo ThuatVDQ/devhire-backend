@@ -15,4 +15,5 @@ public interface IJobApplicationService {
     void deleteByUserId(Long userId);
 
     JobApplicationDTO getJobApplication(Long jobApplicationId) throws DataNotFoundException;
+    List<String> getAllCvPathsByJobId(Long jobId);
 }

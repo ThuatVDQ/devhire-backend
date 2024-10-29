@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +35,16 @@ public class JobApplicationService implements IJobApplicationService{
                 .userId(jobApplication.getUser().getId())
                 .cvId(jobApplication.getCv().getId())
                 .build();
+    }
+
+    @Override
+    public List<String> getAllCvPathsByJobId(Long jobId) {
+        List<JobApplication> jobApplications = jobApplicationRepository.findByJobId(jobId);
+        return jobApplications.stream()
+                .map(JobApplication::getCv)
+                .filter(Objects::nonNull)
+                .map(CV::getCvUrl)
+                .collect(Collectors.toList());
     }
 
     @Override
