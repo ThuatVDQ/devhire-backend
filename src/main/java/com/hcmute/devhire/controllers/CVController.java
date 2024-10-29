@@ -74,7 +74,6 @@ public class CVController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @GetMapping("/{cvId}/download")
     public ResponseEntity<?> downloadCV(
             @PathVariable("cvId") Long cvId
@@ -91,6 +90,7 @@ public class CVController {
             Resource resource = new FileSystemResource(file);
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName());
+            headers.add("Access-Control-Expose-Headers", "Content-Disposition"); // Thêm cấu hình này
 
             return ResponseEntity.ok()
                     .headers(headers)
