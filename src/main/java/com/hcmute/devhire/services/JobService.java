@@ -8,6 +8,8 @@ import com.hcmute.devhire.repositories.JobRepository;
 import com.hcmute.devhire.repositories.JobSkillRepository;
 import com.hcmute.devhire.utils.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 
@@ -86,9 +88,35 @@ public class JobService implements IJobService{
     }
 
     @Override
-    public List<JobDTO> getAllJobs() {
-        List<Job> jobs = jobRepository.findAll();
-        return jobs.stream().map(job -> JobDTO.builder()
+    public Page<JobDTO> getAllJobs(PageRequest pageRequest) throws Exception {
+        Page<Job> jobs= jobRepository.findAll(pageRequest);
+        return jobs.map(this::convertDTO);
+    }
+
+    public JobDTO convertDTO(Job job) {
+        List<AddressDTO> addressDTOs = job.getJobAddresses().stream()
+                .map(jobAddress -> AddressDTO.builder()
+                        .city(jobAddress.getAddress().getCity())
+                        .district(jobAddress.getAddress().getDistrict())
+                        .street(jobAddress.getAddress().getStreet())
+                        .build())
+                .toList();
+
+        List<SkillDTO> skillDTOs = job.getJobSkills().stream()
+                .map(jobSkill -> SkillDTO.builder()
+                        .name(jobSkill.getSkill().getName())
+                        .build())
+                .toList();
+        CompanyDTO companyDTO = null;
+        if (job.getCompany() != null) {
+            companyDTO = CompanyDTO.builder()
+                    .name(job.getCompany().getName() == null ? "" : job.getCompany().getName())
+                    .logo(job.getCompany().getLogo() == null ? "" : job.getCompany().getLogo())
+                    .address(job.getCompany().getAddress() == null ? "" : job.getCompany().getAddress())
+                    .webUrl(job.getCompany().getWebUrl() == null ? "" : job.getCompany().getWebUrl())
+                    .build();
+        }
+        return JobDTO.builder()
                 .id(job.getId())
                 .title(job.getTitle())
                 .description(job.getDescription())
@@ -104,8 +132,10 @@ public class JobService implements IJobService{
                 .deadline(job.getDeadline())
                 .slots(job.getSlots())
                 .status(job.getStatus().name())
-                .build()
-        ).toList();
+                .addresses(addressDTOs)
+                .skills(skillDTOs)
+                .company(companyDTO)
+                .build();
     }
 
     @Override

@@ -3,6 +3,11 @@ package com.hcmute.devhire.controllers;
 import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.*;
+import com.hcmute.devhire.responses.CompanyListResponse;
+import com.hcmute.devhire.responses.JobListResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.FieldError;
 import com.hcmute.devhire.services.ICVService;
 import com.hcmute.devhire.services.IJobService;
@@ -31,9 +36,31 @@ public class JobController {
     private final IUserService userService;
     private final FileUtil fileUtil;
     @GetMapping("")
-    public ResponseEntity<?> getAllJobs() {
-        List<JobDTO> jobDTOS = jobService.getAllJobs();
-        return ResponseEntity.ok(jobDTOS);
+    public ResponseEntity<?> getAllJobs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        if (page < 0 || limit <= 0) {
+            return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
+        }
+        try {
+            PageRequest pageRequest = PageRequest.of(
+                    page, limit,
+                    Sort.by("id").ascending()
+            );
+            Page<JobDTO> jobDTOPage = jobService.getAllJobs(pageRequest);
+            JobListResponse response = JobListResponse.builder()
+                    .jobs(jobDTOPage.getContent())
+                    .currentPage(page)
+                    .pageSize(limit)
+                    .totalPages(jobDTOPage.getTotalPages())
+                    .totalElements(jobDTOPage.getTotalElements())
+                    .build();
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
     @GetMapping("/{jobId}")
     public ResponseEntity<?> getJob(
