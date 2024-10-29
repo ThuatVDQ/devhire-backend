@@ -53,7 +53,7 @@ public class JobApplicationController {
             Path zipPath = Files.createTempFile("cvs_for_job_" + jobId, ".zip");
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipPath))) {
                 for (String cvPath : cvPaths) {
-                    File file = new File(cvPath);
+                    File file = new File("uploads/" + cvPath);
                     if (file.exists()) {
                         zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
                         Files.copy(file.toPath(), zipOutputStream);

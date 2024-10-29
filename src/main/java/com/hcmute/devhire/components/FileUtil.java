@@ -36,9 +36,8 @@ public class FileUtil {
         if (file.getOriginalFilename() == null) {
             throw new IOException("Invalid image format");
         }
-        String filename = StringUtils.cleanPath(file.getOriginalFilename());
 
-        String uniqueFilename = UUID.randomUUID().toString() + "_" + filename;
+        String uniqueFilename = UUID.randomUUID().toString();
         Path uploadDir = Paths.get("uploads");
 
         if (!Files.exists(uploadDir)) {
