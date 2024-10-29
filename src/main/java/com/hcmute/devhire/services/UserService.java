@@ -1,11 +1,13 @@
 package com.hcmute.devhire.services;
 
 
+import com.hcmute.devhire.DTOs.ProfileDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
 import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.repositories.RoleRepository;
 import com.hcmute.devhire.repositories.UserRepository;
+import com.hcmute.devhire.utils.Status;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -152,6 +154,25 @@ public class UserService implements IUserService{
         }
 
         return user;
+    }
+
+    @Override
+    public User updateProfile(String username, ProfileDTO profileDTO) throws EntityNotFoundException {
+        User user = username.contains("@")
+                ? userRepository.findByEmail(username).orElseThrow(() -> new EntityNotFoundException("User not found"))
+                : userRepository.findByPhone(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if (profileDTO.getFullName() != null) {
+            user.setFullName(profileDTO.getFullName());
+        }
+
+        if (profileDTO.getGender() != null) {
+            user.setGender(profileDTO.getGender());
+        }
+        if (profileDTO.getIntroduction() != null) {
+            user.setIntroduction(profileDTO.getIntroduction());
+        }
+
+        return userRepository.save(user);
     }
 
     private String safeGet(String value) {

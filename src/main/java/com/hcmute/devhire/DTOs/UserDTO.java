@@ -25,6 +25,7 @@ public class UserDTO {
     private String password;
 
     @JsonProperty("retype_password")
+    @NotBlank(message = "Retype password can't be blank")
     private String retypePassword;
 
     private String gender;

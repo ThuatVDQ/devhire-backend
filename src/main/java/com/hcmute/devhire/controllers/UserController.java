@@ -1,5 +1,6 @@
 package com.hcmute.devhire.controllers;
 
+import com.hcmute.devhire.DTOs.ProfileDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
 import com.hcmute.devhire.DTOs.UserLoginDTO;
 import com.hcmute.devhire.components.FileUtil;
@@ -144,6 +145,25 @@ public class UserController {
 
         return ResponseEntity.ok("Delete avatar successfully");
     }
+
+    @PutMapping("/updateProfile")
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody ProfileDTO profileDTO, BindingResult result) {
+        try {
+            if(result.hasErrors()) {
+                List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+                return ResponseEntity.badRequest().body(errorMessage);
+            }
+            String username = getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.status(401).body("Unauthorized: No user found.");
+            }
+            User user = userService.updateProfile(username, profileDTO);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     private String getAuthenticatedUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
