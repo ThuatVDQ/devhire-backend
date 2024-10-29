@@ -157,6 +157,8 @@ public class JobService implements IJobService{
                 .user(user)
                 .status(JobApplicationStatus.IN_PROGRESS)
                 .build();
+        job.setApplyNumber(job.getApplyNumber() + 1);
+        jobRepository.save(job);
         return jobApplicationRepository.save(jobApplication);
     }
 
