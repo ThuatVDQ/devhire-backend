@@ -6,6 +6,9 @@ import com.hcmute.devhire.entities.CV;
 import com.hcmute.devhire.services.CVService;
 import com.hcmute.devhire.services.ICVService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,8 +58,47 @@ public class CVController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-
     }
 
+    @GetMapping("/{cvId}")
+    public ResponseEntity<?> getCVById(
+            @PathVariable("cvId") Long cvId
+    ) {
+        try {
+            CVDTO cvDTO = cvService.findById(cvId);
+            if (cvDTO == null) {
+                return ResponseEntity.badRequest().body("CV not found");
+            }
+            return ResponseEntity.ok(cvDTO);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{cvId}/download")
+    public ResponseEntity<?> downloadCV(
+            @PathVariable("cvId") Long cvId
+    ) {
+        try {
+            CVDTO cvDTO = cvService.findById(cvId);
+            if (cvDTO == null) {
+                return ResponseEntity.badRequest().body("CV not found");
+            }
+            File file = new File("uploads/" + cvDTO.getCvUrl());
+            if (!file.exists()) {
+                return ResponseEntity.badRequest().body("CV not found");
+            }
+            Resource resource = new FileSystemResource(file);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName());
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(file.length())
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

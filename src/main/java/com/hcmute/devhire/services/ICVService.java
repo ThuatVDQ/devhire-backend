@@ -10,6 +10,6 @@ import java.util.Optional;
 public interface ICVService {
     CV createCV(CVDTO cvDTO) throws Exception;
     CV findByUserId(Long userId);
-    Optional<CV> findById(Long id);
+    CVDTO findById(Long id);
     CVDTO uploadCV(Long userId, MultipartFile file) throws IOException;
 }

@@ -2,10 +2,7 @@ package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.entities.*;
-import com.hcmute.devhire.repositories.JobAddressRepository;
-import com.hcmute.devhire.repositories.JobApplicationRepository;
-import com.hcmute.devhire.repositories.JobRepository;
-import com.hcmute.devhire.repositories.JobSkillRepository;
+import com.hcmute.devhire.repositories.*;
 import com.hcmute.devhire.utils.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +27,7 @@ public class JobService implements IJobService{
     private final IAddressService addressService;
     private final ISkillService skillService;
     private final ICompanyService companyService;
+    private final CVRepository cvRepository;
     @Override
     public Job createJob(JobDTO jobDTO, String username) throws Exception {
         try {
@@ -149,7 +147,7 @@ public class JobService implements IJobService{
                 .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
         User user = userService.findById(applyJobRequestDTO.getUserId());
 
-        CV cv = cvService.findById(applyJobRequestDTO.getCvId())
+        CV cv = cvRepository.findById(applyJobRequestDTO.getCvId())
                 .orElseThrow(() -> new Exception("CV not found with id: " + applyJobRequestDTO.getCvId()));
 
         JobApplication jobApplication = JobApplication

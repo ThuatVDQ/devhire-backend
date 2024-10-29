@@ -40,8 +40,16 @@ public class CVService implements ICVService{
     }
 
     @Override
-    public Optional<CV> findById(Long id) {
-        return cvRepository.findById(id);
+    public CVDTO findById(Long id) {
+        CV cv = cvRepository.findById(id).orElse(null);
+        if (cv == null) {
+            return null;
+        }
+        return CVDTO.builder()
+                .id(cv.getId())
+                .userId(cv.getUser().getId())
+                .cvUrl(cv.getCvUrl())
+                .build();
     }
 
     @Override
