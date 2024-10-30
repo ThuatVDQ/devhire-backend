@@ -36,8 +36,16 @@ public class FileUtil {
         if (file.getOriginalFilename() == null) {
             throw new IOException("Invalid image format");
         }
+        // Lấy tên file và phần mở rộng
+        String filename = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileExtension = "";
 
-        String uniqueFilename = UUID.randomUUID().toString();
+        int extensionIndex = filename.lastIndexOf(".");
+        if (extensionIndex > 0) {
+            fileExtension = filename.substring(extensionIndex);
+        }
+
+        String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
         Path uploadDir = Paths.get("uploads");
 
         if (!Files.exists(uploadDir)) {
