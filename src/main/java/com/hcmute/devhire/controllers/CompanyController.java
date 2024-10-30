@@ -107,4 +107,22 @@ public class CompanyController {
             return ResponseEntity.status(500).body("An error occurred: " + e.getMessage());
         }
     }
+
+    @PutMapping("/updateCompany")
+    public ResponseEntity<?> updateCompany(@Valid @RequestBody CompanyDTO companyDTO, BindingResult result) {
+        try {
+            if(result.hasErrors()) {
+                List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+                return ResponseEntity.badRequest().body(errorMessage);
+            }
+            String username = getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.status(401).body("Unauthorized: No user found.");
+            }
+            Company company = companyService.updateCompany(companyDTO, username);
+            return ResponseEntity.ok(company);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

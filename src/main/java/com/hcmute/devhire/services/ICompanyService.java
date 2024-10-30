@@ -11,4 +11,5 @@ public interface ICompanyService {
     Page<CompanyDTO> getAllCompanies(PageRequest pageRequest);
     Company findByUser(String username);
     CompanyDTO getByUser(String username);
+    Company updateCompany(CompanyDTO companyDTO, String username) throws Exception;
 }

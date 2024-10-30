@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class CompanyService implements ICompanyService {
@@ -75,5 +77,37 @@ public class CompanyService implements ICompanyService {
         }
 
         return convertDTO(company);
+    }
+
+    @Override
+    public Company updateCompany(CompanyDTO companyDTO, String username) throws Exception {
+        UserDTO user = userService.findByUsername(username);
+        if (user == null) {
+            throw new Exception("User not found");
+        }
+        if (user.getRoleId() != 2) {
+            throw new Exception("User is not create a company");
+        }
+        Company company = companyRepository.findByUser(username);
+        if (companyDTO.getName() != null) {
+            company.setName(companyDTO.getName());
+        }
+        if (companyDTO.getTaxCode() != null) {
+            company.setTaxCode(companyDTO.getTaxCode());
+        }
+        if (companyDTO.getDescription() != null) {
+            company.setDescription(companyDTO.getDescription());
+        }
+        if (companyDTO.getScale() != 0) {
+            company.setScale(companyDTO.getScale());
+        }
+        if (companyDTO.getWebUrl() != null) {
+            company.setWebUrl(companyDTO.getWebUrl());
+        }
+        if (companyDTO.getAddress() != null) {
+            company.setAddress(companyDTO.getAddress());
+        }
+
+        return companyRepository.save(company);
     }
 }
