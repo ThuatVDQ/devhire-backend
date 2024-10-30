@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +46,20 @@ public class JobApplicationService implements IJobApplicationService{
                 .filter(Objects::nonNull)
                 .map(CV::getCvUrl)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<JobApplication> findApplicationByJobIdAndUserId(Long jobId, Long userId) {
+        JobApplication jobApplications = jobApplicationRepository.findByJobIdAndUserId(jobId, userId);
+        if (jobApplications != null) {
+            return Optional.of(jobApplications);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public void updateJobApplication(JobApplication jobApplication) {
+        jobApplicationRepository.save(jobApplication);
     }
 
     @Override

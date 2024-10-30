@@ -5,6 +5,7 @@ import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.exceptions.DataNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IJobApplicationService {
     List<JobApplicationDTO> findByJobId(Long jobId);
@@ -16,4 +17,6 @@ public interface IJobApplicationService {
 
     JobApplicationDTO getJobApplication(Long jobApplicationId) throws DataNotFoundException;
     List<String> getAllCvPathsByJobId(Long jobId);
+    Optional<JobApplication> findApplicationByJobIdAndUserId(Long jobId, Long userId);
+    void updateJobApplication(JobApplication jobApplication);
 }

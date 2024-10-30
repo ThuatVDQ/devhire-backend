@@ -5,13 +5,11 @@ import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.responses.CompanyListResponse;
 import com.hcmute.devhire.responses.JobListResponse;
+import com.hcmute.devhire.services.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.validation.FieldError;
-import com.hcmute.devhire.services.ICVService;
-import com.hcmute.devhire.services.IJobService;
-import com.hcmute.devhire.services.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,6 +34,8 @@ public class JobController {
     private final ICVService cvService;
     private final IUserService userService;
     private final FileUtil fileUtil;
+    private final IJobApplicationService jobApplicationService;
+
     @GetMapping("")
     public ResponseEntity<?> getAllJobs(
             @RequestParam(defaultValue = "0") int page,
@@ -172,16 +173,25 @@ public class JobController {
                 username = userDetails.getUsername();
             }
             UserDTO userDTO = userService.findByUsername(username);
+
+            Optional<JobApplication> existingApplication = jobApplicationService.findApplicationByJobIdAndUserId(jobId, userDTO.getId());
+
             CVDTO cvDTO = cvService.uploadCV(userDTO.getId(), file);
             CV cv = cvService.createCV(cvDTO);
-            ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
-                    .userId(userDTO.getId())
-                    .cvId(cv.getId())
-                    .jobId(jobId)
-                    .build();
-
-            JobApplication jobApplication = jobService.applyForJob(jobId, applyJobRequestDTO);
-            return ResponseEntity.ok().body("Applied successfully");
+            if (existingApplication.isPresent()) {
+                JobApplication jobApplication = existingApplication.get();
+                jobApplication.setCv(cv);
+                jobApplicationService.updateJobApplication(jobApplication);
+                return ResponseEntity.ok().body("Updated CV for existing application");
+            } else {
+                ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
+                        .userId(userDTO.getId())
+                        .cvId(cv.getId())
+                        .jobId(jobId)
+                        .build();
+                jobService.applyForJob(jobId, applyJobRequestDTO);
+                return ResponseEntity.ok().body("Applied successfully");
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
