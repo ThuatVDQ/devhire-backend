@@ -1,7 +1,9 @@
 package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.CompanyDTO;
+import com.hcmute.devhire.entities.Address;
 import com.hcmute.devhire.entities.Company;
+import com.hcmute.devhire.entities.Skill;
 import com.hcmute.devhire.responses.CompanyListResponse;
 import com.hcmute.devhire.services.CompanyService;
 import com.hcmute.devhire.services.ICompanyService;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -123,6 +126,48 @@ public class CompanyController {
             return ResponseEntity.ok(company);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/skills")
+    public ResponseEntity<?> getAllSkillsForCompany() {
+        try {
+            String username = getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.badRequest().body("User not found");
+            }
+
+            CompanyDTO companyDTO = companyService.getByUser(username);
+            if (companyDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company not found for user");
+            }
+
+            Set<Skill> skills = companyService.getAllSkillsForCompany(companyDTO.getId());
+            return ResponseEntity.ok(skills);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/addresses")
+    public ResponseEntity<?> getAllAddressesForCompany() {
+        try {
+            String username = getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.badRequest().body("User not found");
+            }
+
+            CompanyDTO companyDTO = companyService.getByUser(username);
+            if (companyDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company not found for user");
+            }
+
+            Set<Address> addresses = companyService.getAllAddressesForCompany(companyDTO.getId());
+            return ResponseEntity.ok(addresses);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }
 }
