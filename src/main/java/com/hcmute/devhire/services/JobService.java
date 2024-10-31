@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JobService implements IJobService{
     private final JobRepository jobRepository;
-    private final CategoryService categoryService;
+    private final ICategoryService categoryService;
     private final JobAddressRepository jobAddressRepository;
     private final JobSkillRepository jobSkillRepository;
     private final IUserService userService;
@@ -30,6 +30,9 @@ public class JobService implements IJobService{
     private final ICompanyService companyService;
     private final CVRepository cvRepository;
     private final IFavoriteJobService favoriteJobService;
+    private final IJobApplicationService jobApplicationService;
+    private final FavoriteJobRepository favoriteJobRepository;
+
     @Override
     public Job createJob(JobDTO jobDTO, String username) throws Exception {
         try {
@@ -88,12 +91,20 @@ public class JobService implements IJobService{
     }
 
     @Override
-    public Page<JobDTO> getAllJobs(PageRequest pageRequest) throws Exception {
+    public Page<JobDTO> getAllJobs(PageRequest pageRequest, String username) throws Exception {
         Page<Job> jobs= jobRepository.findAll(pageRequest);
-        return jobs.map(this::convertDTO);
+
+        return jobs.map(job -> {
+            try {
+                return convertDTO(job, username);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
-    public JobDTO convertDTO(Job job) {
+    public JobDTO convertDTO(Job job, String username) throws Exception {
+
         List<AddressDTO> addressDTOs = job.getJobAddresses().stream()
                 .map(jobAddress -> AddressDTO.builder()
                         .city(jobAddress.getAddress().getCity())
@@ -116,6 +127,19 @@ public class JobService implements IJobService{
                     .webUrl(job.getCompany().getWebUrl() == null ? "" : job.getCompany().getWebUrl())
                     .build();
         }
+        String applicationStatus = null;
+        boolean liked = false;
+        if (username != null) {
+            User user = userService.findByUserName(username);
+            FavoriteJob favoriteJob = favoriteJobRepository.findByUserAndJob(user, job);
+            if (favoriteJob != null) {
+                liked = true;
+            }
+            JobApplication jobApplications = jobApplicationRepository.findByJobIdAndUserId(job.getId(), user.getId());
+            if (jobApplications != null) {
+                applicationStatus = jobApplications.getStatus().name();
+            }
+        }
         return JobDTO.builder()
                 .id(job.getId())
                 .title(job.getTitle())
@@ -135,6 +159,8 @@ public class JobService implements IJobService{
                 .addresses(addressDTOs)
                 .skills(skillDTOs)
                 .company(companyDTO)
+                .isFavorite(liked)
+                .applyStatus(applicationStatus)
                 .build();
     }
 
@@ -226,7 +252,13 @@ public class JobService implements IJobService{
         try {
             Collection<FavoriteJob> favoriteJob = favoriteJobService.getFavoriteJobs(user);
             List<JobDTO> jobDTOs = favoriteJob.stream()
-                    .map(favJob -> convertDTO(favJob.getJob())
+                    .map(favJob -> {
+                                try {
+                                    return convertDTO(favJob.getJob(), user.getUsername());
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
                     ).toList();
             return JobListResponse.builder()
                     .jobs(jobDTOs)

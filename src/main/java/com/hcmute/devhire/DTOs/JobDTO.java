@@ -73,4 +73,10 @@ public class JobDTO {
 
     private List<AddressDTO> addresses;
     private List<SkillDTO> skills;
+
+    @JsonProperty("is_favorite")
+    private boolean isFavorite;
+
+    @JsonProperty("apply_status")
+    private String applyStatus;
 }

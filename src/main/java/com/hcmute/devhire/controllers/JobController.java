@@ -45,11 +45,25 @@ public class JobController {
             return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
         }
         try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = null;
+
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.badRequest().body("User is not authenticated");
+            }
+
+            if (authentication.getPrincipal() instanceof UserDetails userDetails) {
+                username = userDetails.getUsername();
+            }
+
+            if (username == null) {
+                return ResponseEntity.badRequest().body("Could not retrieve authenticated username");
+            }
             PageRequest pageRequest = PageRequest.of(
                     page, limit,
                     Sort.by("id").ascending()
             );
-            Page<JobDTO> jobDTOPage = jobService.getAllJobs(pageRequest);
+            Page<JobDTO> jobDTOPage = jobService.getAllJobs(pageRequest, username);
             JobListResponse response = JobListResponse.builder()
                     .jobs(jobDTOPage.getContent())
                     .currentPage(page)
