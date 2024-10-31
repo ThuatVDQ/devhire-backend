@@ -1,9 +1,12 @@
 package com.hcmute.devhire.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.hcmute.devhire.entities.Job;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -37,5 +40,6 @@ public class CompanyDTO {
     private String webUrl;
     private String status;
     private UserDTO createBy;
+    private List<Job> jobs;
     private int totalJob;
 }

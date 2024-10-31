@@ -18,4 +18,5 @@ public interface ICompanyService {
     Company updateCompany(CompanyDTO companyDTO, String username) throws Exception;
     Set<Skill> getAllSkillsForCompany(Long companyId);
     Set<Address> getAllAddressesForCompany(Long companyId);
+    CompanyDTO getCompanyById(Long companyId) throws Exception;
 }

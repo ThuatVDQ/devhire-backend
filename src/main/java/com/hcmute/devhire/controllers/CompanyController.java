@@ -59,6 +59,18 @@ public class CompanyController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCompanyById(@PathVariable Long id) {
+        try {
+            CompanyDTO companyDTO = companyService.getCompanyById(id);
+            if (companyDTO == null) {
+                return ResponseEntity.badRequest().body("Company not found");
+            }
+            return ResponseEntity.ok(companyDTO);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     @PostMapping("")
     public ResponseEntity<?> createCompany(@Valid @RequestBody CompanyDTO companyDTO, BindingResult result) {
 

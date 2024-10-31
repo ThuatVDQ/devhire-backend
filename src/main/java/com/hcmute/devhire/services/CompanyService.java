@@ -68,6 +68,7 @@ public class CompanyService implements ICompanyService {
                 .scale(company.getScale())
                 .status(company.getStatus())
                 .totalJob(company.getJobs().size())
+                .jobs(company.getJobs())
                 .build();
     }
     @Override
@@ -135,5 +136,11 @@ public class CompanyService implements ICompanyService {
                 .flatMap(job -> job.getJobAddresses().stream())
                 .map(JobAddress::getAddress)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public CompanyDTO getCompanyById(Long companyId) throws Exception {
+        Company company = companyRepository.findById(companyId).orElseThrow(() -> new Exception("Company not found"));
+        return convertDTO(company);
     }
 }
