@@ -3,6 +3,7 @@ package com.hcmute.devhire.services;
 import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.*;
+import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.utils.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -204,15 +205,34 @@ public class JobService implements IJobService{
         try {
             Job job = jobRepository.findById(jobId)
                     .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
-            UserDTO userDTO = userService.findByUsername(username);
-            if (userDTO == null) {
+            User user = userService.findByUserName(username);
+            if (user == null) {
                 throw new Exception("User not found");
             }
+            if (!favoriteJobService.addFavorite(job, user)) {
+                throw new Exception("User already liked this job");
+            }
+
             job.setLikeNumber(job.getLikeNumber() + 1);
-            favoriteJobService.createFavoriteJob(job, userDTO.getId());
             jobRepository.save(job);
+
         } catch (Exception e) {
             throw new Exception("Error liking job: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public JobListResponse getFavoriteJobs(User user) throws Exception {
+        try {
+            Collection<FavoriteJob> favoriteJob = favoriteJobService.getFavoriteJobs(user);
+            List<JobDTO> jobDTOs = favoriteJob.stream()
+                    .map(favJob -> convertDTO(favJob.getJob())
+                    ).toList();
+            return JobListResponse.builder()
+                    .jobs(jobDTOs)
+                    .build();
+        } catch (Exception e) {
+            throw new Exception("Error retrieving favorite jobs: " + e.getMessage());
         }
     }
 }

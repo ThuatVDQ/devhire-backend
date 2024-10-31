@@ -5,6 +5,8 @@ import com.hcmute.devhire.DTOs.JobApplicationDTO;
 import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.JobApplication;
+import com.hcmute.devhire.entities.User;
+import com.hcmute.devhire.responses.JobListResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -18,4 +20,6 @@ public interface IJobService {
 
     List<JobDTO> getJobsByCompany(String username) throws Exception;
     void likeJob(Long jobId, String username) throws Exception;
+    JobListResponse getFavoriteJobs(User user) throws Exception;
+
 }

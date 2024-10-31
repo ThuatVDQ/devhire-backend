@@ -2,6 +2,7 @@ package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.User;
+import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.services.IFavoriteJobService;
 import com.hcmute.devhire.services.IJobService;
 import com.hcmute.devhire.services.IUserService;
@@ -20,30 +21,24 @@ public class FavoriteJobController {
     private final IUserService userService;
     private final IJobService jobService;
 
-    @PostMapping("/favorite")
-    public ResponseEntity<String> addFavorite(@RequestParam Long jobId) throws Exception {
+    @GetMapping("/favorite")
+    public ResponseEntity<?> getFavoriteJobs() {
         try {
             String username = getAuthenticatedUsername();
             if (username == null) {
-                return ResponseEntity.status(401).body("Unauthorized: No user found.");
+                return ResponseEntity.badRequest().body("Unauthorized: No user found.");
             }
 
             User user = userService.findByUserName(username);
-            Job job = jobService.findById(jobId);
-
-            if (user == null || job == null) {
-                return ResponseEntity.badRequest().body("User or Job not found");
+            if (user == null) {
+                return ResponseEntity.badRequest().body("User not found");
             }
-
-            favoriteJobService.addFavorite(user, job);
-            return ResponseEntity.ok("Job added to favorites");
-
+            JobListResponse jobListResponse = jobService.getFavoriteJobs(user);
+            return ResponseEntity.ok(jobListResponse);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("An error occurred: " + e.getMessage());
+            return ResponseEntity.badRequest().body("An error occurred: " + e.getMessage());
         }
     }
-
     @DeleteMapping("/remove")
     public ResponseEntity<String> removeFavorite(@RequestParam Long jobId) throws Exception {
         try {
@@ -63,8 +58,7 @@ public class FavoriteJobController {
             return ResponseEntity.ok("Job removed from favorites");
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("An error occurred: " + e.getMessage());
+            return ResponseEntity.badRequest().body("An error occurred: " + e.getMessage());
         }
     }
 

@@ -5,27 +5,26 @@ import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.repositories.FavoriteJobRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class FavoriteJobService implements IFavoriteJobService {
-    @Autowired
-    private FavoriteJobRepository favoriteJobRepository;
+    private final FavoriteJobRepository favoriteJobRepository;
 
-    public FavoriteJob addFavorite(User user, Job job) {
-        // Kiểm tra xem công việc đã được yêu thích hay chưa
+    public boolean addFavorite(Job job, User user) {
         FavoriteJob existingFavorite = favoriteJobRepository.findByUserAndJob(user, job);
         if (existingFavorite != null) {
-            return existingFavorite; // Nếu đã yêu thích, trả về thông tin yêu thích hiện có
+            return false;
         }
 
-        // Nếu chưa yêu thích, tạo mới
         FavoriteJob favoriteJob = new FavoriteJob();
         favoriteJob.setUser(user);
         favoriteJob.setJob(job);
-        return favoriteJobRepository.save(favoriteJob);
+        favoriteJobRepository.save(favoriteJob);
+        return true;
     }
 
     public void removeFavorite(User user, Job job) {
@@ -33,5 +32,10 @@ public class FavoriteJobService implements IFavoriteJobService {
         if (favoriteJob != null) {
             favoriteJobRepository.delete(favoriteJob);
         }
+    }
+
+    @Override
+    public List<FavoriteJob> getFavoriteJobs(User user) {
+        return favoriteJobRepository.findByUser(user);
     }
 }
