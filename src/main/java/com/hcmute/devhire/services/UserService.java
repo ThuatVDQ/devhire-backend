@@ -97,6 +97,22 @@ public class UserService implements IUserService{
         return userRepository.findById(id).orElseThrow(() -> new Exception("User not found"));
     }
 
+    public User findByUserName(String username) throws Exception {
+        Optional<User> userOptional;
+
+        if (username.contains("@")) {
+            userOptional = userRepository.findByEmail(username);
+        } else {
+            userOptional = userRepository.findByPhone(username);
+        }
+
+        if (userOptional.isEmpty()) {
+            throw new Exception("User not found with username: " + username);
+        }
+
+        return userOptional.get();
+    }
+
     @Override
     public UserDTO findByUsername(String username) throws Exception {
         Optional<User> userOptional;
