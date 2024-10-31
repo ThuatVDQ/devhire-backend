@@ -16,4 +16,5 @@ public interface IUserService {
     UserDTO getProfile(String phone) throws Exception;
     User updateAvatar(String username, String avatarUrl) throws EntityNotFoundException;
     User updateProfile(String username, ProfileDTO profileDTO) throws EntityNotFoundException;
+    User findByUserName(String username) throws Exception;
 }
