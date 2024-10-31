@@ -50,7 +50,7 @@ public class JobApplicationController {
                 return ResponseEntity.notFound().build();
             }
 
-            Path zipPath = Files.createTempFile("cvs_for_job_" + jobId, ".zip");
+            Path zipPath = Files.createTempFile("cvs_for_job", ".zip");
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipPath))) {
                 for (String cvPath : cvPaths) {
                     File file = new File("uploads/" + cvPath);
@@ -64,7 +64,7 @@ public class JobApplicationController {
 
             Resource resource = new FileSystemResource(zipPath.toFile());
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=all_cvs_for_job_" + jobId + ".zip");
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=all_cvs_for_job" + ".zip");
             headers.add("Access-Control-Expose-Headers", "Content-Disposition");
             return ResponseEntity.ok()
                     .headers(headers)
