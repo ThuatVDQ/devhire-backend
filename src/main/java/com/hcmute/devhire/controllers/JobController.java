@@ -35,6 +35,7 @@ public class JobController {
     private final IUserService userService;
     private final FileUtil fileUtil;
     private final IJobApplicationService jobApplicationService;
+    private final FavoriteJobService favoriteJobService;
 
     @GetMapping("")
     public ResponseEntity<?> getAllJobs(
@@ -47,18 +48,10 @@ public class JobController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = null;
-
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return ResponseEntity.badRequest().body("User is not authenticated");
-            }
-
-            if (authentication.getPrincipal() instanceof UserDetails userDetails) {
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
                 username = userDetails.getUsername();
             }
 
-            if (username == null) {
-                return ResponseEntity.badRequest().body("Could not retrieve authenticated username");
-            }
             PageRequest pageRequest = PageRequest.of(
                     page, limit,
                     Sort.by("id").ascending()
@@ -81,9 +74,26 @@ public class JobController {
     public ResponseEntity<?> getJob(
             @PathVariable("jobId") Long jobId
     ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = null;
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
+        }
         try {
+            boolean isLiked = false;
+            String applyStatus = null;
             Job job = jobService.findById(jobId);
-
+            if (username != null) {
+                User user = userService.findByUserName(username);
+                FavoriteJob favoriteJob = favoriteJobService.findByUserAndJob(user, job);
+                if (favoriteJob != null) {
+                    isLiked = true;
+                }
+                Optional<JobApplication> jobApplications = Optional.ofNullable(jobApplicationService.findByJobIdAndUserId(job.getId(), user.getId()));
+                if (jobApplications.isPresent()) {
+                    applyStatus = jobApplications.get().getStatus().name();
+                }
+            }
             List<AddressDTO> addressDTOs = job.getJobAddresses().stream()
                     .map(jobAddress -> AddressDTO.builder()
                             .city(jobAddress.getAddress().getCity())
@@ -126,6 +136,8 @@ public class JobController {
                     .addresses(addressDTOs)
                     .skills(skillDTOs)
                     .company(companyDTO)
+                    .isFavorite(isLiked)
+                    .applyStatus(applyStatus)
                     .build();
             return ResponseEntity.ok(jobDTO);
         } catch (Exception e) {

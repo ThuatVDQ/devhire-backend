@@ -38,4 +38,9 @@ public class FavoriteJobService implements IFavoriteJobService {
     public List<FavoriteJob> getFavoriteJobs(User user) {
         return favoriteJobRepository.findByUser(user);
     }
+
+    @Override
+    public FavoriteJob findByUserAndJob(User user, Job job) {
+        return favoriteJobRepository.findByUserAndJob(user, job);
+    }
 }

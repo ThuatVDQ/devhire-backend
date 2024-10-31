@@ -10,4 +10,5 @@ public interface IFavoriteJobService {
     boolean addFavorite(Job job, User user );
     void removeFavorite(User user, Job job);
     List<FavoriteJob> getFavoriteJobs(User user);
+    FavoriteJob findByUserAndJob(User user, Job job);
 }
