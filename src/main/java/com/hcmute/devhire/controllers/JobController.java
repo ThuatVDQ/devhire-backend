@@ -219,4 +219,25 @@ public class JobController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+
+    @PostMapping("/{jobId}/like")
+    public ResponseEntity<?> likeJob(
+            @PathVariable("jobId") Long jobId
+    ) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = null;
+
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+                username = userDetails.getUsername();
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+            }
+
+            jobService.likeJob(jobId, username);
+            return ResponseEntity.ok().body("Liked job successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

@@ -28,6 +28,7 @@ public class JobService implements IJobService{
     private final ISkillService skillService;
     private final ICompanyService companyService;
     private final CVRepository cvRepository;
+    private final IFavoriteJobService favoriteJobService;
     @Override
     public Job createJob(JobDTO jobDTO, String username) throws Exception {
         try {
@@ -195,6 +196,23 @@ public class JobService implements IJobService{
             ).toList();
         } catch (Exception e) {
             throw new Exception("Error retrieving jobs for company: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void likeJob(Long jobId, String username) throws Exception {
+        try {
+            Job job = jobRepository.findById(jobId)
+                    .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
+            UserDTO userDTO = userService.findByUsername(username);
+            if (userDTO == null) {
+                throw new Exception("User not found");
+            }
+            job.setLikeNumber(job.getLikeNumber() + 1);
+            favoriteJobService.createFavoriteJob(job, userDTO.getId());
+            jobRepository.save(job);
+        } catch (Exception e) {
+            throw new Exception("Error liking job: " + e.getMessage());
         }
     }
 }

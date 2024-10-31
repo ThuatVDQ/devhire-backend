@@ -1,5 +1,6 @@
 package com.hcmute.devhire.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,9 +19,11 @@ public class FavoriteJob extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonBackReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "job_id", referencedColumnName = "id")
+    @JsonBackReference
     private Job job;
 }
