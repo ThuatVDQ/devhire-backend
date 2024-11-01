@@ -36,7 +36,7 @@ public class JobService implements IJobService{
         try {
             JobType jobType = EnumUtil.getEnumFromString(JobType.class, jobDTO.getType());
             Currency currency = EnumUtil.getEnumFromString(Currency.class, jobDTO.getCurrency());
-            JobStatus status = EnumUtil.getEnumFromString(JobStatus.class, "CLOSED");
+            JobStatus status = EnumUtil.getEnumFromString(JobStatus.class, "PENDING");
 
             Category category = categoryService.findById(jobDTO.getCategory().getId());
 
@@ -267,6 +267,54 @@ public class JobService implements IJobService{
             }).toList();
         } catch (Exception e) {
             throw new Exception("Error retrieving jobs for company: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void approveJob(Long jobId) throws Exception {
+        try {
+            Job job = jobRepository.findById(jobId)
+                    .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
+            job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, "OPEN"));
+            jobRepository.save(job);
+        } catch (Exception e) {
+            throw new Exception("Error approving job: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void rejectJob(Long jobId) throws Exception {
+        try {
+            Job job = jobRepository.findById(jobId)
+                    .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
+            job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, "REJECTED"));
+            jobRepository.save(job);
+        } catch (Exception e) {
+            throw new Exception("Error rejecting job: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void expiredJob(Long jobId) throws Exception {
+        try {
+            Job job = jobRepository.findById(jobId)
+                    .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
+            job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, "CLOSED"));
+            jobRepository.save(job);
+        } catch (Exception e) {
+            throw new Exception("Error expiring job: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void vipJob(Long jobId) throws Exception {
+        try {
+            Job job = jobRepository.findById(jobId)
+                    .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
+            job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, "HOT"));
+            jobRepository.save(job);
+        } catch (Exception e) {
+            throw new Exception("Error making job VIP: " + e.getMessage());
         }
     }
 }

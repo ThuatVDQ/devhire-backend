@@ -6,6 +6,8 @@ import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.responses.CompanyListResponse;
 import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.services.*;
+import com.hcmute.devhire.utils.EnumUtil;
+import com.hcmute.devhire.utils.JobStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -283,6 +285,60 @@ public class JobController {
 
             jobService.likeJob(jobId, username);
             return ResponseEntity.ok().body("Liked job successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/{jobId}/approve")
+    public ResponseEntity<?> approveJob(
+            @PathVariable("jobId") Long jobId
+    ) {
+        try {
+            Job job = jobService.findById(jobId);
+            if (job == null) {
+                return ResponseEntity.badRequest().body("Job not found");
+            }
+            if (job.getStatus() != JobStatus.PENDING) {
+                return ResponseEntity.badRequest().body("Job is not pending");
+            }
+            jobService.approveJob(jobId);
+            return ResponseEntity.ok().body("Approved job successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/{jobId}/reject")
+    public ResponseEntity<?> rejectJob(
+            @PathVariable("jobId") Long jobId
+    ) {
+        try {
+            Job job = jobService.findById(jobId);
+            if (job == null) {
+                return ResponseEntity.badRequest().body("Job not found");
+            }
+            if (job.getStatus() != JobStatus.PENDING) {
+                return ResponseEntity.badRequest().body("Job is not pending");
+            }
+            jobService.rejectJob(jobId);
+            return ResponseEntity.ok().body("Rejected job successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/{jobId}/expire")
+    public ResponseEntity<?> expireJob(
+            @PathVariable("jobId") Long jobId
+    ) {
+        try {
+            Job job = jobService.findById(jobId);
+            if (job == null) {
+                return ResponseEntity.badRequest().body("Job not found");
+            }
+            if (job.getStatus() != JobStatus.OPEN) {
+                return ResponseEntity.badRequest().body("Job is not open");
+            }
+            jobService.expiredJob(jobId);
+            return ResponseEntity.ok().body("Expired job successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

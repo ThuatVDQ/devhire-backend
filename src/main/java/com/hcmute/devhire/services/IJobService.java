@@ -22,5 +22,8 @@ public interface IJobService {
     void likeJob(Long jobId, String username) throws Exception;
     JobListResponse getFavoriteJobs(User user) throws Exception;
     List<JobDTO> getJobsByCompanyId(Long companyId, String username) throws Exception;
-
+    void approveJob(Long jobId) throws Exception;
+    void rejectJob(Long jobId) throws Exception;
+    void expiredJob(Long jobId) throws Exception;
+    void vipJob(Long jobId) throws Exception;
 }
