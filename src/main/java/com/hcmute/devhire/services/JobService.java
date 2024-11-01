@@ -159,6 +159,7 @@ public class JobService implements IJobService{
                 .company(companyDTO)
                 .isFavorite(liked)
                 .applyStatus(applicationStatus)
+                .applyNumber(job.getApplyNumber())
                 .build();
     }
 
