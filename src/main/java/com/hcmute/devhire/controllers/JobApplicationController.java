@@ -1,18 +1,18 @@
 package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
+import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.services.IJobApplicationService;
+import com.hcmute.devhire.utils.JobApplicationStatus;
+import com.hcmute.devhire.utils.JobStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -71,6 +71,62 @@ public class JobApplicationController {
                     .contentLength(zipPath.toFile().length())
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/{jobApplicationId}/seen")
+    public ResponseEntity<?> seenJobApplication(
+            @PathVariable("jobApplicationId") Long jobApplicationId
+    ) {
+        try {
+            JobApplicationDTO jobApplicationDTO = jobApplicationService.getJobApplication(jobApplicationId);
+            if (jobApplicationDTO == null) {
+                return ResponseEntity.badRequest().body("Job not found");
+            }
+            if (!jobApplicationDTO.getStatus().equals(JobApplicationStatus.IN_PROGRESS.name())) {
+                return ResponseEntity.badRequest().body("Job application is not in progress");
+            }
+            jobApplicationService.seenJobApplication(jobApplicationId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{jobApplicationId}/reject")
+    public ResponseEntity<?> rejectJobApplication(
+            @PathVariable("jobApplicationId") Long jobApplicationId
+    ) {
+        try {
+            JobApplicationDTO jobApplicationDTO = jobApplicationService.getJobApplication(jobApplicationId);
+            if (jobApplicationDTO == null) {
+                return ResponseEntity.badRequest().body("Job not found");
+            }
+            if (!jobApplicationDTO.getStatus().equals(JobApplicationStatus.SEEN.name())) {
+                return ResponseEntity.badRequest().body("Job application is not seen");
+            }
+            jobApplicationService.rejectJobApplication(jobApplicationId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{jobApplicationId}/approve")
+    public ResponseEntity<?> approveJobApplication(
+            @PathVariable("jobApplicationId") Long jobApplicationId
+    ) {
+        try {
+            JobApplicationDTO jobApplicationDTO = jobApplicationService.getJobApplication(jobApplicationId);
+            if (jobApplicationDTO == null) {
+                return ResponseEntity.badRequest().body("Job not found");
+            }
+            if (!jobApplicationDTO.getStatus().equals(JobApplicationStatus.SEEN.name())) {
+                return ResponseEntity.badRequest().body("Job application is not seen");
+            }
+            jobApplicationService.approveJobApplication(jobApplicationId);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

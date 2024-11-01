@@ -19,4 +19,7 @@ public interface IJobApplicationService {
     List<String> getAllCvPathsByJobId(Long jobId);
     Optional<JobApplication> findApplicationByJobIdAndUserId(Long jobId, Long userId);
     void updateJobApplication(JobApplication jobApplication);
+    void seenJobApplication(Long jobApplicationId);
+    void rejectJobApplication(Long jobApplicationId);
+    void approveJobApplication(Long jobApplicationId);
 }

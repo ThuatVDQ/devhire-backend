@@ -63,6 +63,39 @@ public class JobApplicationService implements IJobApplicationService{
     }
 
     @Override
+    public void seenJobApplication(Long jobApplicationId) {
+        try {
+            JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId).get();
+            jobApplication.setStatus(JobApplicationStatus.SEEN);
+            jobApplicationRepository.save(jobApplication);
+        } catch (Exception e) {
+            throw new RuntimeException("Job application not found with id: " + jobApplicationId);
+        }
+    }
+
+    @Override
+    public void rejectJobApplication(Long jobApplicationId) {
+        try {
+            JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId).get();
+            jobApplication.setStatus(JobApplicationStatus.REJECTED);
+            jobApplicationRepository.save(jobApplication);
+        } catch (Exception e) {
+            throw new RuntimeException("Job application not found with id: " + jobApplicationId);
+        }
+    }
+
+    @Override
+    public void approveJobApplication(Long jobApplicationId) {
+        try {
+            JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId).get();
+            jobApplication.setStatus(JobApplicationStatus.ACCEPTED);
+            jobApplicationRepository.save(jobApplication);
+        } catch (Exception e) {
+            throw new RuntimeException("Job application not found with id: " + jobApplicationId);
+        }
+    }
+
+    @Override
     public List<JobApplicationDTO> findByJobId(Long jobId) {
         List<JobApplication> jobApplications = jobApplicationRepository.findByJobId(jobId);
         return jobApplications.stream().map(app -> JobApplicationDTO.builder()
