@@ -106,6 +106,7 @@ public class JobApplicationService implements IJobApplicationService{
                 .cvId(app.getCv().getId())
                 .cvUrl(app.getCv().getCvUrl())
                 .applyDate(app.getUpdatedAt())
+                .id(app.getId())
                 .build()
         ).collect(Collectors.toList());
     }

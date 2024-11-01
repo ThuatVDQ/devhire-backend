@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class JobApplicationDTO {
+    private Long id;
     private String status;
     @JsonProperty("job_id")
     private Long jobId;

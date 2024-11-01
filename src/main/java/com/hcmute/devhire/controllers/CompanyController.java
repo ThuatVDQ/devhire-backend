@@ -155,6 +155,10 @@ public class CompanyController {
             }
 
             Set<Skill> skills = companyService.getAllSkillsForCompany(companyDTO.getId());
+
+            if (skills.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No skills have been saved for this company.");
+            }
             return ResponseEntity.ok(skills);
 
         } catch (Exception e) {
@@ -176,6 +180,11 @@ public class CompanyController {
             }
 
             Set<Address> addresses = companyService.getAllAddressesForCompany(companyDTO.getId());
+
+            if (addresses.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No addresses have been saved for this company.");
+            }
+
             return ResponseEntity.ok(addresses);
 
         } catch (Exception e) {
