@@ -88,7 +88,7 @@ public class JobApplicationController {
                 return ResponseEntity.badRequest().body("Job application is not in progress");
             }
             jobApplicationService.seenJobApplication(jobApplicationId);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body("Seen job application");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -107,13 +107,13 @@ public class JobApplicationController {
                 return ResponseEntity.badRequest().body("Job application is not seen");
             }
             jobApplicationService.rejectJobApplication(jobApplicationId);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body("Rejected job application");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PostMapping("/{jobApplicationId}/approve")
+    @PostMapping("/{jobApplicationId}/accept")
     public ResponseEntity<?> approveJobApplication(
             @PathVariable("jobApplicationId") Long jobApplicationId
     ) {
@@ -126,7 +126,7 @@ public class JobApplicationController {
                 return ResponseEntity.badRequest().body("Job application is not seen");
             }
             jobApplicationService.approveJobApplication(jobApplicationId);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body("Approved job application");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
