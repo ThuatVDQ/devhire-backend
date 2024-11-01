@@ -246,6 +246,27 @@ public class JobController {
         }
     }
 
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<?> getJobsByCompanyId(
+            @PathVariable("companyId") Long companyId
+    ) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = null;
+
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+                username = userDetails.getUsername();
+            }
+            List<JobDTO> jobDTO = jobService.getJobsByCompanyId(companyId, username);
+
+            if (jobDTO.isEmpty()) {
+                return ResponseEntity.badRequest().body("No jobs found for the company");
+            }
+            return ResponseEntity.ok(jobDTO);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     @PostMapping("/{jobId}/like")
     public ResponseEntity<?> likeJob(
             @PathVariable("jobId") Long jobId

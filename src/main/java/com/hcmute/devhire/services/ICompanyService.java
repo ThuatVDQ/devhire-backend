@@ -12,9 +12,9 @@ import java.util.Set;
 
 public interface ICompanyService {
     Company createCompany(CompanyDTO companyDTO, String username) throws Exception;
-    Page<CompanyDTO> getAllCompanies(PageRequest pageRequest);
+    Page<CompanyDTO> getAllCompanies(PageRequest pageRequest) throws Exception;
     Company findByUser(String username);
-    CompanyDTO getByUser(String username);
+    CompanyDTO getByUser(String username) throws Exception;
     Company updateCompany(CompanyDTO companyDTO, String username) throws Exception;
     Set<Skill> getAllSkillsForCompany(Long companyId);
     Set<Address> getAllAddressesForCompany(Long companyId);
