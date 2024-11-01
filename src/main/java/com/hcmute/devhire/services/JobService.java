@@ -23,14 +23,12 @@ public class JobService implements IJobService{
     private final JobAddressRepository jobAddressRepository;
     private final JobSkillRepository jobSkillRepository;
     private final IUserService userService;
-    private final ICVService cvService;
     private final JobApplicationRepository jobApplicationRepository;
     private final IAddressService addressService;
     private final ISkillService skillService;
     private final ICompanyService companyService;
     private final CVRepository cvRepository;
     private final IFavoriteJobService favoriteJobService;
-    private final IJobApplicationService jobApplicationService;
     private final FavoriteJobRepository favoriteJobRepository;
 
     @Override
@@ -193,34 +191,19 @@ public class JobService implements IJobService{
     @Override
     public List<JobDTO> getJobsByCompany(String username) throws Exception {
         try {
-            // Tìm công ty dựa trên username
             Company company = companyService.findByUser(username);
             if (company == null) {
                 throw new Exception("Company not found");
             }
 
-            // Tìm danh sách công việc dựa trên companyId
             List<Job> jobs = jobRepository.findByCompanyId(company.getId());
-
-            // Map từ Job sang JobDTO
-            return jobs.stream().map(job -> JobDTO.builder()
-                    .id(job.getId())
-                    .title(job.getTitle())
-                    .salaryStart(job.getSalaryStart())
-                    .salaryEnd(job.getSalaryEnd())
-                    .type(job.getType().name())
-                    .currency(job.getCurrency().name())
-                    .deadline(job.getDeadline())
-                    .slots(job.getSlots())
-                    .status(job.getStatus().name())
-                    .applyNumber(job.getApplyNumber())
-                    .likeNumber(job.getLikeNumber())
-                    .category(job.getCategory() != null ?
-                            CategoryDTO.builder()
-                                    .name(job.getCategory().getName())
-                                    .build() : null)
-                    .build()
-            ).toList();
+            return jobs.stream().map(job -> {
+                try {
+                    return convertDTO(job, username);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }).toList();
         } catch (Exception e) {
             throw new Exception("Error retrieving jobs for company: " + e.getMessage());
         }
@@ -265,6 +248,25 @@ public class JobService implements IJobService{
                     .build();
         } catch (Exception e) {
             throw new Exception("Error retrieving favorite jobs: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<JobDTO> getJobsByCompanyId(Long companyId, String username) throws Exception {
+        try {
+            List<Job> jobs = jobRepository.findByCompanyId(companyId);
+            if (jobs.isEmpty()) {
+                throw new Exception("No jobs found for company with id: " + companyId);
+            }
+            return jobs.stream().map(job -> {
+                try {
+                    return convertDTO(job, username);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }).toList();
+        } catch (Exception e) {
+            throw new Exception("Error retrieving jobs for company: " + e.getMessage());
         }
     }
 }

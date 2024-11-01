@@ -8,6 +8,7 @@ import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.CompanyRepository;
 import com.hcmute.devhire.repositories.JobRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class CompanyService implements ICompanyService {
     private final CompanyRepository companyRepository;
     private final IUserService userService;
     private final JobRepository jobRepository;
+
     @Override
     public Company createCompany(CompanyDTO companyDTO, String username) throws Exception {
         UserDTO user = userService.findByUsername(username);
@@ -51,31 +53,23 @@ public class CompanyService implements ICompanyService {
     }
 
     @Override
-    public Page<CompanyDTO> getAllCompanies(PageRequest pageRequest) {
-        Page<Company> companies= companyRepository.findAll(pageRequest);
-        return companies.map(this::convertDTO);
+    public Page<CompanyDTO> getAllCompanies(PageRequest pageRequest) throws Exception {
+        try {
+            Page<Company> companies = companyRepository.findAll(pageRequest);
+            return companies.map(company -> {
+                try {
+                    return convertDTO(company);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (Exception e) {
+            throw new Exception("Error when get all companies");
+        }
     }
 
-    public CompanyDTO convertDTO(Company company) {
-        List<JobDTO> jobDTO = company.getJobs().stream()
-                .map(job -> JobDTO.builder()
-                        .id(job.getId())
-                        .title(job.getTitle())
-                        .salaryStart(job.getSalaryStart())
-                        .salaryEnd(job.getSalaryEnd())
-                        .type(job.getType().name())
-                        .currency(job.getCurrency().name())
-                        .deadline(job.getDeadline())
-                        .slots(job.getSlots())
-                        .status(job.getStatus().name())
-                        .applyNumber(job.getApplyNumber())
-                        .likeNumber(job.getLikeNumber())
-                        .category(job.getCategory() != null ?
-                                CategoryDTO.builder()
-                                        .name(job.getCategory().getName())
-                                        .build() : null)
-                        .build())
-                .collect(Collectors.toList());
+    public CompanyDTO convertDTO(Company company) throws Exception {
+
         return CompanyDTO.builder()
                 .id(company.getId())
                 .name(company.getName())
@@ -89,7 +83,6 @@ public class CompanyService implements ICompanyService {
                 .scale(company.getScale())
                 .status(company.getStatus())
                 .totalJob(company.getJobs().size())
-                .jobs(jobDTO)
                 .build();
     }
     @Override
@@ -98,7 +91,7 @@ public class CompanyService implements ICompanyService {
     }
 
     @Override
-    public CompanyDTO getByUser(String username) {
+    public CompanyDTO getByUser(String username) throws Exception {
         Company company = companyRepository.findByUser(username);
         if (company == null) {
             return null;
