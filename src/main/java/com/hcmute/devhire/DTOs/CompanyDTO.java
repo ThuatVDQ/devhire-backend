@@ -40,6 +40,6 @@ public class CompanyDTO {
     private String webUrl;
     private String status;
     private UserDTO createBy;
-    private List<Job> jobs;
+    private List<JobDTO> jobs;
     private int totalJob;
 }

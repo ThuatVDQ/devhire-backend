@@ -61,7 +61,11 @@ public class JobDTO {
 
     @NotNull(message = "Slots cannot be blank")
     private int slots;
+
+    @JsonProperty("apply_number")
     private int applyNumber;
+
+    @JsonProperty("like_number")
     private int likeNumber;
     private int views;
 

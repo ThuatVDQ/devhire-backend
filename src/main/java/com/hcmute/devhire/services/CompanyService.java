@@ -1,6 +1,8 @@
 package com.hcmute.devhire.services;
 
+import com.hcmute.devhire.DTOs.CategoryDTO;
 import com.hcmute.devhire.DTOs.CompanyDTO;
+import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.CompanyRepository;
@@ -55,6 +57,25 @@ public class CompanyService implements ICompanyService {
     }
 
     public CompanyDTO convertDTO(Company company) {
+        List<JobDTO> jobDTO = company.getJobs().stream()
+                .map(job -> JobDTO.builder()
+                        .id(job.getId())
+                        .title(job.getTitle())
+                        .salaryStart(job.getSalaryStart())
+                        .salaryEnd(job.getSalaryEnd())
+                        .type(job.getType().name())
+                        .currency(job.getCurrency().name())
+                        .deadline(job.getDeadline())
+                        .slots(job.getSlots())
+                        .status(job.getStatus().name())
+                        .applyNumber(job.getApplyNumber())
+                        .likeNumber(job.getLikeNumber())
+                        .category(job.getCategory() != null ?
+                                CategoryDTO.builder()
+                                        .name(job.getCategory().getName())
+                                        .build() : null)
+                        .build())
+                .collect(Collectors.toList());
         return CompanyDTO.builder()
                 .id(company.getId())
                 .name(company.getName())
@@ -68,7 +89,7 @@ public class CompanyService implements ICompanyService {
                 .scale(company.getScale())
                 .status(company.getStatus())
                 .totalJob(company.getJobs().size())
-                .jobs(company.getJobs())
+                .jobs(jobDTO)
                 .build();
     }
     @Override
