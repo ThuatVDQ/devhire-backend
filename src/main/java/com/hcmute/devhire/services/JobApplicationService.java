@@ -119,7 +119,7 @@ public class JobApplicationService implements IJobApplicationService{
                 .fullName(app.getUser().getFullName())
                 .cvId(app.getCv().getId())
                 .cvUrl(app.getCv().getCvUrl())
-                .applyDate(app.getUpdatedAt())
+                .applyDate(app.getCreatedAt())
                 .id(app.getId())
                 .build()
         ).collect(Collectors.toList());

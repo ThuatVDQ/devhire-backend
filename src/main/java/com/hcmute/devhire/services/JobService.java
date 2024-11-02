@@ -160,6 +160,10 @@ public class JobService implements IJobService{
                 .isFavorite(liked)
                 .applyStatus(applicationStatus)
                 .applyNumber(job.getApplyNumber())
+                .category(CategoryDTO.builder()
+                        .id(job.getCategory().getId())
+                        .name(job.getCategory().getName())
+                        .build())
                 .build();
     }
 
