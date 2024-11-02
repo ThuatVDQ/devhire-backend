@@ -18,7 +18,6 @@ public class UserDTO {
 
     private String email;
 
-    @NotBlank(message = "Phone can't be blank")
     private String phone;
 
     @NotBlank(message = "Password can't be blank")

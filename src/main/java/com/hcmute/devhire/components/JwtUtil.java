@@ -29,7 +29,7 @@ public class JwtUtil {
     public String generateToken(User user) {
         //properties -> claims
         Map<String, Object> claims = new HashMap<>();
-        String subject = user.getPhone() != null && !user.getPhone().isEmpty() ? user.getPhone() : user.getEmail();
+        String subject = user.getEmail() != null && !user.getEmail().isEmpty() ? user.getEmail() : user.getPhone();
 
         // Thêm các thuộc tính cần thiết vào claims
         claims.put("phone", user.getPhone());

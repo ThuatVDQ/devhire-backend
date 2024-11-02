@@ -54,6 +54,9 @@ public class UserController {
                 List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
                 return ResponseEntity.badRequest().body(errorMessage);
             }
+            if (userDTO.getPhone() == null && userDTO.getEmail() == null) {
+                return ResponseEntity.badRequest().body("Phone or email is required");
+            }
             if (!userDTO.getPassword().equals(userDTO.getRetypePassword())) {
                 return ResponseEntity.badRequest().body("Password not match");
             }
