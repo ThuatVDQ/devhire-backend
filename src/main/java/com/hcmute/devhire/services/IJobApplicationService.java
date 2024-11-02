@@ -20,6 +20,7 @@ public interface IJobApplicationService {
     Optional<JobApplication> findApplicationByJobIdAndUserId(Long jobId, Long userId);
     void updateJobApplication(JobApplication jobApplication);
     void seenJobApplication(Long jobApplicationId);
+    void seenAllJobApplication(Long jobId);
     void rejectJobApplication(Long jobApplicationId);
     void approveJobApplication(Long jobApplicationId);
 }

@@ -74,6 +74,20 @@ public class JobApplicationService implements IJobApplicationService{
     }
 
     @Override
+    public void seenAllJobApplication(Long jobId) {
+        List<JobApplication> jobApplications = jobApplicationRepository.findByJobId(jobId);
+        if (jobApplications.isEmpty()) {
+            throw new RuntimeException("Job applications not found");
+        }
+        jobApplications.forEach(jobApplication -> {
+            if (jobApplication.getStatus().equals(JobApplicationStatus.IN_PROGRESS)) {
+                jobApplication.setStatus(JobApplicationStatus.SEEN);
+                jobApplicationRepository.save(jobApplication);
+            }
+        });
+    }
+
+    @Override
     public void rejectJobApplication(Long jobApplicationId) {
         try {
             JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId).get();

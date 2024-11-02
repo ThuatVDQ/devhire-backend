@@ -94,6 +94,18 @@ public class JobApplicationController {
         }
     }
 
+    @PostMapping("/{jobId}/seen-all")
+    public ResponseEntity<?> seenAllJobApplication(
+            @PathVariable("jobId") Long jobId
+    ) {
+        try {
+            jobApplicationService.seenAllJobApplication(jobId);
+            return ResponseEntity.ok().body("Seen all job application");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PostMapping("/{jobApplicationId}/reject")
     public ResponseEntity<?> rejectJobApplication(
             @PathVariable("jobApplicationId") Long jobApplicationId
