@@ -26,5 +26,5 @@ public interface IJobService {
     void rejectJob(Long jobId) throws Exception;
     void expiredJob(Long jobId) throws Exception;
     void vipJob(Long jobId) throws Exception;
-
+    Page<JobDTO> searchJobs(PageRequest pageRequest, String keyword, String location, String jobType, String username);
 }

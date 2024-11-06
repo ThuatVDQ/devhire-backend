@@ -3,11 +3,13 @@ package com.hcmute.devhire.services;
 import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.*;
+import com.hcmute.devhire.repositories.specification.JobSpecifications;
 import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.utils.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 
@@ -321,5 +323,31 @@ public class JobService implements IJobService{
         } catch (Exception e) {
             throw new Exception("Error making job VIP: " + e.getMessage());
         }
+    }
+
+    @Override
+    public Page<JobDTO> searchJobs(PageRequest pageRequest, String keyword, String location, String jobType, String username) {
+        Specification<Job> spec = Specification.where(null);
+
+        if (keyword != null && !keyword.isEmpty()) {
+            spec = spec.and(JobSpecifications.hasKeyword(keyword));
+        }
+
+        if (location != null && !location.isEmpty()) {
+            spec = spec.and(JobSpecifications.hasLocation(location));
+        }
+
+        if (jobType != null && !jobType.isEmpty()) {
+            spec = spec.and(JobSpecifications.hasJobType(jobType));
+        }
+
+        Page<Job> jobs = jobRepository.findAll(spec, pageRequest);
+        return jobs.map(job -> {
+            try {
+                return convertDTO(job, username);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }
