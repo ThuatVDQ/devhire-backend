@@ -3,6 +3,7 @@ package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.ProfileDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
+import com.hcmute.devhire.DTOs.VerifyUserDTO;
 import com.hcmute.devhire.entities.User;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -17,4 +18,6 @@ public interface IUserService {
     User updateAvatar(String username, String avatarUrl) throws EntityNotFoundException;
     User updateProfile(String username, ProfileDTO profileDTO) throws EntityNotFoundException;
     User findByUserName(String username) throws Exception;
+    void verifyUser(VerifyUserDTO input) throws Exception;
+    void resendVerificationCode(String email) throws Exception;
 }

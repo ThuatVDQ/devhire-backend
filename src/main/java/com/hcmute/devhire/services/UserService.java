@@ -3,11 +3,12 @@ package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.ProfileDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
+import com.hcmute.devhire.DTOs.VerifyUserDTO;
 import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.repositories.RoleRepository;
 import com.hcmute.devhire.repositories.UserRepository;
-import com.hcmute.devhire.utils.Status;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import com.hcmute.devhire.components.JwtUtil;
+import java.time.LocalDateTime;
+import java.util.Random;
 
 
 import java.util.Objects;
@@ -29,6 +32,7 @@ public class UserService implements IUserService{
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final IEmailService emailService;
     private final JwtUtil jwtUtil;
     @Override
     @Transactional
@@ -63,9 +67,79 @@ public class UserService implements IUserService{
         String encodedPassword = passwordEncoder.encode(password);
         newUser.setPassword(encodedPassword);
 
+        newUser.setVerificationCode(generateVerificationCode());
+        newUser.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        newUser.setEnabled(false);
+        sendVerificationEmail(newUser);
+
         return userRepository.save(newUser);
     }
 
+    @Override
+    public void verifyUser(VerifyUserDTO input) {
+        Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+                throw new RuntimeException("Verification code has expired");
+            }
+            if (user.getVerificationCode().equals(input.getVerificationCode())) {
+                user.setEnabled(true);
+                user.setVerificationCode(null);
+                user.setVerificationCodeExpiresAt(null);
+                userRepository.save(user);
+            } else {
+                throw new RuntimeException("Invalid verification code");
+            }
+        } else {
+            throw new RuntimeException("User not found");
+        }
+    }
+
+    @Override
+    public void resendVerificationCode(String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.isEnabled()) {
+                throw new RuntimeException("Account is already verified");
+            }
+            user.setVerificationCode(generateVerificationCode());
+            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+            sendVerificationEmail(user);
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found");
+        }
+    }
+
+    private void sendVerificationEmail(User user) {
+        String subject = "Account Verification";
+        String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
+        String htmlMessage = "<html>"
+                + "<body style=\"font-family: Arial, sans-serif;\">"
+                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
+                + "<h2 style=\"color: #333;\">Welcome to our app!</h2>"
+                + "<p style=\"font-size: 16px;\">Please enter the verification code below to continue:</p>"
+                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
+                + "<h3 style=\"color: #333;\">Verification Code:</h3>"
+                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + verificationCode + "</p>"
+                + "</div>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
+
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send verification email");
+        }
+    }
+    private String generateVerificationCode() {
+        Random random = new Random();
+        int code = random.nextInt(900000) + 100000;
+        return String.valueOf(code);
+    }
     @Override
     public String login(String username, String password, Long roleId) throws Exception {
         Optional<User> user;
@@ -89,6 +163,11 @@ public class UserService implements IUserService{
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
         //authenticate with java spring security
         authenticationManager.authenticate(authenticationToken);
+
+        if (!existingUser.isEnabled()) {
+            throw new Exception("Account is not verified");
+        }
+
         return jwtUtil.generateToken(existingUser);
     }
 

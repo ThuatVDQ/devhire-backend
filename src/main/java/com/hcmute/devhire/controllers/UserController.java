@@ -3,6 +3,7 @@ package com.hcmute.devhire.controllers;
 import com.hcmute.devhire.DTOs.ProfileDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
 import com.hcmute.devhire.DTOs.UserLoginDTO;
+import com.hcmute.devhire.DTOs.VerifyUserDTO;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.LoginResponse;
@@ -63,6 +64,33 @@ public class UserController {
             User user = userService.createUser(userDTO);
             //return ResponseEntity.ok("Register successfully");
             return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyUser(
+            @Valid @RequestBody VerifyUserDTO verifyUserDTO,
+            BindingResult result
+            ) {
+        if(result.hasErrors()) {
+            List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
+        try {
+            userService.verifyUser(verifyUserDTO);
+            return ResponseEntity.ok("Account verified successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/resend")
+    public ResponseEntity<?> resendVerificationCode(@RequestParam String email) {
+        try {
+            userService.resendVerificationCode(email);
+            return ResponseEntity.ok("Verification code sent");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
