@@ -1,9 +1,10 @@
 package com.hcmute.devhire.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.Instant;
 
-import java.util.Date;
 
 @Entity
 @Table(name = "notification")
@@ -21,10 +22,14 @@ public class Notification extends BaseEntity {
     @Column(name = "message")
     private String message;
 
-    @Column(name = "send_at")
-    private Long sendAt;
+    @Column(name = "send_at", nullable = false)
+    private Instant sendAt;
+
+    @Column(name = "is_read", nullable = false)
+    private Boolean isRead = false;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonBackReference
     private User user;
 }
