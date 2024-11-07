@@ -1,9 +1,7 @@
 package com.hcmute.devhire.services;
 
 
-import com.hcmute.devhire.DTOs.ProfileDTO;
-import com.hcmute.devhire.DTOs.UserDTO;
-import com.hcmute.devhire.DTOs.VerifyUserDTO;
+import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.repositories.RoleRepository;
@@ -58,7 +56,6 @@ public class UserService implements IUserService{
                 .fullName(userDTO.getFullName())
                 .phone(userDTO.getPhone() != null ? userDTO.getPhone() : "")
                 .email(userDTO.getEmail() != null ? userDTO.getEmail() : "")
-                .password(userDTO.getPassword())
                 .build();
 
         newUser.setRole(role);
@@ -113,6 +110,53 @@ public class UserService implements IUserService{
         }
     }
 
+    @Override
+    public void forgotPassword(String email) throws Exception {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setVerificationCode(generateVerificationCode());
+            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+            userRepository.save(user);
+            sendVerificationEmail(user);
+        } else {
+            throw new Exception("User not found");
+        }
+    }
+
+    @Override
+    public void updatePassword(UpdatePasswordDTO updatePasswordDTO, String email) throws Exception {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            if (passwordEncoder.matches(updatePasswordDTO.getPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(updatePasswordDTO.getNewPassword()));
+
+                userRepository.save(user);
+            } else {
+                throw new RuntimeException("Invalid password");
+            }
+        } else {
+            throw new Exception("User not found");
+        }
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordDTO resetPasswordDTO) throws Exception {
+        Optional<User> optionalUser = userRepository.findByEmail(resetPasswordDTO.getEmail());
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
+            user.setVerificationCode(null);
+            user.setVerificationCodeExpiresAt(null);
+            userRepository.save(user);
+        } else {
+            throw new Exception("User not found");
+        }
+    }
+
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
@@ -142,33 +186,30 @@ public class UserService implements IUserService{
     }
     @Override
     public String login(String username, String password, Long roleId) throws Exception {
-        Optional<User> user;
-        if (username.contains("@")) {
-            user = Optional.ofNullable(userRepository.findByEmail(username)
-                    .orElseThrow(() -> new Exception("Email not found")));
+        Optional<User> user = userRepository.findByEmail(username);
+        if (user.isPresent()) {
+            User existingUser = user.get();
+
+            if (!passwordEncoder.matches(password, existingUser.getPassword())) {
+                throw new Exception("Invalid phone number or password");
+            }
+            if (!Objects.equals(existingUser.getRole().getId(), roleId)) {
+                throw new Exception("Invalid role");
+            }
+
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+            //authenticate with java spring security
+            authenticationManager.authenticate(authenticationToken);
+
+            if (!existingUser.isEnabled()) {
+                throw new Exception("Account is not verified");
+            }
+
+            return jwtUtil.generateToken(existingUser);
         } else {
-            user = Optional.ofNullable(userRepository.findByPhone(username)
-                    .orElseThrow(() -> new Exception("Phone number not found")));
+            throw new Exception("User not found");
         }
 
-        User existingUser = user.get();
-
-        if (!passwordEncoder.matches(password, existingUser.getPassword())) {
-            throw new Exception("Invalid phone number or password");
-        }
-        if (!Objects.equals(existingUser.getRole().getId(), roleId)) {
-            throw new Exception("Invalid role");
-        }
-
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-        //authenticate with java spring security
-        authenticationManager.authenticate(authenticationToken);
-
-        if (!existingUser.isEnabled()) {
-            throw new Exception("Account is not verified");
-        }
-
-        return jwtUtil.generateToken(existingUser);
     }
 
     @Override

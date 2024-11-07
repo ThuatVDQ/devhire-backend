@@ -1,9 +1,7 @@
 package com.hcmute.devhire.services;
 
 
-import com.hcmute.devhire.DTOs.ProfileDTO;
-import com.hcmute.devhire.DTOs.UserDTO;
-import com.hcmute.devhire.DTOs.VerifyUserDTO;
+import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.entities.User;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -20,4 +18,7 @@ public interface IUserService {
     User findByUserName(String username) throws Exception;
     void verifyUser(VerifyUserDTO input) throws Exception;
     void resendVerificationCode(String email) throws Exception;
+    void forgotPassword(String email) throws Exception;
+    void updatePassword(UpdatePasswordDTO updatePasswordDTO, String email) throws Exception;
+    void resetPassword(ResetPasswordDTO resetPasswordDTO) throws Exception;
 }

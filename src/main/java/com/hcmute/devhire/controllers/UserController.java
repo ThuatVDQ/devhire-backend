@@ -1,9 +1,6 @@
 package com.hcmute.devhire.controllers;
 
-import com.hcmute.devhire.DTOs.ProfileDTO;
-import com.hcmute.devhire.DTOs.UserDTO;
-import com.hcmute.devhire.DTOs.UserLoginDTO;
-import com.hcmute.devhire.DTOs.VerifyUserDTO;
+import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.LoginResponse;
@@ -12,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.FieldError;
@@ -122,6 +120,84 @@ public class UserController {
                     .roleId(null)
                     .build()
             );
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        try {
+            userService.forgotPassword(email);
+            return ResponseEntity.ok("Verification code sent");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/forgot-password/verify")
+    public ResponseEntity<?> verifyForgotPassword(
+            @Valid @RequestBody VerifyUserDTO verifyUserDTO,
+            BindingResult result
+    ) {
+        if(result.hasErrors()) {
+            List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
+        try {
+            userService.verifyUser(verifyUserDTO);
+            return ResponseEntity.ok("Verification code verified");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/forgot-password/reset")
+    public ResponseEntity<?> resetPassword(
+            @Valid @RequestBody ResetPasswordDTO resetPasswordDTO,
+            BindingResult result
+    ) {
+        if(result.hasErrors()) {
+            List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
+        try {
+            if (!resetPasswordDTO.isPasswordMatching()) {
+                return ResponseEntity.badRequest().body("Password not match");
+            }
+            userService.resetPassword(resetPasswordDTO);
+            return ResponseEntity.ok("Password reset successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/forgot-password/resend")
+    public ResponseEntity<?> forgotPasswordResendVerificationCode(@RequestParam String email) {
+        try {
+            userService.resendVerificationCode(email);
+            return ResponseEntity.ok("Verification code sent");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/update-password")
+    public ResponseEntity<?> updatePassword(@Valid @RequestBody UpdatePasswordDTO updatePasswordDTO, BindingResult result) {
+        try {
+            if(result.hasErrors()) {
+                List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+                return ResponseEntity.badRequest().body(errorMessage);
+            }
+            String email = getAuthenticatedUsername();
+            if (email == null) {
+                return ResponseEntity.badRequest().body("Unauthorized: No user found.");
+            }
+            if (!updatePasswordDTO.isPasswordMatching()) {
+                return ResponseEntity.badRequest().body("Password not match");
+            }
+            userService.updatePassword(updatePasswordDTO, email);
+            return ResponseEntity.ok("Update password successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
