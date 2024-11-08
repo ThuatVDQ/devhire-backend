@@ -260,8 +260,8 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public UserDTO getProfile(String phone) throws Exception {
-        User user = userRepository.findByPhone(phone).orElseThrow(() -> new Exception("User not found"));
+    public UserDTO getProfile(String email) throws Exception {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new Exception("User not found"));
         return UserDTO.builder()
                 .fullName(safeGet(user.getFullName()))
                 .phone(safeGet(user.getPhone()))

@@ -12,7 +12,7 @@ public interface IUserService {
     String login(String username, String password, Long roleId) throws Exception;
     User findById(Long id) throws Exception;
     UserDTO findByUsername(String username) throws Exception;
-    UserDTO getProfile(String phone) throws Exception;
+    UserDTO getProfile(String email) throws Exception;
     User updateAvatar(String username, String avatarUrl) throws EntityNotFoundException;
     User updateProfile(String username, ProfileDTO profileDTO) throws EntityNotFoundException;
     User findByUserName(String username) throws Exception;
