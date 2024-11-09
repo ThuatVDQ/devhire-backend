@@ -4,6 +4,7 @@ import com.hcmute.devhire.DTOs.CategoryDTO;
 import com.hcmute.devhire.DTOs.CompanyDTO;
 import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
+import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.CompanyRepository;
 import com.hcmute.devhire.repositories.JobRepository;
@@ -12,7 +13,9 @@ import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import java.util.List;
@@ -25,6 +28,7 @@ public class CompanyService implements ICompanyService {
     private final CompanyRepository companyRepository;
     private final IUserService userService;
     private final JobRepository jobRepository;
+    private final FileUtil fileUtil;
 
     @Override
     public Company createCompany(CompanyDTO companyDTO, String username) throws Exception {
@@ -156,5 +160,17 @@ public class CompanyService implements ICompanyService {
     public CompanyDTO getCompanyById(Long companyId) throws Exception {
         Company company = companyRepository.findById(companyId).orElseThrow(() -> new Exception("Company not found"));
         return convertDTO(company);
+    }
+
+    @Override
+    public void uploadLogo(MultipartFile file, String username) throws IOException {
+        if (fileUtil.isImageFormatValid(file)) {
+            String filename = fileUtil.storeFile(file);
+            Company company = companyRepository.findByUser(username);
+            company.setLogo(filename);
+            companyRepository.save(company);
+        } else {
+            throw new IOException("Invalid image format");
+        }
     }
 }
