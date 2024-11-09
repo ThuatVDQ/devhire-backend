@@ -1,5 +1,6 @@
 package com.hcmute.devhire.services;
 
+import com.hcmute.devhire.DTOs.EmailRequestDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
 import com.hcmute.devhire.entities.CV;
 import com.hcmute.devhire.entities.Job;
@@ -11,6 +12,7 @@ import com.hcmute.devhire.repositories.JobApplicationRepository;
 import com.hcmute.devhire.repositories.JobRepository;
 import com.hcmute.devhire.repositories.UserRepository;
 import com.hcmute.devhire.utils.JobApplicationStatus;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,8 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JobApplicationService implements IJobApplicationService{
     private final JobApplicationRepository jobApplicationRepository;
-
-
+    private final IEmailService emailService;
     @Override
     public JobApplicationDTO getJobApplication(Long jobApplicationId) throws DataNotFoundException {
         JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId)
@@ -112,6 +113,89 @@ public class JobApplicationService implements IJobApplicationService{
     }
 
     @Override
+    public void sendEmailToApplicant(EmailRequestDTO emailRequestDTO) {
+
+        String htmlMessage = String.format("""
+    <!DOCTYPE html>
+    <html lang='en'>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>CV Acceptance Notification</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 0;
+            }
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                text-align: center;
+                padding: 10px;
+                background-color: #4CAF50;
+                color: #ffffff;
+                border-radius: 8px 8px 0 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .content h1 {
+                color: #333333;
+            }
+            .content p {
+                color: #666666;
+                line-height: 1.6;
+            }
+            .button {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 5px;
+            }
+            .footer {
+                margin-top: 30px;
+                text-align: center;
+                font-size: 12px;
+                color: #aaaaaa;
+            }
+        </style>
+    </head>
+    <body>
+        <div class='email-container'>
+            <div class='header'>
+                <h2>Job Application Update</h2>
+            </div>
+            <div class='content'>
+                <h1>Congratulations, %s!</h1>
+                <p>%s</p>
+                <p>Thank you for your interest in joining our team!</p>
+            </div>
+            <div class='footer'>
+                <p>&copy; 2024 Our Company, Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """, emailRequestDTO.getName(), emailRequestDTO.getContent());
+        try {
+            emailService.sendEmail(emailRequestDTO.getEmail(), emailRequestDTO.getSubject(), htmlMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email");
+        }
+    }
+
+    @Override
     public List<JobApplicationDTO> findByJobId(Long jobId) {
         List<JobApplication> jobApplications = jobApplicationRepository.findByJobId(jobId);
         return jobApplications.stream().map(app -> JobApplicationDTO.builder()
@@ -123,6 +207,7 @@ public class JobApplicationService implements IJobApplicationService{
                 .cvUrl(app.getCv().getCvUrl())
                 .applyDate(app.getCreatedAt())
                 .id(app.getId())
+                .email(app.getUser().getEmail())
                 .build()
         ).collect(Collectors.toList());
     }

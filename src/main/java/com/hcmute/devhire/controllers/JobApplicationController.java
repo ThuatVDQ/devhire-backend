@@ -1,17 +1,23 @@
 package com.hcmute.devhire.controllers;
 
+import com.hcmute.devhire.DTOs.EmailRequestDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.JobApplication;
+import com.hcmute.devhire.entities.User;
+import com.hcmute.devhire.services.IEmailService;
 import com.hcmute.devhire.services.IJobApplicationService;
+import com.hcmute.devhire.services.UserService;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import com.hcmute.devhire.utils.JobStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -26,6 +32,7 @@ import java.util.zip.ZipOutputStream;
 @RequestMapping("/api/job-application")
 public class JobApplicationController {
     private final IJobApplicationService jobApplicationService;
+    private final IEmailService emailService;
 
     @GetMapping("/{jobId}")
     public ResponseEntity<?> getJobApplicationByJob(
@@ -141,6 +148,22 @@ public class JobApplicationController {
             return ResponseEntity.ok().body("Approved job application");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/send-email")
+    public ResponseEntity<?> sendEmail(
+            @Valid @RequestBody EmailRequestDTO emailRequestDTO,
+            BindingResult result
+            ) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+        try {
+            jobApplicationService.sendEmailToApplicant(emailRequestDTO);
+            return ResponseEntity.ok("Email sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("An error occurred while sending email: " + e.getMessage());
         }
     }
 }

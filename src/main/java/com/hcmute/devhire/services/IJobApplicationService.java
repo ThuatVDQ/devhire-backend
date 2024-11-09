@@ -1,5 +1,6 @@
 package com.hcmute.devhire.services;
 
+import com.hcmute.devhire.DTOs.EmailRequestDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
 import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.exceptions.DataNotFoundException;
@@ -25,4 +26,5 @@ public interface IJobApplicationService {
     void seenAllJobApplication(Long jobId);
     void rejectJobApplication(Long jobApplicationId);
     void approveJobApplication(Long jobApplicationId);
+    void sendEmailToApplicant(EmailRequestDTO emailRequestDTO);
 }
