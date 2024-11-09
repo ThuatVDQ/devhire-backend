@@ -48,11 +48,7 @@ public class JobController {
             return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
         }
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = null;
-            if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-                username = userDetails.getUsername();
-            }
+            String username = getAuthenticatedUsername();
 
             PageRequest pageRequest = PageRequest.of(
                     page, limit,
@@ -76,11 +72,7 @@ public class JobController {
     public ResponseEntity<?> getJob(
             @PathVariable("jobId") Long jobId
     ) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = null;
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-        }
+        String username = getAuthenticatedUsername();
         try {
             boolean isLiked = false;
             String applyStatus = null;
@@ -195,10 +187,9 @@ public class JobController {
                 return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                         .body("File must be an image or a PDF");
             }
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = null;
-            if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-                username = userDetails.getUsername();
+            String username = getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
             }
             UserDTO userDTO = userService.findByUsername(username);
 
@@ -226,12 +217,8 @@ public class JobController {
     }
     @GetMapping("/company")
     public ResponseEntity<?> getJobsByRecruiterCompany() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = null;
-
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-        } else {
+        String username = getAuthenticatedUsername();
+        if (username == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
 
@@ -253,12 +240,7 @@ public class JobController {
             @PathVariable("companyId") Long companyId
     ) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = null;
-
-            if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-                username = userDetails.getUsername();
-            }
+            String username = getAuthenticatedUsername();
             List<JobDTO> jobDTO = jobService.getJobsByCompanyId(companyId, username);
 
             if (jobDTO.isEmpty()) {
@@ -274,12 +256,8 @@ public class JobController {
             @PathVariable("jobId") Long jobId
     ) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = null;
-
-            if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-                username = userDetails.getUsername();
-            } else {
+            String username = getAuthenticatedUsername();
+            if (username == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
             }
 
@@ -355,11 +333,7 @@ public class JobController {
         if (page < 0 || limit <= 0) {
             return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
         }
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = null;
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-        }
+        String username = getAuthenticatedUsername();
         try {
 
             PageRequest pageRequest = PageRequest.of(
@@ -379,5 +353,53 @@ public class JobController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/applied")
+    public ResponseEntity<?> getAppliedJobs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        if (page < 0 || limit <= 0) {
+            return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
+        }
+
+        String username = getAuthenticatedUsername();
+        if (username == null) {
+            return ResponseEntity.badRequest().body("User is not authenticated");
+        }
+
+        try {
+            PageRequest pageRequest = PageRequest.of(
+                    page, limit,
+                    Sort.by("id").ascending()
+            );
+
+            Page<JobDTO> jobApplied = jobService.getAppliedJobs(pageRequest, username);
+            JobListResponse response = JobListResponse.builder()
+                    .jobs(jobApplied.getContent())
+                    .currentPage(page)
+                    .pageSize(limit)
+                    .totalPages(jobApplied.getTotalPages())
+                    .totalElements(jobApplied.getTotalElements())
+                    .build();
+            if (jobApplied.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No jobs found for the user");
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    public String getAuthenticatedUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = null;
+
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
+        }
+
+        return username;
     }
 }

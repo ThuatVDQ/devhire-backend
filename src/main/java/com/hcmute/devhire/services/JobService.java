@@ -32,6 +32,7 @@ public class JobService implements IJobService{
     private final CVRepository cvRepository;
     private final IFavoriteJobService favoriteJobService;
     private final FavoriteJobRepository favoriteJobRepository;
+    private final IJobApplicationService jobApplicationService;
 
     @Override
     public Job createJob(JobDTO jobDTO, String username) throws Exception {
@@ -349,5 +350,33 @@ public class JobService implements IJobService{
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    @Override
+    public Page<JobDTO> getAppliedJobs(PageRequest pageRequest, String username) throws Exception {
+        User user = userService.findByUserName(username);
+        if (user == null) {
+            throw new Exception("User not found");
+        }
+        Page<JobApplication> jobApplications = jobApplicationService.findByUserId(user.getId(), pageRequest);
+        return jobApplications.map(jobApplication -> JobDTO.builder()
+                .id(jobApplication.getJob().getId())
+                .title(jobApplication.getJob().getTitle())
+                .salaryEnd(jobApplication.getJob().getSalaryEnd())
+                .salaryStart(jobApplication.getJob().getSalaryStart())
+                .type(jobApplication.getJob().getType().name())
+                .currency(jobApplication.getJob().getCurrency().name())
+                .experience(jobApplication.getJob().getExperience())
+                .position(jobApplication.getJob().getPosition())
+                .level(jobApplication.getJob().getLevel())
+                .company(CompanyDTO.builder()
+                        .id(jobApplication.getJob().getCompany().getId())
+                        .name(jobApplication.getJob().getCompany().getName())
+                        .logo(jobApplication.getJob().getCompany().getLogo())
+                        .build())
+                .applyStatus(jobApplication.getStatus().name())
+                .cvUrl(jobApplication.getCv().getCvUrl())
+                .dateApplied(jobApplication.getUpdatedAt())
+                .build());
     }
 }

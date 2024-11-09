@@ -1,7 +1,6 @@
 package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.ApplyJobRequestDTO;
-import com.hcmute.devhire.DTOs.JobApplicationDTO;
 import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.JobApplication;
@@ -27,4 +26,5 @@ public interface IJobService {
     void expiredJob(Long jobId) throws Exception;
     void vipJob(Long jobId) throws Exception;
     Page<JobDTO> searchJobs(PageRequest pageRequest, String keyword, String location, String jobType, String username);
+    Page<JobDTO> getAppliedJobs(PageRequest pageRequest, String username) throws Exception;
 }

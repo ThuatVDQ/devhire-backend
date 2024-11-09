@@ -12,6 +12,8 @@ import com.hcmute.devhire.repositories.JobRepository;
 import com.hcmute.devhire.repositories.UserRepository;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -126,8 +128,8 @@ public class JobApplicationService implements IJobApplicationService{
     }
 
     @Override
-    public List<JobApplication> findByUserId(Long userId) {
-        return jobApplicationRepository.findByUserId(userId);
+    public Page<JobApplication> findByUserId(Long userId, PageRequest pageRequest) {
+        return jobApplicationRepository.findByUserId(userId, pageRequest);
     }
 
     @Override
