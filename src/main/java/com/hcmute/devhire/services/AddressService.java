@@ -15,14 +15,22 @@ public class AddressService implements IAddressService {
 
     @Override
     public Address createAddress(AddressDTO addressDTO) {
-        Address address = Address.builder()
-                .country(addressDTO.getCountry())
-                .city(addressDTO.getCity())
-                .district(addressDTO.getDistrict())
-                .street(addressDTO.getStreet())
-                .build();
-
-        return addressRepository.save(address);
+        Address address = addressRepository.findAddressByCityAndDistrictAndStreet(
+                addressDTO.getCity(),
+                addressDTO.getDistrict(),
+                addressDTO.getStreet()
+        );
+        if (address != null) {
+            return address;
+        } else {
+            address = Address.builder()
+                    .country(addressDTO.getCountry())
+                    .city(addressDTO.getCity())
+                    .district(addressDTO.getDistrict())
+                    .street(addressDTO.getStreet())
+                    .build();
+            return addressRepository.save(address);
+        }
     }
 
     @Override

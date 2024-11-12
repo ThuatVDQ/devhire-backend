@@ -13,10 +13,15 @@ public class SkillService implements ISkillService {
 
     @Override
     public Skill createSkill(SkillDTO skillDTO) {
-        Skill skill = Skill.builder()
-                .name(skillDTO.getName())
-                .build();
-        return skillRepository.save(skill);
+        Skill skill = skillRepository.findSkillByName(skillDTO.getName());
+        if (skill != null) {
+            return skill;
+        } else {
+            skill = Skill.builder()
+                    .name(skillDTO.getName())
+                    .build();
+            return skillRepository.save(skill);
+        }
     }
 
 }
