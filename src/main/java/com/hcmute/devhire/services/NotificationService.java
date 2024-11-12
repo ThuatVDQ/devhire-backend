@@ -25,6 +25,7 @@ public class NotificationService implements INotificationService {
         }
         Notification notification = Notification.builder()
                 .message(message)
+                .isRead(false)
                 .sendAt(Instant.ofEpochSecond(Instant.now().getEpochSecond()))
                 .user(user)
                 .build();

@@ -3,10 +3,8 @@ package com.hcmute.devhire.controllers;
 import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.*;
-import com.hcmute.devhire.responses.CompanyListResponse;
 import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.services.*;
-import com.hcmute.devhire.utils.EnumUtil;
 import com.hcmute.devhire.utils.JobStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,6 +35,8 @@ public class JobController {
     private final FileUtil fileUtil;
     private final IJobApplicationService jobApplicationService;
     private final FavoriteJobService favoriteJobService;
+    private final IEmailService emailService;
+    private final NotificationService notificationService;
 
     @GetMapping("")
     public ResponseEntity<?> getAllJobs(
@@ -201,6 +200,8 @@ public class JobController {
                 JobApplication jobApplication = existingApplication.get();
                 jobApplication.setCv(cv);
                 jobApplicationService.updateJobApplication(jobApplication);
+                Job job = jobService.findById(jobId);
+                notificationService.createAndSendNotification("New CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
                 return ResponseEntity.ok().body("Updated CV for existing application");
             } else {
                 ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
@@ -209,12 +210,32 @@ public class JobController {
                         .jobId(jobId)
                         .build();
                 jobService.applyForJob(jobId, applyJobRequestDTO);
+                sendNewApplicationNotification(jobId, userDTO);
+
                 return ResponseEntity.ok().body("Applied successfully");
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    public void sendNewApplicationNotification(Long jobId, UserDTO applicant) throws Exception {
+        Job job = jobService.findById(jobId);
+        String recruiterEmail = job.getCompany().getCreatedBy().getEmail();
+        String recruiterName = job.getCompany().getName();
+
+        notificationService.createAndSendNotification("New CV submitted for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
+
+        String subject = "New CV Submitted for " + job.getTitle();
+        String content = String.format(
+                "Hello %s,\n\nA new CV has been submitted by %s for the position %s.\n" +
+                        "Please review the application in the system.\n\nBest regards,\nDevHire Team",
+                recruiterName, applicant.getFullName(), job.getTitle()
+        );
+
+        emailService.sendEmail(recruiterEmail, subject, content);
+    }
+
     @GetMapping("/company")
     public ResponseEntity<?> getJobsByRecruiterCompany() {
         String username = getAuthenticatedUsername();
