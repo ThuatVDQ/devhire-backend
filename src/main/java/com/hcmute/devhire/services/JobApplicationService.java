@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class JobApplicationService implements IJobApplicationService{
     private final JobApplicationRepository jobApplicationRepository;
     private final IEmailService emailService;
+    private final INotificationService notificationService;
     @Override
     public JobApplicationDTO getJobApplication(Long jobApplicationId) throws DataNotFoundException {
         JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId)
@@ -70,6 +71,7 @@ public class JobApplicationService implements IJobApplicationService{
         try {
             JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId).get();
             jobApplication.setStatus(JobApplicationStatus.SEEN);
+            notificationService.createAndSendNotification("The recruiter, " + jobApplication.getJob().getCompany().getName() + " just viewed your CV.", jobApplication.getUser().getUsername());
             jobApplicationRepository.save(jobApplication);
         } catch (Exception e) {
             throw new RuntimeException("Job application not found with id: " + jobApplicationId);
@@ -95,6 +97,7 @@ public class JobApplicationService implements IJobApplicationService{
         try {
             JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId).get();
             jobApplication.setStatus(JobApplicationStatus.REJECTED);
+            notificationService.createAndSendNotification("The recruiter, " + jobApplication.getJob().getCompany().getName() + " just updated your cv status is not suitable", jobApplication.getUser().getUsername());
             jobApplicationRepository.save(jobApplication);
         } catch (Exception e) {
             throw new RuntimeException("Job application not found with id: " + jobApplicationId);
@@ -106,6 +109,7 @@ public class JobApplicationService implements IJobApplicationService{
         try {
             JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId).get();
             jobApplication.setStatus(JobApplicationStatus.ACCEPTED);
+            notificationService.createAndSendNotification("The recruiter, " + jobApplication.getJob().getCompany().getName() + " just updated your cv status suitable.", jobApplication.getUser().getUsername());
             jobApplicationRepository.save(jobApplication);
         } catch (Exception e) {
             throw new RuntimeException("Job application not found with id: " + jobApplicationId);
