@@ -94,7 +94,8 @@ public class JobService implements IJobService{
 
     @Override
     public Page<JobDTO> getAllJobs(PageRequest pageRequest, String username) throws Exception {
-        Page<Job> jobs= jobRepository.findAll(pageRequest);
+        List<JobStatus> statuses = List.of(JobStatus.OPEN, JobStatus.HOT);
+        Page<Job> jobs= jobRepository.findByStatusIn(statuses, pageRequest);
 
         return jobs.map(job -> {
             try {
