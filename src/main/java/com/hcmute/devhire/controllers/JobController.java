@@ -109,6 +109,7 @@ public class JobController {
                         .logo(job.getCompany().getLogo() == null ? "" : job.getCompany().getLogo())
                         .address(job.getCompany().getAddress() == null ? "" : job.getCompany().getAddress())
                         .webUrl(job.getCompany().getWebUrl() == null ? "" : job.getCompany().getWebUrl())
+                        .id(job.getCompany().getId())
                         .build();
             }
             JobDTO jobDTO = JobDTO.builder()
