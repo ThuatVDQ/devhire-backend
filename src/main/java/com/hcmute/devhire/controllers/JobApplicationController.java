@@ -183,6 +183,19 @@ public class JobApplicationController {
         }
     }
 
+    @GetMapping("/count-per-job")
+    public ResponseEntity<?> countPerJob() {
+        String username = getAuthenticatedUsername();
+        if (username == null) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        try {
+            return ResponseEntity.ok(jobApplicationService.countJobApplicationPerJob(username));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     public String getAuthenticatedUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;

@@ -1,10 +1,12 @@
 package com.hcmute.devhire.repositories;
 
 import com.hcmute.devhire.entities.JobApplication;
+import com.hcmute.devhire.responses.CountPerJobResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -20,4 +22,9 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     int countByCompanyId(Long companyId);
 
 
+    @Query("SELECT new com.hcmute.devhire.responses.CountPerJobResponse(a.job.title, COUNT(a)) " +
+            "FROM JobApplication a " +
+            "WHERE a.job.company.id = :companyId " +
+            "GROUP BY a.job.id, a.job.title")
+    List<CountPerJobResponse> countApplicationsPerJobByCompany(@Param("companyId") Long companyId);
 }

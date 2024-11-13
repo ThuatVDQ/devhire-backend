@@ -8,6 +8,7 @@ import com.hcmute.devhire.repositories.CVRepository;
 import com.hcmute.devhire.repositories.JobApplicationRepository;
 import com.hcmute.devhire.repositories.JobRepository;
 import com.hcmute.devhire.repositories.UserRepository;
+import com.hcmute.devhire.responses.CountPerJobResponse;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -203,6 +204,16 @@ public class JobApplicationService implements IJobApplicationService{
         Company company = companyService.findByUser(username);
         if (company != null) {
             return jobApplicationRepository.countByCompanyId(company.getId());
+        } else {
+            throw new RuntimeException("Company not found");
+        }
+    }
+
+    @Override
+    public List<CountPerJobResponse> countJobApplicationPerJob(String username) {
+        Company company = companyService.findByUser(username);
+        if (company != null) {
+            return jobApplicationRepository.countApplicationsPerJobByCompany(company.getId());
         } else {
             throw new RuntimeException("Company not found");
         }

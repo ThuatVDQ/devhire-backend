@@ -4,6 +4,7 @@ import com.hcmute.devhire.DTOs.EmailRequestDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
 import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.exceptions.DataNotFoundException;
+import com.hcmute.devhire.responses.CountPerJobResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -28,4 +29,5 @@ public interface IJobApplicationService {
     void approveJobApplication(Long jobApplicationId);
     void sendEmailToApplicant(EmailRequestDTO emailRequestDTO);
     int getTotalJobApplication(String username);
+    List<CountPerJobResponse> countJobApplicationPerJob(String username);
 }
