@@ -413,6 +413,21 @@ public class JobController {
         }
     }
 
+    @GetMapping("/total-posted")
+    public ResponseEntity<?> getTotalPostedJobs() {
+        String username = getAuthenticatedUsername();
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        }
+
+        try {
+            int totalJobs = jobService.countJobsByCompanyId(username);
+            return ResponseEntity.ok(totalJobs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     public String getAuthenticatedUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;

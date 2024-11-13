@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,4 +16,7 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     Page<Job> findAll(Pageable pageable);
     Optional<Job> findById(Long id);
     List<Job> findByCompanyId(Long companyId);
+
+    @Query("SELECT COUNT(j) FROM Job j WHERE j.company.id = ?1")
+    int countJobsByCompany(Long companyId);
 }

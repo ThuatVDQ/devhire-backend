@@ -384,4 +384,10 @@ public class JobService implements IJobService{
                 .dateApplied(jobApplication.getUpdatedAt())
                 .build());
     }
+
+    @Override
+    public int countJobsByCompanyId(String username) throws Exception {
+        Company company = companyService.findByUser(username);
+        return jobRepository.countJobsByCompany(company.getId());
+    }
 }
