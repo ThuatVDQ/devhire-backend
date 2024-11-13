@@ -17,6 +17,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -165,5 +168,29 @@ public class JobApplicationController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("An error occurred while sending email: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<?> getTotalJobApplication() {
+        String username = getAuthenticatedUsername();
+        if (username == null) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        try {
+            return ResponseEntity.ok(jobApplicationService.getTotalJobApplication(username));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    public String getAuthenticatedUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = null;
+
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
+        }
+
+        return username;
     }
 }

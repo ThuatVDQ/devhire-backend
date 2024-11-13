@@ -27,4 +27,5 @@ public interface IJobApplicationService {
     void rejectJobApplication(Long jobApplicationId);
     void approveJobApplication(Long jobApplicationId);
     void sendEmailToApplicant(EmailRequestDTO emailRequestDTO);
+    int getTotalJobApplication(String username);
 }

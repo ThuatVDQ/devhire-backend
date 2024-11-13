@@ -2,10 +2,7 @@ package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.EmailRequestDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
-import com.hcmute.devhire.entities.CV;
-import com.hcmute.devhire.entities.Job;
-import com.hcmute.devhire.entities.JobApplication;
-import com.hcmute.devhire.entities.User;
+import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.exceptions.DataNotFoundException;
 import com.hcmute.devhire.repositories.CVRepository;
 import com.hcmute.devhire.repositories.JobApplicationRepository;
@@ -29,6 +26,8 @@ public class JobApplicationService implements IJobApplicationService{
     private final JobApplicationRepository jobApplicationRepository;
     private final IEmailService emailService;
     private final INotificationService notificationService;
+    private final ICompanyService companyService;
+
     @Override
     public JobApplicationDTO getJobApplication(Long jobApplicationId) throws DataNotFoundException {
         JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId)
@@ -196,6 +195,16 @@ public class JobApplicationService implements IJobApplicationService{
             emailService.sendEmail(emailRequestDTO.getEmail(), emailRequestDTO.getSubject(), htmlMessage);
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send email");
+        }
+    }
+
+    @Override
+    public int getTotalJobApplication(String username) {
+        Company company = companyService.findByUser(username);
+        if (company != null) {
+            return jobApplicationRepository.countByCompanyId(company.getId());
+        } else {
+            throw new RuntimeException("Company not found");
         }
     }
 
