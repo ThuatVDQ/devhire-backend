@@ -196,6 +196,21 @@ public class JobApplicationController {
         }
     }
 
+    @GetMapping("/monthly-count")
+    public ResponseEntity<?> countMonthly(
+            @RequestParam(defaultValue = "2024") int year
+    ) {
+        String username = getAuthenticatedUsername();
+        if (username == null) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        try {
+            return ResponseEntity.ok(jobApplicationService.countJobApplicationByMonth(year, username));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     public String getAuthenticatedUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;
