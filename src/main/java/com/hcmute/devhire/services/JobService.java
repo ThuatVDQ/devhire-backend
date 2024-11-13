@@ -390,4 +390,10 @@ public class JobService implements IJobService{
         Company company = companyService.findByUser(username);
         return jobRepository.countJobsByCompany(company.getId());
     }
+
+    @Override
+    public int countPendingJobsByCompanyId(String username) {
+        Company company = companyService.findByUser(username);
+        return jobRepository.countPendingJobsByCompanyId(company.getId());
+    }
 }
