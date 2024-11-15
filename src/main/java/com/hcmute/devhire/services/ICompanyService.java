@@ -22,4 +22,5 @@ public interface ICompanyService {
     Set<Address> getAllAddressesForCompany(Long companyId);
     CompanyDTO getCompanyById(Long companyId) throws Exception;
     void uploadLogo(MultipartFile file, String username) throws IOException;
+    Page<CompanyDTO> searchCompanies(Pageable pageable, String keyword) throws Exception;
 }

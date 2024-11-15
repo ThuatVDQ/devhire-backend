@@ -8,10 +8,14 @@ import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.CompanyRepository;
 import com.hcmute.devhire.repositories.JobRepository;
+import com.hcmute.devhire.repositories.specification.CompanySpecifications;
+import com.hcmute.devhire.repositories.specification.JobSpecifications;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -171,6 +175,26 @@ public class CompanyService implements ICompanyService {
             companyRepository.save(company);
         } else {
             throw new IOException("Invalid image format");
+        }
+    }
+
+    @Override
+    public Page<CompanyDTO> searchCompanies(Pageable pageable, String keyword) throws Exception {
+        Specification<Company> spec = Specification.where(null);
+        if (!Objects.isNull(keyword) && !keyword.isEmpty()) {
+            spec = spec.and(CompanySpecifications.hasKeyword(keyword));
+        }
+        try {
+            Page<Company> companies = companyRepository.findAll(spec, pageable);
+            return companies.map(company -> {
+                try {
+                    return convertDTO(company);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (Exception e) {
+            throw new Exception("Error when search companies");
         }
     }
 }
