@@ -462,6 +462,20 @@ public class JobController {
         }
     }
 
+    @GetMapping("/latest")
+    public ResponseEntity<?> getLatestJobsByCompany() {
+        String username = getAuthenticatedUsername();
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        }
+        try {
+            List<JobDTO> latestJobs = jobService.getLatestJobs(username);
+            return ResponseEntity.ok(latestJobs);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
     public String getAuthenticatedUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;

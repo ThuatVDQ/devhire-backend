@@ -412,4 +412,34 @@ public class JobService implements IJobService{
         Company company = companyService.findByUser(username);
         return jobRepository.countPendingJobsByCompanyId(company.getId());
     }
+
+    @Override
+    public List<JobDTO> getLatestJobs(String username) throws Exception {
+        try {
+            // Tìm công ty theo tên người dùng
+            Company company = companyService.findByUser(username);
+            if (company == null) {
+                throw new Exception("Company not found");
+            }
+
+            // Lấy 5 công việc mới nhất của công ty
+            List<Job> jobs = jobRepository.findTop5ByCompanyIdOrderByCreatedAtDesc(company.getId());
+
+            // Chuyển đổi danh sách công việc sang JobDTO
+            return jobs.stream()
+                    .map(job -> {
+                        JobDTO jobDTO = new JobDTO();
+                        jobDTO.setId(job.getId());
+                        jobDTO.setTitle(job.getTitle());
+                        jobDTO.setDeadline(job.getDeadline());
+                        jobDTO.setSlots(job.getSlots());
+                        jobDTO.setStatus(job.getStatus().name());
+                        return jobDTO;
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Xử lý lỗi nếu xảy ra và ném ra lỗi phù hợp
+            throw new Exception("Error fetching latest jobs: " + e.getMessage());
+        }
+    }
 }

@@ -24,4 +24,6 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
     @Query("SELECT COUNT(j) FROM Job j WHERE j.company.id = ?1 AND j.status = 'PENDING'")
     int countPendingJobsByCompanyId(Long companyId);
+
+    List<Job> findTop5ByCompanyIdOrderByCreatedAtDesc(Long companyId);
 }

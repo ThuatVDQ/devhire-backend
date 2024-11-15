@@ -30,4 +30,5 @@ public interface IJobService {
     Page<JobDTO> getAppliedJobs(PageRequest pageRequest, String username) throws Exception;
     int countJobsByCompanyId(String username) throws Exception;
     int countPendingJobsByCompanyId(String username);
+    List<JobDTO> getLatestJobs(String username) throws Exception;
 }
