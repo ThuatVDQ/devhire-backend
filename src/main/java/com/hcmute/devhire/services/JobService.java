@@ -199,21 +199,24 @@ public class JobService implements IJobService{
     }
 
     @Override
-    public List<JobDTO> getJobsByCompany(String username) throws Exception {
+    public Page<JobDTO> getJobsByCompany(PageRequest pageRequest, String username) throws Exception {
         try {
             Company company = companyService.findByUser(username);
             if (company == null) {
                 throw new Exception("Company not found");
             }
 
-            List<Job> jobs = jobRepository.findByCompanyId(company.getId());
-            return jobs.stream().map(job -> {
-                try {
-                    return convertDTO(job, username);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }).toList();
+            Page<Job> jobs = jobRepository.findByCompanyId(company.getId(), pageRequest);
+            return jobs.map(job -> JobDTO.builder()
+                    .id(job.getId())
+                    .title(job.getTitle())
+                    .salaryStart(job.getSalaryStart())
+                    .salaryEnd(job.getSalaryEnd())
+                    .type(job.getType().name())
+                    .status(job.getStatus().name())
+                    .category(CategoryDTO.builder().name(job.getCategory().getName()).build())
+                    .applyNumber(job.getApplyNumber())
+                    .build());
         } catch (Exception e) {
             throw new Exception("Error retrieving jobs for company: " + e.getMessage());
         }

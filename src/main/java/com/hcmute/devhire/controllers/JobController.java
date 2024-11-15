@@ -238,20 +238,38 @@ public class JobController {
     }
 
     @GetMapping("/company")
-    public ResponseEntity<?> getJobsByRecruiterCompany() {
+    public ResponseEntity<?> getJobsByRecruiterCompany(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+
+        if (page < 0 || limit <= 0) {
+            return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
+        }
+
         String username = getAuthenticatedUsername();
         if (username == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+            return ResponseEntity.badRequest().body("User is not authenticated");
         }
 
         try {
+            PageRequest pageRequest = PageRequest.of(
+                    page, limit,
+                    Sort.by("id").ascending()
+            );
 
-            List<JobDTO> jobDTOS = jobService.getJobsByCompany(username);
-
-            if (jobDTOS.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No jobs found for the recruiter's company");
+            Page<JobDTO> jobs = jobService.getJobsByCompany(pageRequest, username);
+            JobListResponse response = JobListResponse.builder()
+                    .jobs(jobs.getContent())
+                    .currentPage(page)
+                    .pageSize(limit)
+                    .totalPages(jobs.getTotalPages())
+                    .totalElements(jobs.getTotalElements())
+                    .build();
+            if (jobs.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No jobs found for the user");
             }
-            return ResponseEntity.ok(jobDTOS);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
