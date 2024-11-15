@@ -106,6 +106,19 @@ public class JobService implements IJobService{
         });
     }
 
+    @Override
+    public Page<JobDTO> getAllJobsAdmin(PageRequest pageRequest, String username) throws Exception {
+        Page<Job> jobs= jobRepository.findAll(pageRequest);
+
+        return jobs.map(job -> {
+            try {
+                return convertDTO(job, username);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     public JobDTO convertDTO(Job job, String username) throws Exception {
 
         List<AddressDTO> addressDTOs = job.getJobAddresses().stream()
