@@ -1,6 +1,7 @@
 package com.hcmute.devhire.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -23,9 +24,11 @@ public class Notification extends BaseEntity {
     private String message;
 
     @Column(name = "send_at", nullable = false)
+    @JsonProperty("send_at")
     private Instant sendAt;
 
     @Column(name = "is_read", nullable = false)
+    @JsonProperty("is_read")
     private Boolean isRead = false;
 
     @ManyToOne
