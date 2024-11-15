@@ -133,23 +133,6 @@ public class UserController {
         }
     }
 
-    @PostMapping("/forgot-password/verify")
-    public ResponseEntity<?> verifyForgotPassword(
-            @Valid @RequestBody VerifyUserDTO verifyUserDTO,
-            BindingResult result
-    ) {
-        if(result.hasErrors()) {
-            List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
-            return ResponseEntity.badRequest().body(errorMessage);
-        }
-        try {
-            userService.verifyUser(verifyUserDTO);
-            return ResponseEntity.ok("Verification code verified");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
     @PostMapping("/forgot-password/reset")
     public ResponseEntity<?> resetPassword(
             @Valid @RequestBody ResetPasswordDTO resetPasswordDTO,
@@ -165,16 +148,6 @@ public class UserController {
             }
             userService.resetPassword(resetPasswordDTO);
             return ResponseEntity.ok("Password reset successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/forgot-password/resend")
-    public ResponseEntity<?> forgotPasswordResendVerificationCode(@RequestParam String email) {
-        try {
-            userService.resendVerificationCode(email);
-            return ResponseEntity.ok("Verification code sent");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
