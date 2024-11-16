@@ -43,11 +43,11 @@ public class JobService implements IJobService{
             JobStatus status = EnumUtil.getEnumFromString(JobStatus.class, "PENDING");
 
             Category category = categoryService.findById(jobDTO.getCategory().getId());
-
             Company company = companyService.findByUser(username);
             if (company == null) {
                 throw new Exception("Company not found");
             }
+
             Job newJob = Job.builder()
                     .title(jobDTO.getTitle())
                     .description(jobDTO.getDescription())
@@ -67,30 +67,41 @@ public class JobService implements IJobService{
                     .company(company)
                     .build();
             Job savedJob = jobRepository.save(newJob);
-            List<Address> addresses = jobDTO.getAddresses().stream()
-                    .map(addressService::createAddress).toList();
 
-            addresses.forEach(address -> {
-                JobAddress jobAddress = JobAddress.builder()
-                        .job(savedJob)
-                        .address(address)
-                        .build();
-                jobAddressRepository.save(jobAddress);
-            });
-            List<Skill> skills = jobDTO.getSkills().stream()
-                    .map(skillService::createSkill).toList();
-            skills.forEach(skill -> {
-                JobSkill jobSkill = JobSkill.builder()
-                        .job(savedJob)
-                        .skill(skill)
-                        .build();
-                jobSkillRepository.save(jobSkill);
-            });
+            // Handle addresses
+            if (jobDTO.getAddresses() != null) {
+                jobAddressRepository.deleteAllByJobId(savedJob.getId());
+                List<Address> addresses = jobDTO.getAddresses().stream()
+                        .map(addressService::createAddress).toList();
+                List<JobAddress> jobAddresses = addresses.stream()
+                        .map(address -> JobAddress.builder()
+                                .job(savedJob)
+                                .address(address)
+                                .build())
+                        .toList();
+                jobAddressRepository.saveAll(jobAddresses);
+            }
+
+            // Handle skills
+            if (jobDTO.getSkills() != null) {
+                jobSkillRepository.deleteAllByJobId(savedJob.getId());
+                List<Skill> skills = jobDTO.getSkills().stream()
+                        .map(skillService::createSkill).toList();
+                List<JobSkill> jobSkills = skills.stream()
+                        .map(skill -> JobSkill.builder()
+                                .job(savedJob)
+                                .skill(skill)
+                                .build())
+                        .toList();
+                jobSkillRepository.saveAll(jobSkills);
+            }
+
             return savedJob;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error creating job: " + e.getMessage());
         }
     }
+
 
     @Override
     public Page<JobDTO> getAllJobs(PageRequest pageRequest, String username) throws Exception {
@@ -440,6 +451,67 @@ public class JobService implements IJobService{
         } catch (Exception e) {
             // Xử lý lỗi nếu xảy ra và ném ra lỗi phù hợp
             throw new Exception("Error fetching latest jobs: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void editJob(Long jobId, JobDTO jobDTO) throws Exception {
+        try {
+            Job job = jobRepository.findById(jobId)
+                    .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
+
+            job.setTitle(jobDTO.getTitle());
+            job.setDescription(jobDTO.getDescription());
+            job.setSalaryStart(jobDTO.getSalaryStart());
+            job.setSalaryEnd(jobDTO.getSalaryEnd());
+            job.setType(EnumUtil.getEnumFromString(JobType.class, jobDTO.getType()));
+            job.setCurrency(EnumUtil.getEnumFromString(Currency.class, jobDTO.getCurrency()));
+            job.setExperience(jobDTO.getExperience());
+            job.setPosition(jobDTO.getPosition());
+            job.setLevel(jobDTO.getLevel());
+            job.setRequirement(jobDTO.getRequirement());
+            job.setBenefit(jobDTO.getBenefit());
+            job.setDeadline(jobDTO.getDeadline());
+            job.setSlots(jobDTO.getSlots());
+            job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, jobDTO.getStatus()));
+
+            if (jobDTO.getAddresses() != null) {
+                // Cleanup existing addresses
+                jobAddressRepository.deleteAllByJobId(job.getId());
+
+                // Map and save new addresses
+                List<Address> addresses = jobDTO.getAddresses().stream()
+                        .map(addressService::createAddress).toList();
+
+                List<JobAddress> jobAddresses = addresses.stream()
+                        .map(address -> JobAddress.builder()
+                                .job(job)
+                                .address(address)
+                                .build())
+                        .toList();
+
+                jobAddressRepository.saveAll(jobAddresses);
+            }
+
+            if (jobDTO.getSkills() != null) {
+                jobSkillRepository.deleteAllByJobId(job.getId());
+
+                List<Skill> skills = jobDTO.getSkills().stream()
+                        .map(skillService::createSkill).toList();
+
+                List<JobSkill> jobSkills = skills.stream()
+                        .map(skill -> JobSkill.builder()
+                                .job(job)
+                                .skill(skill)
+                                .build())
+                        .toList();
+
+                jobSkillRepository.saveAll(jobSkills);
+            }
+
+            jobRepository.save(job);
+        } catch (Exception e) {
+            throw new Exception("Error editing job: " + e.getMessage());
         }
     }
 }

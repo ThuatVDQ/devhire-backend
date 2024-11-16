@@ -477,6 +477,40 @@ public class JobController {
         }
     }
 
+    @PostMapping("/{jobId}/edit")
+    public ResponseEntity<?> editJob(
+            @PathVariable("jobId") Long jobId,
+            @Valid @RequestBody JobDTO jobDTO,
+            BindingResult result
+    ) {
+        if (result.hasErrors()) {
+            List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
+
+        try {
+            Job job = jobService.findById(jobId);
+            if (job == null) {
+                return ResponseEntity.badRequest().body("Job not found");
+            }
+
+            String username = getAuthenticatedUsername();
+
+            if (username == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not retrieve authenticated username");
+            }
+
+            if (!job.getCompany().getCreatedBy().getUsername().equals(username)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not authorized to edit this job");
+            }
+
+            jobService.editJob(jobId, jobDTO);
+            return ResponseEntity.ok().body("Job updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     public String getAuthenticatedUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;

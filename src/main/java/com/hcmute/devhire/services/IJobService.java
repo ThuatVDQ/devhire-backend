@@ -31,4 +31,5 @@ public interface IJobService {
     int countJobsByCompanyId(String username) throws Exception;
     int countPendingJobsByCompanyId(String username);
     List<JobDTO> getLatestJobs(String username) throws Exception;
+    void editJob(Long jobId, JobDTO jobDTO) throws Exception;
 }
