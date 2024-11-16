@@ -132,6 +132,7 @@ public class JobController {
                     .company(companyDTO)
                     .isFavorite(isLiked)
                     .applyStatus(applyStatus)
+                    .category(CategoryDTO.builder().name(job.getCategory().getName()).id(job.getCategory().getId()).build())
                     .build();
             return ResponseEntity.ok(jobDTO);
         } catch (Exception e) {
