@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,6 +37,7 @@ public class JobService implements IJobService{
     private final INotificationService notificationService;
 
     @Override
+    @Transactional
     public Job createJob(JobDTO jobDTO, String username) throws Exception {
         try {
             JobType jobType = EnumUtil.getEnumFromString(JobType.class, jobDTO.getType());
@@ -455,6 +457,7 @@ public class JobService implements IJobService{
     }
 
     @Override
+    @Transactional
     public void editJob(Long jobId, JobDTO jobDTO) throws Exception {
         try {
             Job job = jobRepository.findById(jobId)
@@ -474,6 +477,7 @@ public class JobService implements IJobService{
             job.setDeadline(jobDTO.getDeadline());
             job.setSlots(jobDTO.getSlots());
             job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, jobDTO.getStatus()));
+            job.setCategory(categoryService.findById(jobDTO.getCategory().getId()));
 
             if (jobDTO.getAddresses() != null) {
                 // Cleanup existing addresses
@@ -513,5 +517,10 @@ public class JobService implements IJobService{
         } catch (Exception e) {
             throw new Exception("Error editing job: " + e.getMessage());
         }
+    }
+
+    @Override
+    public int countJobs() throws Exception {
+        return jobRepository.countJobs();
     }
 }
