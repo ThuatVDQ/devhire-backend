@@ -32,4 +32,6 @@ public interface IJobApplicationService {
     int getTotalJobApplication(String username);
     List<CountPerJobResponse> countJobApplicationPerJob(String username);
     List<MonthlyApplicationCountResponse> countJobApplicationByMonth(int year, String username);
+    List<CountPerJobResponse> countJobApplicationPerJob();
+    List<MonthlyApplicationCountResponse> countJobApplicationByMonth(int year);
 }

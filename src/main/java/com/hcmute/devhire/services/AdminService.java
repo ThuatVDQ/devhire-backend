@@ -1,10 +1,12 @@
 package com.hcmute.devhire.services;
 
+import com.hcmute.devhire.responses.CountPerJobResponse;
 import com.hcmute.devhire.responses.DashboardResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Service
@@ -13,6 +15,7 @@ public class AdminService implements IAdminService {
     private final IJobService jobService;
     private final IUserService userService;
     private final ICompanyService companyService;
+    private final IJobApplicationService jobApplicationService;
     @Override
     public DashboardResponse getDashboardData() throws Exception {
         LocalDate currentDate = LocalDate.now();
@@ -38,6 +41,7 @@ public class AdminService implements IAdminService {
                 .companies(DashboardResponse.Stats.builder().count(countCompany).growth(growthCompany).build())
                 .build();
     }
+
     private double calculateGrowth(int current, int previous) {
         if (previous == 0) {
             return current > 0 ? 100.0 : 0.0;

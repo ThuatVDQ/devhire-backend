@@ -231,6 +231,16 @@ public class JobApplicationService implements IJobApplicationService{
     }
 
     @Override
+    public List<CountPerJobResponse> countJobApplicationPerJob() {
+        return jobApplicationRepository.countApplicationsPerJob();
+    }
+
+    @Override
+    public List<MonthlyApplicationCountResponse> countJobApplicationByMonth(int year) {
+        return jobApplicationRepository.countApplicationsByMonthForCompany(year);
+    }
+
+    @Override
     public List<JobApplicationDTO> findByJobId(Long jobId) {
         List<JobApplication> jobApplications = jobApplicationRepository.findByJobId(jobId);
         return jobApplications.stream().map(app -> JobApplicationDTO.builder()

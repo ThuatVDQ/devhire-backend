@@ -35,4 +35,16 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
             "GROUP BY MONTH(a.createdAt) " +
             "ORDER BY MONTH(a.createdAt)")
     List<MonthlyApplicationCountResponse> countApplicationsByMonthForCompany(@Param("year") int year, @Param("companyId") Long companyId);
+
+    @Query("SELECT new com.hcmute.devhire.responses.CountPerJobResponse(a.job.title, COUNT(a)) " +
+            "FROM JobApplication a " +
+            "GROUP BY a.job.id, a.job.title")
+    List<CountPerJobResponse> countApplicationsPerJob();
+
+    @Query("SELECT new com.hcmute.devhire.responses.MonthlyApplicationCountResponse(MONTH(a.createdAt), COUNT(a)) " +
+            "FROM JobApplication a " +
+            "WHERE YEAR(a.createdAt) = :year " +
+            "GROUP BY MONTH(a.createdAt) " +
+            "ORDER BY MONTH(a.createdAt)")
+    List<MonthlyApplicationCountResponse> countApplicationsByMonthForCompany(@Param("year") int year);
 }
