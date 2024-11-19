@@ -476,7 +476,7 @@ public class JobService implements IJobService{
             job.setBenefit(jobDTO.getBenefit());
             job.setDeadline(jobDTO.getDeadline());
             job.setSlots(jobDTO.getSlots());
-            job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, jobDTO.getStatus()));
+            job.setStatus(JobStatus.valueOf("PENDING"));
             job.setCategory(categoryService.findById(jobDTO.getCategory().getId()));
 
             if (jobDTO.getAddresses() != null) {
