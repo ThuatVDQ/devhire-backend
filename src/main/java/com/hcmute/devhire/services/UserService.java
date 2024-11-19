@@ -155,6 +155,16 @@ public class UserService implements IUserService{
         }
     }
 
+    @Override
+    public int countUsers() throws Exception {
+        return userRepository.countUsers();
+    }
+
+    @Override
+    public int countUsersMonthly(int month, int year) throws Exception {
+        return userRepository.countUsersMonthly(month, year);
+    }
+
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();

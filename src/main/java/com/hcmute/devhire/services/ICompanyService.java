@@ -23,4 +23,6 @@ public interface ICompanyService {
     CompanyDTO getCompanyById(Long companyId) throws Exception;
     void uploadLogo(MultipartFile file, String username) throws IOException;
     Page<CompanyDTO> searchCompanies(Pageable pageable, String keyword) throws Exception;
+    int countCompanies() throws Exception;
+    int countCompaniesMonthly(int month, int year) throws Exception;
 }

@@ -21,4 +21,6 @@ public interface IUserService {
     void forgotPassword(String email) throws Exception;
     void updatePassword(UpdatePasswordDTO updatePasswordDTO, String email) throws Exception;
     void resetPassword(ResetPasswordDTO resetPasswordDTO) throws Exception;
+    int countUsers() throws Exception;
+    int countUsersMonthly(int month, int year) throws Exception;
 }

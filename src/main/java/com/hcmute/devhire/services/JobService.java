@@ -523,4 +523,9 @@ public class JobService implements IJobService{
     public int countJobs() throws Exception {
         return jobRepository.countJobs();
     }
+
+    @Override
+    public int countJobsMonthly(int month, int year) throws Exception {
+        return jobRepository.countJobsMonthly(month, year);
+    }
 }

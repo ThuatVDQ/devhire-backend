@@ -1,0 +1,47 @@
+package com.hcmute.devhire.services;
+
+import com.hcmute.devhire.responses.DashboardResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+
+
+@Service
+@RequiredArgsConstructor
+public class AdminService implements IAdminService {
+    private final IJobService jobService;
+    private final IUserService userService;
+    private final ICompanyService companyService;
+    @Override
+    public DashboardResponse getDashboardData() throws Exception {
+        LocalDate currentDate = LocalDate.now();
+        LocalDate previousMonthDate = currentDate.minusMonths(1);
+
+        int previousMonth = previousMonthDate.getMonthValue();
+        int previousYear = previousMonthDate.getYear();
+        int currentMonth = currentDate.getMonthValue();
+
+        int currentYear = currentDate.getYear();
+
+        int countUser = userService.countUsers();
+        int countJob = jobService.countJobs();
+        int countCompany = companyService.countCompanies();
+
+        double growthUser = calculateGrowth(userService.countUsersMonthly(currentMonth, currentYear), userService.countUsersMonthly(previousMonth, previousYear));
+        double growthJob = calculateGrowth(jobService.countJobsMonthly(currentMonth, currentYear), jobService.countJobsMonthly(previousMonth, previousYear));
+        double growthCompany = calculateGrowth(companyService.countCompaniesMonthly(currentMonth, currentYear), companyService.countCompaniesMonthly(previousMonth, previousYear));
+
+        return DashboardResponse.builder()
+                .users(DashboardResponse.Stats.builder().count(countUser).growth(growthUser).build())
+                .jobs(DashboardResponse.Stats.builder().count(countJob).growth(growthJob).build())
+                .companies(DashboardResponse.Stats.builder().count(countCompany).growth(growthCompany).build())
+                .build();
+    }
+    private double calculateGrowth(int current, int previous) {
+        if (previous == 0) {
+            return current > 0 ? 100.0 : 0.0;
+        }
+        return ((double) (current - previous) / previous) * 100;
+    }
+}
