@@ -5,6 +5,7 @@ import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.*;
 import com.hcmute.devhire.repositories.specification.JobSpecifications;
 import com.hcmute.devhire.responses.JobListResponse;
+import com.hcmute.devhire.responses.MonthlyCountResponse;
 import com.hcmute.devhire.utils.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -527,5 +528,10 @@ public class JobService implements IJobService{
     @Override
     public int countJobsMonthly(int month, int year) throws Exception {
         return jobRepository.countJobsMonthly(month, year);
+    }
+
+    @Override
+    public List<MonthlyCountResponse> countJobsByMonth(int year) throws Exception {
+        return jobRepository.countJobsByMonth(year);
     }
 }

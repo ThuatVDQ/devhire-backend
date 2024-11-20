@@ -2,7 +2,7 @@ package com.hcmute.devhire.repositories;
 
 import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.responses.CountPerJobResponse;
-import com.hcmute.devhire.responses.MonthlyApplicationCountResponse;
+import com.hcmute.devhire.responses.MonthlyCountResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,22 +29,22 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
             "GROUP BY a.job.id, a.job.title")
     List<CountPerJobResponse> countApplicationsPerJobByCompany(@Param("companyId") Long companyId);
 
-    @Query("SELECT new com.hcmute.devhire.responses.MonthlyApplicationCountResponse(MONTH(a.createdAt), COUNT(a)) " +
+    @Query("SELECT new com.hcmute.devhire.responses.MonthlyCountResponse(MONTH(a.createdAt), COUNT(a)) " +
             "FROM JobApplication a " +
             "WHERE YEAR(a.createdAt) = :year AND a.job.company.id = :companyId " +
             "GROUP BY MONTH(a.createdAt) " +
             "ORDER BY MONTH(a.createdAt)")
-    List<MonthlyApplicationCountResponse> countApplicationsByMonthForCompany(@Param("year") int year, @Param("companyId") Long companyId);
+    List<MonthlyCountResponse> countApplicationsByMonthForCompany(@Param("year") int year, @Param("companyId") Long companyId);
 
     @Query("SELECT new com.hcmute.devhire.responses.CountPerJobResponse(a.job.title, COUNT(a)) " +
             "FROM JobApplication a " +
             "GROUP BY a.job.id, a.job.title")
     List<CountPerJobResponse> countApplicationsPerJob();
 
-    @Query("SELECT new com.hcmute.devhire.responses.MonthlyApplicationCountResponse(MONTH(a.createdAt), COUNT(a)) " +
+    @Query("SELECT new com.hcmute.devhire.responses.MonthlyCountResponse(MONTH(a.createdAt), COUNT(a)) " +
             "FROM JobApplication a " +
             "WHERE YEAR(a.createdAt) = :year " +
             "GROUP BY MONTH(a.createdAt) " +
             "ORDER BY MONTH(a.createdAt)")
-    List<MonthlyApplicationCountResponse> countApplicationsByMonthForCompany(@Param("year") int year);
+    List<MonthlyCountResponse> countApplicationsByMonthForCompany(@Param("year") int year);
 }
