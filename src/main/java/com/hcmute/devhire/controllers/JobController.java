@@ -503,7 +503,9 @@ public class JobController {
             if (!job.getCompany().getCreatedBy().getUsername().equals(username)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not authorized to edit this job");
             }
-
+            if (job.getStatus() == JobStatus.OPEN || job.getStatus() == JobStatus.HOT) {
+                return ResponseEntity.badRequest().body("Cannot edit job that is open or hot");
+            }
             jobService.editJob(jobId, jobDTO);
             return ResponseEntity.ok().body("Job updated successfully");
         } catch (Exception e) {

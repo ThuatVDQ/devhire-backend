@@ -476,7 +476,7 @@ public class JobService implements IJobService{
             job.setBenefit(jobDTO.getBenefit());
             job.setDeadline(jobDTO.getDeadline());
             job.setSlots(jobDTO.getSlots());
-            job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, jobDTO.getStatus()));
+            job.setStatus(JobStatus.valueOf("PENDING"));
             job.setCategory(categoryService.findById(jobDTO.getCategory().getId()));
 
             if (jobDTO.getAddresses() != null) {
@@ -522,5 +522,10 @@ public class JobService implements IJobService{
     @Override
     public int countJobs() throws Exception {
         return jobRepository.countJobs();
+    }
+
+    @Override
+    public int countJobsMonthly(int month, int year) throws Exception {
+        return jobRepository.countJobsMonthly(month, year);
     }
 }

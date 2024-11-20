@@ -197,4 +197,14 @@ public class CompanyService implements ICompanyService {
             throw new Exception("Error when search companies");
         }
     }
+
+    @Override
+    public int countCompanies() throws Exception {
+        return companyRepository.countCompanies();
+    }
+
+    @Override
+    public int countCompaniesMonthly(int month, int year) throws Exception {
+        return companyRepository.countCompaniesMonthly(month, year);
+    }
 }

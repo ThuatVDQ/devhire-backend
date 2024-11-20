@@ -13,4 +13,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existByEmail(String email);
     Optional<User> findByPhone(String phone);
     Optional<User> findByEmail(String email);
+
+    @Query("SELECT COUNT(u) FROM User u")
+    int countUsers();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE MONTH(u.createdAt) = ?1 AND YEAR(u.createdAt) = ?2")
+    int countUsersMonthly(int month, int year);
 }

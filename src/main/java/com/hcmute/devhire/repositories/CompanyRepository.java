@@ -16,4 +16,10 @@ public interface CompanyRepository extends JpaRepository<Company, Long>, JpaSpec
 
     @Query("SELECT c FROM Company c WHERE c.createdBy.email = :username OR c.createdBy.phone = :username")
     Company findByUser(@Param("username") String username);
+
+    @Query("SELECT COUNT(c) FROM Company c")
+    int countCompanies();
+
+    @Query("SELECT COUNT(c) FROM Company c WHERE MONTH(c.createdAt) = :month AND YEAR(c.createdAt) = :year")
+    int countCompaniesMonthly(@Param("month") int month, @Param("year") int year);
 }
