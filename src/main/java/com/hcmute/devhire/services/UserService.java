@@ -6,6 +6,7 @@ import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.repositories.RoleRepository;
 import com.hcmute.devhire.repositories.UserRepository;
+import com.hcmute.devhire.responses.UserResponse;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import com.hcmute.devhire.components.JwtUtil;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 
 
@@ -163,6 +165,15 @@ public class UserService implements IUserService{
     @Override
     public int countUsersMonthly(int month, int year) throws Exception {
         return userRepository.countUsersMonthly(month, year);
+    }
+
+    @Override
+    public List<UserResponse> getAllUsers() throws Exception {
+        List<User> users = userRepository.findAll();
+        if (users.isEmpty()) {
+            throw new Exception("No user found");
+        }
+        return users.stream().map(UserResponse::convertFromUser).toList();
     }
 
     private void sendVerificationEmail(User user) {
