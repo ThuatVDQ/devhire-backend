@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/users")
@@ -107,6 +108,16 @@ public class UserController {
                     userLoginDTO.getRoleId() == null ? 3 : userLoginDTO.getRoleId());
             UserDTO userDTO = userService.findByUsername(userLoginDTO.getUsername());
 
+            if (Objects.equals(userDTO.getStatus(), "INACTIVE")) {
+                return ResponseEntity.badRequest().body(LoginResponse
+                        .builder()
+                        .message("Your account has been banned")
+                        .token(null)
+                        .roleId(null)
+                        .build()
+                );
+
+            }
             return ResponseEntity.ok(LoginResponse
                     .builder()
                     .message("Login successfully")

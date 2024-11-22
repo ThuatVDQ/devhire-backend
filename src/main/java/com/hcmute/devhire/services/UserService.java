@@ -301,6 +301,7 @@ public class UserService implements IUserService{
                 .phone(user.getPhone())
                 .avatarUrl(user.getAvatarUrl())
                 .roleId(user.getRole().getId())
+                .status(user.getStatus() != null ? user.getStatus().name() : "UNKNOWN")
                 .build();
     }
 
