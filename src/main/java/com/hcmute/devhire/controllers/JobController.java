@@ -324,7 +324,6 @@ public class JobController {
                 return ResponseEntity.badRequest().body("Job is not pending");
             }
             jobService.approveJob(jobId);
-            notificationService.createAndSendNotification("Job approved", job.getCompany().getCreatedBy().getUsername());
             return ResponseEntity.ok().body("Approved job successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -343,7 +342,6 @@ public class JobController {
                 return ResponseEntity.badRequest().body("Job is not pending");
             }
             jobService.rejectJob(jobId);
-            notificationService.createAndSendNotification("Job rejected. Please check the job information again.", job.getCompany().getCreatedBy().getUsername());
             return ResponseEntity.ok().body("Rejected job successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -362,7 +360,6 @@ public class JobController {
                 return ResponseEntity.badRequest().body("Job is not open");
             }
             jobService.expiredJob(jobId);
-            notificationService.createAndSendNotification("Job: " + job.getTitle() +" expired.", job.getCompany().getCreatedBy().getUsername());
             return ResponseEntity.ok().body("Expired job successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
