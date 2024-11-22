@@ -6,11 +6,16 @@ import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.repositories.RoleRepository;
 import com.hcmute.devhire.repositories.UserRepository;
+import com.hcmute.devhire.repositories.specification.UserSpecifications;
 import com.hcmute.devhire.responses.UserResponse;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -168,12 +173,28 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public List<UserResponse> getAllUsers() throws Exception {
-        List<User> users = userRepository.findAll();
-        if (users.isEmpty()) {
-            throw new Exception("No user found");
+    public Page<UserResponse> getAllUsers(PageRequest pageRequest, Long roleId, String status) throws Exception {
+        Specification<User> spec = Specification.where(null);
+
+        if (roleId != null) {
+            spec = spec.and(UserSpecifications.hasRole(roleId));
         }
-        return users.stream().map(UserResponse::convertFromUser).toList();
+        if (status != null && !status.isEmpty()) {
+            spec = spec.and(UserSpecifications.hasStatus(status));
+        }
+
+
+        Page<User> users = userRepository.findAll(spec, pageRequest);
+        return users.map(user -> UserResponse.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .avatarUrl(user.getAvatarUrl())
+                .roleName(user.getRole().getName())
+                .status(user.getStatus() != null ? user.getStatus().name() : "UNKNOWN")
+                .createdAt(user.getCreatedAt())
+                .build());
     }
 
     @Override

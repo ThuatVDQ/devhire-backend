@@ -2,15 +2,15 @@ package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
-import com.hcmute.devhire.responses.CountPerJobResponse;
-import com.hcmute.devhire.responses.DashboardResponse;
-import com.hcmute.devhire.responses.MonthlyCountResponse;
-import com.hcmute.devhire.responses.UserResponse;
+import com.hcmute.devhire.responses.*;
 import com.hcmute.devhire.services.IAdminService;
 import com.hcmute.devhire.services.IJobApplicationService;
 import com.hcmute.devhire.services.IJobService;
 import com.hcmute.devhire.services.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -88,14 +88,33 @@ public class AdminController {
     }
 
     @GetMapping("/getAllUsers")
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity<?> getAllUsers(
+            @RequestParam(required = false) Long roleId,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        if (page < 0 || limit <= 0) {
+            return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
+        }
         try {
+            PageRequest pageRequest = PageRequest.of(
+                    page, limit,
+                    Sort.by("id").ascending()
+            );
             if (!isUserAdmin()) {
                 return ResponseEntity.badRequest()
                         .body("Error: You are not an admin");
             }
-            List<UserResponse> users = userService.getAllUsers();
-            return ResponseEntity.ok(users);
+            Page<UserResponse> users = userService.getAllUsers(pageRequest, roleId, status);
+            UserListResponse userListResponse = UserListResponse.builder()
+                    .users(users.getContent())
+                    .totalPages(users.getTotalPages())
+                    .totalElements(users.getTotalElements())
+                    .currentPage(page)
+                    .pageSize(limit)
+                    .build();
+            return ResponseEntity.ok(userListResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body("Error: " + e.getMessage());
