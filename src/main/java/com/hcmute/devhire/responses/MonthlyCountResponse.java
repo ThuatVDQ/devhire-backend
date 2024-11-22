@@ -6,9 +6,9 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MonthlyApplicationCountResponse {
+public class MonthlyCountResponse {
     private Integer month;
 
-    @JsonProperty("application_count")
-    private Long applicationCount;
+    @JsonProperty("count")
+    private Long count;
 }

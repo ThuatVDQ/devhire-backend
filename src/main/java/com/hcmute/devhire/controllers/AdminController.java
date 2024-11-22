@@ -4,9 +4,11 @@ import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.CountPerJobResponse;
 import com.hcmute.devhire.responses.DashboardResponse;
-import com.hcmute.devhire.responses.MonthlyApplicationCountResponse;
+import com.hcmute.devhire.responses.MonthlyCountResponse;
+import com.hcmute.devhire.responses.UserResponse;
 import com.hcmute.devhire.services.IAdminService;
 import com.hcmute.devhire.services.IJobApplicationService;
+import com.hcmute.devhire.services.IJobService;
 import com.hcmute.devhire.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ public class AdminController {
     private final IJobApplicationService jobApplicationService;
     private final IAdminService adminService;
     private final IUserService userService;
+    private final IJobService jobService;
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboardData() {
         try {
@@ -61,7 +64,7 @@ public class AdminController {
                 return ResponseEntity.badRequest()
                         .body("Error: You are not an admin");
             }
-            List<MonthlyApplicationCountResponse> monthlyApplicationCountResponses = jobApplicationService.countJobApplicationByMonth(year);
+            List<MonthlyCountResponse> monthlyApplicationCountResponses = jobApplicationService.countJobApplicationByMonth(year);
             return ResponseEntity.ok(monthlyApplicationCountResponses);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
@@ -69,6 +72,35 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/monthlyJobs")
+    public ResponseEntity<?> getMonthlyJobs(@RequestParam("year") int year) {
+        try {
+            if (!isUserAdmin()) {
+                return ResponseEntity.badRequest()
+                        .body("Error: You are not an admin");
+            }
+            List<MonthlyCountResponse> monthlyApplicationCountResponses = jobService.countJobsByMonth(year);
+            return ResponseEntity.ok(monthlyApplicationCountResponses);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/getAllUsers")
+    public ResponseEntity<?> getAllUsers() {
+        try {
+            if (!isUserAdmin()) {
+                return ResponseEntity.badRequest()
+                        .body("Error: You are not an admin");
+            }
+            List<UserResponse> users = userService.getAllUsers();
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: " + e.getMessage());
+        }
+    }
 
     public boolean isUserAdmin() throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

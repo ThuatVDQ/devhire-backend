@@ -4,12 +4,9 @@ import com.hcmute.devhire.DTOs.EmailRequestDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.exceptions.DataNotFoundException;
-import com.hcmute.devhire.repositories.CVRepository;
 import com.hcmute.devhire.repositories.JobApplicationRepository;
-import com.hcmute.devhire.repositories.JobRepository;
-import com.hcmute.devhire.repositories.UserRepository;
 import com.hcmute.devhire.responses.CountPerJobResponse;
-import com.hcmute.devhire.responses.MonthlyApplicationCountResponse;
+import com.hcmute.devhire.responses.MonthlyCountResponse;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -221,7 +218,7 @@ public class JobApplicationService implements IJobApplicationService{
     }
 
     @Override
-    public List<MonthlyApplicationCountResponse> countJobApplicationByMonth(int year, String username) {
+    public List<MonthlyCountResponse> countJobApplicationByMonth(int year, String username) {
         Company company = companyService.findByUser(username);
         if (company != null) {
             return jobApplicationRepository.countApplicationsByMonthForCompany(year, company.getId());
@@ -236,7 +233,7 @@ public class JobApplicationService implements IJobApplicationService{
     }
 
     @Override
-    public List<MonthlyApplicationCountResponse> countJobApplicationByMonth(int year) {
+    public List<MonthlyCountResponse> countJobApplicationByMonth(int year) {
         return jobApplicationRepository.countApplicationsByMonthForCompany(year);
     }
 
