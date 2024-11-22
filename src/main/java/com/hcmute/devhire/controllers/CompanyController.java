@@ -7,6 +7,7 @@ import com.hcmute.devhire.entities.Skill;
 import com.hcmute.devhire.responses.CompanyListResponse;
 import com.hcmute.devhire.services.CompanyService;
 import com.hcmute.devhire.services.ICompanyService;
+import com.hcmute.devhire.services.INotificationService;
 import com.hcmute.devhire.services.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ import java.util.Set;
 @RequestMapping("/api/companies")
 public class CompanyController {
     private final ICompanyService companyService;
+    private final INotificationService notificationService;
     @GetMapping("")
     public ResponseEntity<?> getAllCompanies(
             @RequestParam(defaultValue = "0") int page,
@@ -86,6 +88,7 @@ public class CompanyController {
                 return ResponseEntity.badRequest().body("User not found");
             }
             Company newCompany = companyService.createCompany(companyDTO, username);
+            notificationService.sendNotificationToAdmin("New company has been created");
             return ResponseEntity.ok(newCompany);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -137,6 +140,7 @@ public class CompanyController {
                 return ResponseEntity.status(401).body("Unauthorized: No user found.");
             }
             Company company = companyService.updateCompany(companyDTO, username);
+            notificationService.sendNotificationToAdmin(company.getName() + " has been updated");
             return ResponseEntity.ok(company);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

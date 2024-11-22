@@ -4,6 +4,7 @@ import com.hcmute.devhire.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -19,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE MONTH(u.createdAt) = ?1 AND YEAR(u.createdAt) = ?2")
     int countUsersMonthly(int month, int year);
+
+    List<User> findAllByRoleName(String roleName);
 }

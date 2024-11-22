@@ -176,6 +176,11 @@ public class UserService implements IUserService{
         return users.stream().map(UserResponse::convertFromUser).toList();
     }
 
+    @Override
+    public List<User> findAdmins() throws Exception {
+        return userRepository.findAllByRoleName(Role.ADMIN);
+    }
+
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();

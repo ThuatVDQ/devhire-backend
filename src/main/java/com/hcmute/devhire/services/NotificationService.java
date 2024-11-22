@@ -33,12 +33,11 @@ public class NotificationService implements INotificationService {
     }
 
     @Override
-    public Notification createAndSendNotification(String message, String username) throws Exception {
+    public void createAndSendNotification(String message, String username) throws Exception {
         Notification notification = createNotification(message, username);
 
         messagingTemplate.convertAndSend("/topic/notifications/" + username, notification);
 
-        return notification;
     }
 
     @Override
@@ -77,5 +76,17 @@ public class NotificationService implements INotificationService {
         User user = userService.findByUserName(username);
         List<Notification> notifications = notificationRepository.findByUserId(user.getId());
         return notifications.stream().filter(notification -> !notification.getIsRead()).count();
+    }
+
+    @Override
+    public void sendNotificationToAdmin(String message) throws Exception {
+        List<User> admins = userService.findAdmins();
+        if (admins.isEmpty()) {
+            return;
+        }
+        for (User admin : admins) {
+            Notification notification = createNotification(message, admin.getUsername());
+            messagingTemplate.convertAndSend("/topic/notifications/" + admin.getUsername(), notification);
+        }
     }
 }

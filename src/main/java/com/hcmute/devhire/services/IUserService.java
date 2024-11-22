@@ -26,4 +26,5 @@ public interface IUserService {
     int countUsers() throws Exception;
     int countUsersMonthly(int month, int year) throws Exception;
     List<UserResponse> getAllUsers() throws Exception;
+    List<User> findAdmins() throws Exception;
 }
