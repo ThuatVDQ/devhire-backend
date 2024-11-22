@@ -5,6 +5,8 @@ import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.UserResponse;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,5 +27,5 @@ public interface IUserService {
     void resetPassword(ResetPasswordDTO resetPasswordDTO) throws Exception;
     int countUsers() throws Exception;
     int countUsersMonthly(int month, int year) throws Exception;
-    List<UserResponse> getAllUsers() throws Exception;
+    Page<UserResponse> getAllUsers(PageRequest pageRequest, Long roleId, String status) throws Exception;
 }
