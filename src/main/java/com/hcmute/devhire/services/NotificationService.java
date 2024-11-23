@@ -43,7 +43,7 @@ public class NotificationService implements INotificationService {
     @Override
     public List<Notification> getUserNotifications(String username) throws Exception {
         User user = userService.findByUserName(username);
-        return notificationRepository.findByUserId(user.getId());
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
     }
 
     @Override
@@ -64,7 +64,7 @@ public class NotificationService implements INotificationService {
     @Override
     public void markAllAsRead(String username) throws Exception {
         User user = userService.findByUserName(username);
-        List<Notification> notifications = notificationRepository.findByUserId(user.getId());
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
         notifications.forEach(notification -> {
             notification.setIsRead(true);
             notificationRepository.save(notification);
@@ -74,7 +74,7 @@ public class NotificationService implements INotificationService {
     @Override
     public long countUnreadNotifications(String username) throws Exception {
         User user = userService.findByUserName(username);
-        List<Notification> notifications = notificationRepository.findByUserId(user.getId());
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
         return notifications.stream().filter(notification -> !notification.getIsRead()).count();
     }
 
