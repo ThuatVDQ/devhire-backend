@@ -510,8 +510,8 @@ public class JobController {
                 return ResponseEntity.badRequest().body("Cannot edit job that is open or hot");
             }
             jobService.editJob(jobId, jobDTO);
-            notificationService.createAndSendNotification("Job: " + job.getTitle() + " updated", job.getCompany().getCreatedBy().getUsername());
-            notificationService.sendNotificationToAdmin("Recruiter has edited a job");
+//            notificationService.createAndSendNotification("Job: " + job.getTitle() + " updated", job.getCompany().getCreatedBy().getUsername());
+            notificationService.sendNotificationToAdmin("Recruiter has edited a job: " + job.getTitle());
             return ResponseEntity.ok().body("Job updated successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
