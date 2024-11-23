@@ -8,6 +8,7 @@ import com.hcmute.devhire.repositories.RoleRepository;
 import com.hcmute.devhire.repositories.UserRepository;
 import com.hcmute.devhire.repositories.specification.UserSpecifications;
 import com.hcmute.devhire.responses.UserResponse;
+import com.hcmute.devhire.utils.Status;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +75,8 @@ public class UserService implements IUserService{
         newUser.setVerificationCode(generateVerificationCode());
         newUser.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
         newUser.setEnabled(false);
+
+        newUser.setStatus(Status.valueOf("ACTIVE"));
         sendVerificationEmail(newUser);
 
         return userRepository.save(newUser);
