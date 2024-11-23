@@ -243,7 +243,7 @@ public class JobController {
 
     @GetMapping("/company")
     public ResponseEntity<?> getJobsByRecruiterCompany(
-            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String type,
             @RequestParam(defaultValue = "0") int page,
@@ -265,7 +265,7 @@ public class JobController {
                     Sort.by("id").descending()
             );
 
-            Page<JobDTO> jobs = jobService.getJobsByCompany(pageRequest, title, status, type, username);
+            Page<JobDTO> jobs = jobService.getJobsByCompany(pageRequest, keyword, status, type, username);
             JobListResponse response = JobListResponse.builder()
                     .jobs(jobs.getContent())
                     .currentPage(page)
