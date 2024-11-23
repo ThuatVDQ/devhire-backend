@@ -243,6 +243,9 @@ public class JobController {
 
     @GetMapping("/company")
     public ResponseEntity<?> getJobsByRecruiterCompany(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit
     ) {
@@ -259,10 +262,10 @@ public class JobController {
         try {
             PageRequest pageRequest = PageRequest.of(
                     page, limit,
-                    Sort.by("id").ascending()
+                    Sort.by("id").descending()
             );
 
-            Page<JobDTO> jobs = jobService.getJobsByCompany(pageRequest, username);
+            Page<JobDTO> jobs = jobService.getJobsByCompany(pageRequest, keyword, status, type, username);
             JobListResponse response = JobListResponse.builder()
                     .jobs(jobs.getContent())
                     .currentPage(page)
@@ -329,6 +332,89 @@ public class JobController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/{jobId}/close")
+    public ResponseEntity<?> closeJob(
+            @PathVariable("jobId") Long jobId
+    ) {
+        try {
+            Job job = jobService.findById(jobId);
+            if (job == null) {
+                return ResponseEntity.badRequest().body("Job not found");
+            }
+            if (job.getStatus() != JobStatus.OPEN && job.getStatus() != JobStatus.HOT) {
+                return ResponseEntity.badRequest().body("Job is not open");
+            }
+            jobService.closeJob(jobId);
+            return ResponseEntity.ok().body("Closed job successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/closeJobs")
+    public ResponseEntity<?> closeJobs(
+            @RequestBody List<Long> job_ids
+    ) {
+        try {
+            for (Long jobId : job_ids) {
+                Job job = jobService.findById(jobId);
+                if (job == null) {
+                    return ResponseEntity.badRequest().body("Job not found");
+                }
+                if (job.getStatus() != JobStatus.OPEN && job.getStatus() != JobStatus.HOT) {
+                    return ResponseEntity.badRequest().body("Job is not open");
+                }
+                jobService.closeJob(jobId);
+            }
+            return ResponseEntity.ok().body("Closed jobs successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/approveJobs")
+    public ResponseEntity<?> approveJobs(
+            @RequestBody List<Long> job_ids
+    ) {
+        try {
+            for (Long jobId : job_ids) {
+                Job job = jobService.findById(jobId);
+                if (job == null) {
+                    return ResponseEntity.badRequest().body("Job not found");
+                }
+                if (job.getStatus() != JobStatus.PENDING) {
+                    return ResponseEntity.badRequest().body("Job is not pending");
+                }
+                jobService.approveJob(jobId);
+            }
+            return ResponseEntity.ok().body("Approved jobs successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/rejectJobs")
+    public ResponseEntity<?> rejectJobs(
+            @RequestBody List<Long> job_ids
+    ) {
+        try {
+            for (Long jobId : job_ids) {
+                Job job = jobService.findById(jobId);
+                if (job == null) {
+                    return ResponseEntity.badRequest().body("Job not found");
+                }
+                if (job.getStatus() != JobStatus.PENDING) {
+                    return ResponseEntity.badRequest().body("Job is not pending");
+                }
+                jobService.rejectJob(jobId);
+            }
+            return ResponseEntity.ok().body("Rejected jobs successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PostMapping("/{jobId}/reject")
     public ResponseEntity<?> rejectJob(
             @PathVariable("jobId") Long jobId
@@ -510,7 +596,6 @@ public class JobController {
                 return ResponseEntity.badRequest().body("Cannot edit job that is open or hot");
             }
             jobService.editJob(jobId, jobDTO);
-//            notificationService.createAndSendNotification("Job: " + job.getTitle() + " updated", job.getCompany().getCreatedBy().getUsername());
             notificationService.sendNotificationToAdmin("Recruiter has edited a job: " + job.getTitle());
             return ResponseEntity.ok().body("Job updated successfully");
         } catch (Exception e) {
