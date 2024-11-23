@@ -205,6 +205,18 @@ public class UserService implements IUserService{
         return userRepository.findAllByRoleName(Role.ADMIN);
     }
 
+    @Override
+    public void changeStatusUser(String status, Long id) throws Exception {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setStatus(Status.valueOf(status));
+            userRepository.save(user);
+        } else {
+            throw new Exception("User not found");
+        }
+    }
+
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();

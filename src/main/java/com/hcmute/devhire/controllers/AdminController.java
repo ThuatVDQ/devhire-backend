@@ -156,6 +156,36 @@ public class AdminController {
         }
     }
 
+    @PostMapping("/banUser")
+    public ResponseEntity<?> banUser(@RequestParam Long userId) {
+        try {
+            if (!isUserAdmin()) {
+                return ResponseEntity.badRequest()
+                        .body("Error: You are not an admin");
+            }
+            userService.changeStatusUser("INACTIVE",userId);
+            return ResponseEntity.ok("User banned successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/unbanUser")
+    public ResponseEntity<?> unbanUser(@RequestParam Long userId) {
+        try {
+            if (!isUserAdmin()) {
+                return ResponseEntity.badRequest()
+                        .body("Error: You are not an admin");
+            }
+            userService.changeStatusUser("ACTIVE",userId);
+            return ResponseEntity.ok("User unbanned successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
     public boolean isUserAdmin() throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;
