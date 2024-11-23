@@ -32,4 +32,7 @@ public class JobSpecifications {
     public static Specification<Job> hasStatuses(List<JobStatus> statuses) {
         return (root, query, criteriaBuilder) -> root.get("status").in(statuses);
     }
+    public static Specification<Job> hasCompanyId(Long companyId) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), companyId);
+    }
 }
