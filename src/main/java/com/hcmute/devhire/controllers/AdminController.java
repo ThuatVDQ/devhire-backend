@@ -186,6 +186,21 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserById(@PathVariable Long userId) {
+        try {
+            if (!isUserAdmin()) {
+                return ResponseEntity.badRequest()
+                        .body("Error: You are not an admin");
+            }
+            User user = userService.findById(userId);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
     public boolean isUserAdmin() throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;
