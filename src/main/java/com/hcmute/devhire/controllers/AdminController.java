@@ -1,5 +1,6 @@
 package com.hcmute.devhire.controllers;
 
+import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.*;
@@ -115,6 +116,40 @@ public class AdminController {
                     .pageSize(limit)
                     .build();
             return ResponseEntity.ok(userListResponse);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/getAllJobs")
+    public ResponseEntity<?> getAllJobs(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        if (page < 0 || limit <= 0) {
+            return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
+        }
+        try {
+            PageRequest pageRequest = PageRequest.of(
+                    page, limit,
+                    Sort.by("id").ascending()
+            );
+            if (!isUserAdmin()) {
+                return ResponseEntity.badRequest()
+                        .body("Error: You are not an admin");
+            }
+            Page<JobDTO> jobs = jobService.getAllJobsAdmin(pageRequest, status, type, null);
+            JobListResponse jobListResponse = JobListResponse.builder()
+                    .jobs(jobs.getContent())
+                    .totalPages(jobs.getTotalPages())
+                    .totalElements(jobs.getTotalElements())
+                    .currentPage(page)
+                    .pageSize(limit)
+                    .build();
+            return ResponseEntity.ok(jobListResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body("Error: " + e.getMessage());

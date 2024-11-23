@@ -21,4 +21,8 @@ public class JobSpecifications {
     public static Specification<Job> hasJobType(String jobType) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("type"), jobType);
     }
+
+    public static Specification<Job> hasStatus(String status) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status);
+    }
 }
