@@ -273,9 +273,7 @@ public class JobController {
                     .totalPages(jobs.getTotalPages())
                     .totalElements(jobs.getTotalElements())
                     .build();
-            if (jobs.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No jobs found for the user");
-            }
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
@@ -362,10 +360,9 @@ public class JobController {
                 if (job == null) {
                     return ResponseEntity.badRequest().body("Job not found");
                 }
-                if (job.getStatus() != JobStatus.OPEN && job.getStatus() != JobStatus.HOT) {
-                    return ResponseEntity.badRequest().body("Job is not open");
+                if (job.getStatus() == JobStatus.OPEN || job.getStatus() == JobStatus.HOT) {
+                    jobService.closeJob(jobId);
                 }
-                jobService.closeJob(jobId);
             }
             return ResponseEntity.ok().body("Closed jobs successfully");
         } catch (Exception e) {
@@ -383,10 +380,9 @@ public class JobController {
                 if (job == null) {
                     return ResponseEntity.badRequest().body("Job not found");
                 }
-                if (job.getStatus() != JobStatus.PENDING) {
-                    return ResponseEntity.badRequest().body("Job is not pending");
+                if (job.getStatus() == JobStatus.PENDING) {
+                    jobService.approveJob(jobId);
                 }
-                jobService.approveJob(jobId);
             }
             return ResponseEntity.ok().body("Approved jobs successfully");
         } catch (Exception e) {
@@ -404,10 +400,9 @@ public class JobController {
                 if (job == null) {
                     return ResponseEntity.badRequest().body("Job not found");
                 }
-                if (job.getStatus() != JobStatus.PENDING) {
-                    return ResponseEntity.badRequest().body("Job is not pending");
+                if (job.getStatus() == JobStatus.PENDING) {
+                    jobService.rejectJob(jobId);
                 }
-                jobService.rejectJob(jobId);
             }
             return ResponseEntity.ok().body("Rejected jobs successfully");
         } catch (Exception e) {
