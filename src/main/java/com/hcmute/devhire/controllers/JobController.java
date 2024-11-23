@@ -262,7 +262,7 @@ public class JobController {
         try {
             PageRequest pageRequest = PageRequest.of(
                     page, limit,
-                    Sort.by("id").ascending()
+                    Sort.by("id").descending()
             );
 
             Page<JobDTO> jobs = jobService.getJobsByCompany(pageRequest, title, status, type, username);
