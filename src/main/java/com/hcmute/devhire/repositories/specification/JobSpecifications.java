@@ -1,9 +1,12 @@
 package com.hcmute.devhire.repositories.specification;
 
 import com.hcmute.devhire.entities.Job;
+import com.hcmute.devhire.utils.JobStatus;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
 
 public class JobSpecifications {
     public static Specification<Job> hasKeyword(String keyword) {
@@ -24,5 +27,9 @@ public class JobSpecifications {
 
     public static Specification<Job> hasStatus(String status) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status);
+    }
+
+    public static Specification<Job> hasStatuses(List<JobStatus> statuses) {
+        return (root, query, criteriaBuilder) -> root.get("status").in(statuses);
     }
 }

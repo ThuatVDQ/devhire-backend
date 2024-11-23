@@ -383,8 +383,10 @@ public class JobService implements IJobService{
         if (jobType != null && !jobType.isEmpty()) {
             spec = spec.and(JobSpecifications.hasJobType(jobType));
         }
+        List<JobStatus> statuses = List.of(JobStatus.OPEN, JobStatus.HOT);
+        spec = spec.and(JobSpecifications.hasStatuses(statuses));
 
-        Page<Job> jobs = jobRepository.findAll(spec, pageRequest);
+        Page<Job> jobs = jobRepository.findAll(spec,pageRequest);
         return jobs.map(job -> {
             try {
                 return convertDTO(job, username);
