@@ -28,4 +28,5 @@ public interface IUserService {
     int countUsers() throws Exception;
     int countUsersMonthly(int month, int year) throws Exception;
     Page<UserResponse> getAllUsers(PageRequest pageRequest, Long roleId, String status) throws Exception;
+    List<User> findAdmins() throws Exception;
 }

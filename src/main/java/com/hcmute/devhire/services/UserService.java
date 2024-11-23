@@ -197,6 +197,11 @@ public class UserService implements IUserService{
                 .build());
     }
 
+    @Override
+    public List<User> findAdmins() throws Exception {
+        return userRepository.findAllByRoleName(Role.ADMIN);
+    }
+
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
@@ -296,6 +301,7 @@ public class UserService implements IUserService{
                 .phone(user.getPhone())
                 .avatarUrl(user.getAvatarUrl())
                 .roleId(user.getRole().getId())
+                .status(user.getStatus() != null ? user.getStatus().name() : "UNKNOWN")
                 .build();
     }
 

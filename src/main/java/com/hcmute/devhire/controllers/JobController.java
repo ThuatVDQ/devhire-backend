@@ -163,6 +163,7 @@ public class JobController {
 
         try {
             Job newJob = jobService.createJob(jobDTO, username);
+            notificationService.sendNotificationToAdmin("Recruiter has created a new job");
             return ResponseEntity.ok(newJob);
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
@@ -204,6 +205,7 @@ public class JobController {
                 jobApplicationService.updateJobApplication(jobApplication);
                 Job job = jobService.findById(jobId);
                 notificationService.createAndSendNotification("New CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
+                notificationService.sendNotificationToAdmin("User has updated CV for job " + job.getTitle());
                 return ResponseEntity.ok().body("Updated CV for existing application");
             } else {
                 ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
@@ -213,7 +215,8 @@ public class JobController {
                         .build();
                 jobService.applyForJob(jobId, applyJobRequestDTO);
                 sendNewApplicationNotification(jobId, userDTO);
-
+                Job job = jobService.findById(jobId);
+                notificationService.sendNotificationToAdmin("User has applied for job " + job.getTitle());
                 return ResponseEntity.ok().body("Applied successfully");
             }
         } catch (Exception e) {
@@ -507,6 +510,8 @@ public class JobController {
                 return ResponseEntity.badRequest().body("Cannot edit job that is open or hot");
             }
             jobService.editJob(jobId, jobDTO);
+            notificationService.createAndSendNotification("Job: " + job.getTitle() + " updated", job.getCompany().getCreatedBy().getUsername());
+            notificationService.sendNotificationToAdmin("Recruiter has edited a job");
             return ResponseEntity.ok().body("Job updated successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

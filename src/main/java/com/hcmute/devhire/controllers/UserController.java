@@ -4,12 +4,12 @@ import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.LoginResponse;
+import com.hcmute.devhire.services.INotificationService;
 import com.hcmute.devhire.services.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.FieldError;
@@ -19,8 +19,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/users")
@@ -28,6 +28,8 @@ import java.util.List;
 public class UserController {
     private final IUserService userService;
     private final FileUtil fileUtil;
+    private final INotificationService notificationService;
+
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
         try {
@@ -60,7 +62,8 @@ public class UserController {
                 return ResponseEntity.badRequest().body("Password not match");
             }
             User user = userService.createUser(userDTO);
-            //return ResponseEntity.ok("Register successfully");
+            notificationService.createAndSendNotification("Welcome to DevHire!", user.getUsername());
+            notificationService.sendNotificationToAdmin("New user registered: " + user.getUsername());
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -105,6 +108,16 @@ public class UserController {
                     userLoginDTO.getRoleId() == null ? 3 : userLoginDTO.getRoleId());
             UserDTO userDTO = userService.findByUsername(userLoginDTO.getUsername());
 
+            if (Objects.equals(userDTO.getStatus(), "INACTIVE")) {
+                return ResponseEntity.badRequest().body(LoginResponse
+                        .builder()
+                        .message("Your account has been banned")
+                        .token(null)
+                        .roleId(null)
+                        .build()
+                );
+
+            }
             return ResponseEntity.ok(LoginResponse
                     .builder()
                     .message("Login successfully")
@@ -168,6 +181,8 @@ public class UserController {
                 return ResponseEntity.badRequest().body("Password not match");
             }
             userService.updatePassword(updatePasswordDTO, email);
+            notificationService.createAndSendNotification("Password updated", email);
+            notificationService.sendNotificationToAdmin("User updated new password");
             return ResponseEntity.ok("Update password successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -203,6 +218,7 @@ public class UserController {
 
         try {
             User user = userService.updateAvatar(username, filename);
+            notificationService.sendNotificationToAdmin("User just updated avatar");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to update avatar: " + e.getMessage());
         }
@@ -219,6 +235,7 @@ public class UserController {
 
         try {
             User user = userService.updateAvatar(username, null);
+            notificationService.sendNotificationToAdmin("User just deleted avatar");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to delete avatar: " + e.getMessage());
         }
@@ -238,6 +255,7 @@ public class UserController {
                 return ResponseEntity.status(401).body("Unauthorized: No user found.");
             }
             User user = userService.updateProfile(username, profileDTO);
+            notificationService.sendNotificationToAdmin("User just updated profile");
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

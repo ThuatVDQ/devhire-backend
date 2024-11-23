@@ -121,8 +121,15 @@ public class JobService implements IJobService{
     }
 
     @Override
-    public Page<JobDTO> getAllJobsAdmin(PageRequest pageRequest, String username) throws Exception {
-        Page<Job> jobs= jobRepository.findAll(pageRequest);
+    public Page<JobDTO> getAllJobsAdmin(PageRequest pageRequest, String status, String type,  String username) throws Exception {
+        Specification<Job> spec = Specification.where(null);
+        if (type != null && !type.isEmpty()) {
+            spec = spec.and(JobSpecifications.hasJobType(type));
+        }
+        if (status != null && !status.isEmpty()) {
+            spec = spec.and(JobSpecifications.hasStatus(status));
+        }
+        Page<Job> jobs= jobRepository.findAll(spec, pageRequest);
 
         return jobs.map(job -> {
             try {

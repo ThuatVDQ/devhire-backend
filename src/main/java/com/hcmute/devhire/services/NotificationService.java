@@ -33,18 +33,17 @@ public class NotificationService implements INotificationService {
     }
 
     @Override
-    public Notification createAndSendNotification(String message, String username) throws Exception {
+    public void createAndSendNotification(String message, String username) throws Exception {
         Notification notification = createNotification(message, username);
 
         messagingTemplate.convertAndSend("/topic/notifications/" + username, notification);
 
-        return notification;
     }
 
     @Override
     public List<Notification> getUserNotifications(String username) throws Exception {
         User user = userService.findByUserName(username);
-        return notificationRepository.findByUserId(user.getId());
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
     }
 
     @Override
@@ -65,7 +64,7 @@ public class NotificationService implements INotificationService {
     @Override
     public void markAllAsRead(String username) throws Exception {
         User user = userService.findByUserName(username);
-        List<Notification> notifications = notificationRepository.findByUserId(user.getId());
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
         notifications.forEach(notification -> {
             notification.setIsRead(true);
             notificationRepository.save(notification);
@@ -75,7 +74,19 @@ public class NotificationService implements INotificationService {
     @Override
     public long countUnreadNotifications(String username) throws Exception {
         User user = userService.findByUserName(username);
-        List<Notification> notifications = notificationRepository.findByUserId(user.getId());
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
         return notifications.stream().filter(notification -> !notification.getIsRead()).count();
+    }
+
+    @Override
+    public void sendNotificationToAdmin(String message) throws Exception {
+        List<User> admins = userService.findAdmins();
+        if (admins.isEmpty()) {
+            return;
+        }
+        for (User admin : admins) {
+            Notification notification = createNotification(message, admin.getUsername());
+            messagingTemplate.convertAndSend("/topic/notifications/" + admin.getUsername(), notification);
+        }
     }
 }

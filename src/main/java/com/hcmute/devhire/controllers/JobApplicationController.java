@@ -7,6 +7,7 @@ import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.services.IEmailService;
 import com.hcmute.devhire.services.IJobApplicationService;
+import com.hcmute.devhire.services.INotificationService;
 import com.hcmute.devhire.services.UserService;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import com.hcmute.devhire.utils.JobStatus;
@@ -35,7 +36,7 @@ import java.util.zip.ZipOutputStream;
 @RequestMapping("/api/job-application")
 public class JobApplicationController {
     private final IJobApplicationService jobApplicationService;
-    private final IEmailService emailService;
+    private final INotificationService notificationService;
 
     @GetMapping("/{jobId}")
     public ResponseEntity<?> getJobApplicationByJob(
@@ -129,6 +130,7 @@ public class JobApplicationController {
                 return ResponseEntity.badRequest().body("Job application is not seen");
             }
             jobApplicationService.rejectJobApplication(jobApplicationId);
+            notificationService.sendNotificationToAdmin("Recruiter has rejected a job application");
             return ResponseEntity.ok().body("Rejected job application");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -148,6 +150,7 @@ public class JobApplicationController {
                 return ResponseEntity.badRequest().body("Job application is not seen");
             }
             jobApplicationService.approveJobApplication(jobApplicationId);
+            notificationService.sendNotificationToAdmin("Recruiter has accept a job application");
             return ResponseEntity.ok().body("Approved job application");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
