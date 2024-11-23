@@ -550,4 +550,16 @@ public class JobService implements IJobService{
     public List<MonthlyCountResponse> countJobsByMonth(int year) throws Exception {
         return jobRepository.countJobsByMonth(year);
     }
+
+    @Override
+    public void closeJob(Long jobId) throws Exception {
+        try {
+            Job job = jobRepository.findById(jobId)
+                    .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
+            job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, "CLOSED"));
+            jobRepository.save(job);
+        } catch (Exception e) {
+            throw new Exception("Error closing job: " + e.getMessage());
+        }
+    }
 }
