@@ -19,6 +19,7 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     Optional<Job> findById(Long id);
     List<Job> findByCompanyId(Long companyId);
 
+    Page<Job> findByCompanyIdOrderByIdDesc(Long companyId, Pageable pageable);
     Page<Job> findByCompanyId(Long companyId, Pageable pageable);
 
     @Query("SELECT COUNT(j) FROM Job j WHERE j.company.id = ?1")

@@ -240,7 +240,7 @@ public class JobService implements IJobService{
                 throw new Exception("Company not found");
             }
 
-            Page<Job> jobs = jobRepository.findByCompanyId(company.getId(), pageRequest);
+            Page<Job> jobs = jobRepository.findByCompanyIdOrderByIdDesc(company.getId(), pageRequest);
             return jobs.map(job -> JobDTO.builder()
                     .id(job.getId())
                     .title(job.getTitle())
