@@ -292,6 +292,22 @@ public class UserService implements IUserService{
     }
 
     @Override
+    public UserDTO findUserDTOById(Long id) throws Exception {
+        User user = userRepository.findById(id).orElseThrow(() -> new Exception("User not found"));
+        return UserDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .gender(user.getGender() != null ? user.getGender() : "")
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .avatarUrl(user.getAvatarUrl())
+                .roleId(user.getRole().getId())
+                .status(user.getStatus() != null ? user.getStatus().name() : "UNKNOWN")
+                .roleName(user.getRole().getName())
+                .build();
+    }
+
+    @Override
     public User findById(Long id) throws Exception {
         return userRepository.findById(id).orElseThrow(() -> new Exception("User not found"));
     }

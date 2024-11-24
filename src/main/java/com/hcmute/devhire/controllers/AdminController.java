@@ -194,7 +194,7 @@ public class AdminController {
                 return ResponseEntity.badRequest()
                         .body("Error: You are not an admin");
             }
-            User user = userService.findById(userId);
+            UserDTO user = userService.findUserDTOById(userId);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
