@@ -562,4 +562,22 @@ public class JobService implements IJobService{
             throw new Exception("Error closing job: " + e.getMessage());
         }
     }
+
+    @Override
+    public List<JobDTO> get5LatestJobs() throws Exception {
+        try {
+            List<Job> jobs = jobRepository.findTop5ByOrderByCreatedAtDesc();
+            return jobs.stream()
+                    .map(job -> {
+                        try {
+                            return convertDTO(job, null);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .toList();
+        } catch (Exception e) {
+            throw new Exception("Error fetching latest jobs: " + e.getMessage());
+        }
+    }
 }

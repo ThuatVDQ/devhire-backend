@@ -1,6 +1,7 @@
 package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.JobDTO;
+import com.hcmute.devhire.DTOs.UserDTO;
 import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.*;
@@ -195,6 +196,36 @@ public class AdminController {
             }
             User user = userService.findById(userId);
             return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/latestUsers")
+    public ResponseEntity<?> getLatestUsers() {
+        try {
+            if (!isUserAdmin()) {
+                return ResponseEntity.badRequest()
+                        .body("Error: You are not an admin");
+            }
+            List<UserDTO> users = userService.get5LatestUsers();
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/latestJobs")
+    public ResponseEntity<?> getLatestJobs() {
+        try {
+            if (!isUserAdmin()) {
+                return ResponseEntity.badRequest()
+                        .body("Error: You are not an admin");
+            }
+            List<JobDTO> jobs = jobService.get5LatestJobs();
+            return ResponseEntity.ok(jobs);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body("Error: " + e.getMessage());

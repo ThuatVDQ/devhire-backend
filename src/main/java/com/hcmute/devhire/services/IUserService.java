@@ -30,4 +30,5 @@ public interface IUserService {
     Page<UserResponse> getAllUsers(PageRequest pageRequest, Long roleId, String status) throws Exception;
     List<User> findAdmins() throws Exception;
     void changeStatusUser(String status, Long id) throws Exception;
+    List<UserDTO> get5LatestUsers() throws Exception;
 }
