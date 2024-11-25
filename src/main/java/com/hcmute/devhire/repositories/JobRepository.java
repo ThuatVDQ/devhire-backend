@@ -41,4 +41,6 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
             "GROUP BY MONTH(j.createdAt) " +
             "ORDER BY MONTH(j.createdAt)")
     List<MonthlyCountResponse> countJobsByMonth(@Param("year") int year);
+
+    List<Job> findTop5ByOrderByCreatedAtDesc();
 }

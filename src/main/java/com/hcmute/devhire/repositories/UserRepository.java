@@ -25,4 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     int countUsersMonthly(int month, int year);
 
     List<User> findAllByRoleName(String roleName);
+
+    List<User> findTop5ByOrderByCreatedAtDesc();
 }
