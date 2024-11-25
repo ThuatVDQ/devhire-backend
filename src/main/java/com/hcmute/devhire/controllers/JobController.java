@@ -237,12 +237,14 @@ public class JobController {
         String subject = "New CV Submitted for " + job.getTitle();
 
         String content = String.format(
-                "Hello %s,\n\n" +
-                        "A new CV has been submitted by %s for the position %s.\n\n" +
-                        "Cover Letter:\n%s\n\n" +
-                        "Please review the application in the system.\n\n" +
-                        "Best regards,\n" +
-                        "DevHire Team",
+                """
+                <p>Hello %s,</p>
+                <p>A new CV has been submitted by %s for the position %s.</p>
+                <p><strong>Cover Letter:</strong></p>
+                <p>%s</p>
+                <p>Please review the application in the system.</p>
+                <p>Best regards,<br>DevHire Team</p>
+                """,
                 recruiterName, applicant.getFullName(), job.getTitle(), letter
         );
 
