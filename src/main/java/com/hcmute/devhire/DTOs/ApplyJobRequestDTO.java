@@ -17,4 +17,6 @@ public class ApplyJobRequestDTO {
     private Long userId;
     @JsonProperty("cv_id")
     private Long cvId;
+
+    private String letter;
 }

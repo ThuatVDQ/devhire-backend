@@ -110,7 +110,9 @@ public class JobService implements IJobService{
     public Page<JobDTO> getAllJobs(PageRequest pageRequest, String username) throws Exception {
         List<JobStatus> statuses = List.of(JobStatus.OPEN, JobStatus.HOT);
         Page<Job> jobs= jobRepository.findByStatusIn(statuses, pageRequest);
-
+        if (jobs.isEmpty()) {
+            throw new Exception("No jobs found");
+        }
         return jobs.map(job -> {
             try {
                 return convertDTO(job, username);
@@ -130,6 +132,10 @@ public class JobService implements IJobService{
             spec = spec.and(JobSpecifications.hasStatus(status));
         }
         Page<Job> jobs= jobRepository.findAll(spec, pageRequest);
+
+        if (jobs.isEmpty()) {
+            throw new Exception("No jobs found");
+        }
 
         return jobs.map(job -> {
             try {
@@ -225,6 +231,7 @@ public class JobService implements IJobService{
                 .job(job)
                 .cv(cv)
                 .user(user)
+                .letter(applyJobRequestDTO.getLetter())
                 .status(JobApplicationStatus.IN_PROGRESS)
                 .build();
         job.setApplyNumber(job.getApplyNumber() + 1);
@@ -251,6 +258,9 @@ public class JobService implements IJobService{
             }
 
             Page<Job> jobs = jobRepository.findAll(spec, pageRequest);
+            if (jobs.isEmpty()) {
+                throw new Exception("No jobs found for that company");
+            }
             return jobs.map(job -> {
                 try {
                     return convertDTO(job, username);
@@ -297,6 +307,9 @@ public class JobService implements IJobService{
                                 }
                             }
                     ).toList();
+            if (jobDTOs.isEmpty()) {
+                throw new Exception("No favorite jobs found");
+            }
             return JobListResponse.builder()
                     .jobs(jobDTOs)
                     .build();
@@ -410,6 +423,9 @@ public class JobService implements IJobService{
             throw new Exception("User not found");
         }
         Page<JobApplication> jobApplications = jobApplicationService.findByUserId(user.getId(), pageRequest);
+        if (jobApplications.isEmpty()) {
+            throw new Exception("You have not applied for any jobs");
+        }
         return jobApplications.map(jobApplication -> JobDTO.builder()
                 .id(jobApplication.getJob().getId())
                 .title(jobApplication.getJob().getTitle())

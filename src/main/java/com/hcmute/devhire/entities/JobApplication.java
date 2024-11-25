@@ -18,6 +18,10 @@ public class JobApplication extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Lob
+    @Column(name = "letter", columnDefinition = "TEXT")
+    private String letter;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
     private JobApplicationStatus status;

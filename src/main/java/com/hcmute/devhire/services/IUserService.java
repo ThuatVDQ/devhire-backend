@@ -18,8 +18,8 @@ public interface IUserService {
     User findById(Long id) throws Exception;
     UserDTO findByUsername(String username) throws Exception;
     UserDTO getProfile(String email) throws Exception;
-    User updateAvatar(String username, String avatarUrl) throws EntityNotFoundException;
-    User updateProfile(String username, ProfileDTO profileDTO) throws EntityNotFoundException;
+    User updateAvatar(String username, String avatarUrl) throws Exception;
+    User updateProfile(String username, ProfileDTO profileDTO) throws Exception;
     User findByUserName(String username) throws Exception;
     void verifyUser(VerifyUserDTO input) throws Exception;
     void resendVerificationCode(String email) throws Exception;

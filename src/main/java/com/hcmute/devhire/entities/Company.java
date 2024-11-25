@@ -54,6 +54,10 @@ public class Company extends BaseEntity {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<CompanyImage> companyImages;
+
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Job> jobs;

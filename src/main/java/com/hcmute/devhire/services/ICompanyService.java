@@ -25,4 +25,5 @@ public interface ICompanyService {
     Page<CompanyDTO> searchCompanies(Pageable pageable, String keyword) throws Exception;
     int countCompanies() throws Exception;
     int countCompaniesMonthly(int month, int year) throws Exception;
+    void uploadCompanyImage(MultipartFile[] images, String username) throws IOException;
 }

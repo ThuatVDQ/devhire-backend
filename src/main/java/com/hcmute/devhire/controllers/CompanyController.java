@@ -88,7 +88,7 @@ public class CompanyController {
                 return ResponseEntity.badRequest().body("User not found");
             }
             Company newCompany = companyService.createCompany(companyDTO, username);
-            notificationService.sendNotificationToAdmin("New company has been created");
+            notificationService.sendNotificationToAdmin("New company: " + newCompany.getName() + " has been created");
             return ResponseEntity.ok(newCompany);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -142,6 +142,22 @@ public class CompanyController {
             Company company = companyService.updateCompany(companyDTO, username);
             notificationService.sendNotificationToAdmin(company.getName() + " has been updated");
             return ResponseEntity.ok(company);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping(value = "/uploadCompanyImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadCompanyImage(
+            @RequestParam("images") MultipartFile[] images
+    ) {
+        try {
+            String username = getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.badRequest().body("Unauthorized: No user found.");
+            }
+            companyService.uploadCompanyImage(images, username);
+            return ResponseEntity.ok("Upload image for company successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

@@ -143,6 +143,7 @@ public class UserService implements IUserService{
                 user.setPassword(passwordEncoder.encode(updatePasswordDTO.getNewPassword()));
 
                 userRepository.save(user);
+
             } else {
                 throw new RuntimeException("Invalid password");
             }
@@ -188,6 +189,9 @@ public class UserService implements IUserService{
 
 
         Page<User> users = userRepository.findAll(spec, pageRequest);
+        if (users.isEmpty()) {
+            throw new Exception("No user found");
+        }
         return users.map(user -> UserResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
@@ -370,7 +374,7 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public User updateAvatar(String username, String avatarUrl) throws EntityNotFoundException {
+    public User updateAvatar(String username, String avatarUrl) throws Exception {
         User user = username.contains("@")
                 ? userRepository.findByEmail(username).orElseThrow(() -> new EntityNotFoundException("User not found"))
                 : userRepository.findByPhone(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -385,11 +389,12 @@ public class UserService implements IUserService{
             userRepository.save(user);
         }
 
+
         return user;
     }
 
     @Override
-    public User updateProfile(String username, ProfileDTO profileDTO) throws EntityNotFoundException {
+    public User updateProfile(String username, ProfileDTO profileDTO) throws Exception {
         User user = username.contains("@")
                 ? userRepository.findByEmail(username).orElseThrow(() -> new EntityNotFoundException("User not found"))
                 : userRepository.findByPhone(username).orElseThrow(() -> new EntityNotFoundException("User not found"));

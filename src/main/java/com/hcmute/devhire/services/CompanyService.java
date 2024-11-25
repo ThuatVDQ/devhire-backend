@@ -6,6 +6,7 @@ import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.*;
+import com.hcmute.devhire.repositories.CompanyImageRepository;
 import com.hcmute.devhire.repositories.CompanyRepository;
 import com.hcmute.devhire.repositories.JobRepository;
 import com.hcmute.devhire.repositories.specification.CompanySpecifications;
@@ -32,7 +33,9 @@ public class CompanyService implements ICompanyService {
     private final CompanyRepository companyRepository;
     private final IUserService userService;
     private final JobRepository jobRepository;
+    private final CompanyImageRepository companyImageRepository;
     private final FileUtil fileUtil;
+    private final ICompanyImageService companyImageService;
 
     @Override
     public Company createCompany(CompanyDTO companyDTO, String username) throws Exception {
@@ -64,6 +67,9 @@ public class CompanyService implements ICompanyService {
     public Page<CompanyDTO> getAllCompanies(PageRequest pageRequest) throws Exception {
         try {
             Page<Company> companies = companyRepository.findAll(pageRequest);
+            if (companies.isEmpty()) {
+                throw new Exception("No company found");
+            }
             return companies.map(company -> {
                 try {
                     return convertDTO(company);
@@ -78,6 +84,8 @@ public class CompanyService implements ICompanyService {
 
     public CompanyDTO convertDTO(Company company) throws Exception {
 
+        List<String> images = companyImageService.getImageUrlsByCompanyId(company.getId());
+
         return CompanyDTO.builder()
                 .id(company.getId())
                 .name(company.getName())
@@ -91,6 +99,7 @@ public class CompanyService implements ICompanyService {
                 .scale(company.getScale())
                 .status(company.getStatus())
                 .totalJob(company.getJobs().size())
+                .images(images == null ? List.of() : images)
                 .build();
     }
     @Override
@@ -186,6 +195,9 @@ public class CompanyService implements ICompanyService {
         }
         try {
             Page<Company> companies = companyRepository.findAll(spec, pageable);
+            if (companies.isEmpty()) {
+                throw new Exception("No company found");
+            }
             return companies.map(company -> {
                 try {
                     return convertDTO(company);
@@ -206,5 +218,22 @@ public class CompanyService implements ICompanyService {
     @Override
     public int countCompaniesMonthly(int month, int year) throws Exception {
         return companyRepository.countCompaniesMonthly(month, year);
+    }
+
+    @Override
+    public void uploadCompanyImage(MultipartFile[] images, String username) throws IOException {
+        Company company = companyRepository.findByUser(username);
+        for (MultipartFile image : images) {
+            if (fileUtil.isImageFormatValid(image)) {
+                String filename = fileUtil.storeFile(image);
+                CompanyImage companyImage = CompanyImage.builder()
+                        .imageUrl(filename)
+                        .company(company)
+                        .build();
+                companyImageRepository.save(companyImage);
+            } else {
+                throw new IOException("Invalid image format");
+            }
+        }
     }
 }
