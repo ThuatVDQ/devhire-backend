@@ -64,6 +64,9 @@ public class CompanyService implements ICompanyService {
     public Page<CompanyDTO> getAllCompanies(PageRequest pageRequest) throws Exception {
         try {
             Page<Company> companies = companyRepository.findAll(pageRequest);
+            if (companies.isEmpty()) {
+                throw new Exception("No company found");
+            }
             return companies.map(company -> {
                 try {
                     return convertDTO(company);
@@ -186,6 +189,9 @@ public class CompanyService implements ICompanyService {
         }
         try {
             Page<Company> companies = companyRepository.findAll(spec, pageable);
+            if (companies.isEmpty()) {
+                throw new Exception("No company found");
+            }
             return companies.map(company -> {
                 try {
                     return convertDTO(company);

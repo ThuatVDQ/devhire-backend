@@ -188,6 +188,9 @@ public class UserService implements IUserService{
 
 
         Page<User> users = userRepository.findAll(spec, pageRequest);
+        if (users.isEmpty()) {
+            throw new Exception("No user found");
+        }
         return users.map(user -> UserResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
