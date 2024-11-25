@@ -39,6 +39,7 @@ public class UserService implements IUserService{
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final IEmailService emailService;
+    private final INotificationService notificationService;
     private final JwtUtil jwtUtil;
     @Override
     @Transactional
@@ -143,6 +144,8 @@ public class UserService implements IUserService{
                 user.setPassword(passwordEncoder.encode(updatePasswordDTO.getNewPassword()));
 
                 userRepository.save(user);
+                notificationService.createAndSendNotification("Password updated", email);
+                notificationService.sendNotificationToAdmin("User: "+user.getFullName() + " updated new password");
             } else {
                 throw new RuntimeException("Invalid password");
             }
@@ -373,7 +376,7 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public User updateAvatar(String username, String avatarUrl) throws EntityNotFoundException {
+    public User updateAvatar(String username, String avatarUrl) throws Exception {
         User user = username.contains("@")
                 ? userRepository.findByEmail(username).orElseThrow(() -> new EntityNotFoundException("User not found"))
                 : userRepository.findByPhone(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -388,11 +391,13 @@ public class UserService implements IUserService{
             userRepository.save(user);
         }
 
+        notificationService.sendNotificationToAdmin("User: "+ user.getFullName() + " just updated avatar");
+
         return user;
     }
 
     @Override
-    public User updateProfile(String username, ProfileDTO profileDTO) throws EntityNotFoundException {
+    public User updateProfile(String username, ProfileDTO profileDTO) throws Exception {
         User user = username.contains("@")
                 ? userRepository.findByEmail(username).orElseThrow(() -> new EntityNotFoundException("User not found"))
                 : userRepository.findByPhone(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -407,6 +412,7 @@ public class UserService implements IUserService{
             user.setIntroduction(profileDTO.getIntroduction());
         }
 
+        notificationService.sendNotificationToAdmin("User: "+ user.getFullName() + " just updated profile");
         return userRepository.save(user);
     }
 

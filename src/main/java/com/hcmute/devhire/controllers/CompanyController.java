@@ -88,7 +88,7 @@ public class CompanyController {
                 return ResponseEntity.badRequest().body("User not found");
             }
             Company newCompany = companyService.createCompany(companyDTO, username);
-            notificationService.sendNotificationToAdmin("New company has been created");
+            notificationService.sendNotificationToAdmin("New company: " + newCompany.getName() + " has been created");
             return ResponseEntity.ok(newCompany);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

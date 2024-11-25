@@ -181,8 +181,7 @@ public class UserController {
                 return ResponseEntity.badRequest().body("Password not match");
             }
             userService.updatePassword(updatePasswordDTO, email);
-            notificationService.createAndSendNotification("Password updated", email);
-            notificationService.sendNotificationToAdmin("User updated new password");
+
             return ResponseEntity.ok("Update password successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -218,7 +217,6 @@ public class UserController {
 
         try {
             User user = userService.updateAvatar(username, filename);
-            notificationService.sendNotificationToAdmin("User just updated avatar");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to update avatar: " + e.getMessage());
         }
@@ -235,7 +233,6 @@ public class UserController {
 
         try {
             User user = userService.updateAvatar(username, null);
-            notificationService.sendNotificationToAdmin("User just deleted avatar");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to delete avatar: " + e.getMessage());
         }
@@ -255,7 +252,6 @@ public class UserController {
                 return ResponseEntity.status(401).body("Unauthorized: No user found.");
             }
             User user = userService.updateProfile(username, profileDTO);
-            notificationService.sendNotificationToAdmin("User just updated profile");
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
