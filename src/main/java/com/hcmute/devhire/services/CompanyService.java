@@ -176,6 +176,11 @@ public class CompanyService implements ICompanyService {
     }
 
     @Override
+    public Company getCompanyByID(Long companyId) throws Exception {
+        return companyRepository.findById(companyId).orElseThrow(() -> new Exception("Company not found"));
+    }
+
+    @Override
     public void uploadLogo(MultipartFile file, String username) throws IOException {
         if (fileUtil.isImageFormatValid(file)) {
             String filename = fileUtil.storeFile(file);
@@ -221,8 +226,15 @@ public class CompanyService implements ICompanyService {
     }
 
     @Override
-    public void uploadCompanyImage(MultipartFile[] images, String username) throws IOException {
+    public void updateCompanyImages(List<String> oldImages, MultipartFile[] images, String username) throws IOException {
         Company company = companyRepository.findByUser(username);
+        if (oldImages != null) {
+            List<CompanyImage> imagesToRemove = company.getCompanyImages().stream()
+                    .filter(companyImage -> !oldImages.contains(companyImage.getImageUrl()))
+                    .toList();
+
+            companyImageRepository.deleteAll(imagesToRemove);
+        }
         for (MultipartFile image : images) {
             if (fileUtil.isImageFormatValid(image)) {
                 String filename = fileUtil.storeFile(image);

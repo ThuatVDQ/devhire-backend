@@ -58,6 +58,10 @@ public class Company extends BaseEntity {
     @JsonManagedReference
     private List<CompanyImage> companyImages;
 
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<CompanyReview> companyReviews;
+
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Job> jobs;

@@ -217,7 +217,7 @@ public class JobController {
                         .letter(letter == null ? "" : letter)
                         .build();
                 jobService.applyForJob(jobId, applyJobRequestDTO);
-                sendNewApplicationNotification(jobId, userDTO);
+                sendNewApplicationNotification(jobId, letter, userDTO);
                 Job job = jobService.findById(jobId);
                 notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has applied for job " + job.getTitle());
                 return ResponseEntity.ok().body("Applied successfully");
@@ -227,7 +227,7 @@ public class JobController {
         }
     }
 
-    public void sendNewApplicationNotification(Long jobId, UserDTO applicant) throws Exception {
+    public void sendNewApplicationNotification(Long jobId, String letter, UserDTO applicant) throws Exception {
         Job job = jobService.findById(jobId);
         String recruiterEmail = job.getCompany().getCreatedBy().getEmail();
         String recruiterName = job.getCompany().getName();
@@ -235,14 +235,22 @@ public class JobController {
         notificationService.createAndSendNotification("New CV submitted for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
 
         String subject = "New CV Submitted for " + job.getTitle();
+
         String content = String.format(
-                "Hello %s,\n\nA new CV has been submitted by %s for the position %s.\n" +
-                        "Please review the application in the system.\n\nBest regards,\nDevHire Team",
-                recruiterName, applicant.getFullName(), job.getTitle()
+                """
+                <p>Hello %s,</p>
+                <p>A new CV has been submitted by %s for the position %s.</p>
+                <p><strong>Cover Letter:</strong></p>
+                <p>%s</p>
+                <p>Please review the application in the system.</p>
+                <p>Best regards,<br>DevHire Team</p>
+                """,
+                recruiterName, applicant.getFullName(), job.getTitle(), letter
         );
 
         emailService.sendEmail(recruiterEmail, subject, content);
     }
+
 
     @GetMapping("/company")
     public ResponseEntity<?> getJobsByRecruiterCompany(
