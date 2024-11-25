@@ -217,6 +217,25 @@ public class UserService implements IUserService{
         }
     }
 
+    @Override
+    public List<UserDTO> get5LatestUsers() throws Exception {
+        try {
+            List<User> users = userRepository.findTop5ByOrderByCreatedAtDesc();
+                return users.stream().map(user -> UserDTO.builder()
+                        .id(user.getId())
+                        .fullName(user.getFullName())
+                        .phone(user.getPhone())
+                        .email(user.getEmail())
+                        .avatarUrl(user.getAvatarUrl())
+                        .roleId(user.getRole().getId())
+                        .status(user.getStatus() != null ? user.getStatus().name() : "UNKNOWN")
+                        .roleName(user.getRole().getName())
+                        .build()).toList();
+        } catch (Exception e) {
+            throw new Exception("Failed to get latest users");
+        }
+    }
+
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
@@ -270,6 +289,22 @@ public class UserService implements IUserService{
             throw new Exception("User not found");
         }
 
+    }
+
+    @Override
+    public UserDTO findUserDTOById(Long id) throws Exception {
+        User user = userRepository.findById(id).orElseThrow(() -> new Exception("User not found"));
+        return UserDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .gender(user.getGender() != null ? user.getGender() : "")
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .avatarUrl(user.getAvatarUrl())
+                .roleId(user.getRole().getId())
+                .status(user.getStatus() != null ? user.getStatus().name() : "UNKNOWN")
+                .roleName(user.getRole().getName())
+                .build();
     }
 
     @Override

@@ -37,4 +37,5 @@ public interface IJobService {
     int countJobsMonthly(int month, int year) throws Exception;
     List<MonthlyCountResponse> countJobsByMonth(int year) throws Exception;
     void closeJob(Long jobId) throws Exception;
+    List<JobDTO> get5LatestJobs() throws Exception;
 }

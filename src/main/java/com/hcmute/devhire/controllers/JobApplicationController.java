@@ -130,7 +130,7 @@ public class JobApplicationController {
                 return ResponseEntity.badRequest().body("Job application is not seen");
             }
             jobApplicationService.rejectJobApplication(jobApplicationId);
-            notificationService.sendNotificationToAdmin("Recruiter has rejected a job application");
+            notificationService.sendNotificationToAdmin("Company has rejected a job application");
             return ResponseEntity.ok().body("Rejected job application");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -150,7 +150,7 @@ public class JobApplicationController {
                 return ResponseEntity.badRequest().body("Job application is not seen");
             }
             jobApplicationService.approveJobApplication(jobApplicationId);
-            notificationService.sendNotificationToAdmin("Recruiter has accept a job application");
+            notificationService.sendNotificationToAdmin("Company has accept a job application");
             return ResponseEntity.ok().body("Approved job application");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

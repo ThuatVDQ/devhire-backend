@@ -163,7 +163,7 @@ public class JobController {
 
         try {
             Job newJob = jobService.createJob(jobDTO, username);
-            notificationService.sendNotificationToAdmin("Recruiter has created a new job");
+            notificationService.sendNotificationToAdmin("Company has created a new job");
             return ResponseEntity.ok(newJob);
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
@@ -273,7 +273,9 @@ public class JobController {
                     .totalPages(jobs.getTotalPages())
                     .totalElements(jobs.getTotalElements())
                     .build();
-
+            if (jobs.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No jobs found for the user");
+            }
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
@@ -355,16 +357,23 @@ public class JobController {
             @RequestBody List<Long> job_ids
     ) {
         try {
+            int count =0;
             for (Long jobId : job_ids) {
                 Job job = jobService.findById(jobId);
                 if (job == null) {
                     return ResponseEntity.badRequest().body("Job not found");
                 }
-                if (job.getStatus() == JobStatus.OPEN || job.getStatus() == JobStatus.HOT) {
-                    jobService.closeJob(jobId);
+                if (job.getStatus() != JobStatus.OPEN && job.getStatus() != JobStatus.HOT) {
+                    count++;
+                    continue;
                 }
+                jobService.closeJob(jobId);
             }
-            return ResponseEntity.ok().body("Closed jobs successfully");
+            if (count == 0) {
+                return ResponseEntity.ok().body("Closed jobs successfully");
+            } else {
+                return ResponseEntity.ok().body("There are " + count + " jobs that are not open");
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -375,16 +384,23 @@ public class JobController {
             @RequestBody List<Long> job_ids
     ) {
         try {
+            int count = 0;
             for (Long jobId : job_ids) {
                 Job job = jobService.findById(jobId);
                 if (job == null) {
                     return ResponseEntity.badRequest().body("Job not found");
                 }
-                if (job.getStatus() == JobStatus.PENDING) {
-                    jobService.approveJob(jobId);
+                if (job.getStatus() != JobStatus.PENDING) {
+                    count++;
+                    continue;
                 }
+                jobService.approveJob(jobId);
             }
-            return ResponseEntity.ok().body("Approved jobs successfully");
+            if (count == 0) {
+                return ResponseEntity.ok().body("Approved jobs successfully");
+            } else {
+                return ResponseEntity.ok().body("There are " + count + " jobs that are not pending");
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -395,16 +411,23 @@ public class JobController {
             @RequestBody List<Long> job_ids
     ) {
         try {
+            int count = 0;
             for (Long jobId : job_ids) {
                 Job job = jobService.findById(jobId);
                 if (job == null) {
                     return ResponseEntity.badRequest().body("Job not found");
                 }
-                if (job.getStatus() == JobStatus.PENDING) {
-                    jobService.rejectJob(jobId);
+                if (job.getStatus() != JobStatus.PENDING) {
+                    count++;
+                    continue;
                 }
+                jobService.rejectJob(jobId);
             }
-            return ResponseEntity.ok().body("Rejected jobs successfully");
+            if (count == 0) {
+                return ResponseEntity.ok().body("Rejected jobs successfully");
+            } else {
+                return ResponseEntity.ok().body("There are " + count + " jobs that are not pending");
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -591,7 +614,7 @@ public class JobController {
                 return ResponseEntity.badRequest().body("Cannot edit job that is open or hot");
             }
             jobService.editJob(jobId, jobDTO);
-            notificationService.sendNotificationToAdmin("Recruiter has edited a job: " + job.getTitle());
+            notificationService.sendNotificationToAdmin("Company has edited a job: " + job.getTitle());
             return ResponseEntity.ok().body("Job updated successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

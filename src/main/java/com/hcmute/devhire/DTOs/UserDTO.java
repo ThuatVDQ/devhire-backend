@@ -38,4 +38,7 @@ public class UserDTO {
     @JsonProperty("role_id")
     @NotNull(message = "Role ID is required")
     private Long roleId;
+
+    @JsonProperty("role_name")
+    private String roleName;
 }
