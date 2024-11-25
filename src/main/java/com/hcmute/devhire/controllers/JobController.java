@@ -173,7 +173,8 @@ public class JobController {
     @PostMapping(value = "/{jobId}/apply", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> applyJob(
             @PathVariable("jobId") Long jobId,
-            @RequestParam("file") MultipartFile file
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("letter") String letter
     ) {
         try {
             if (file == null || file.isEmpty()) {
@@ -202,6 +203,7 @@ public class JobController {
             if (existingApplication.isPresent()) {
                 JobApplication jobApplication = existingApplication.get();
                 jobApplication.setCv(cv);
+                jobApplication.setLetter(letter == null ? "" : letter);
                 jobApplicationService.updateJobApplication(jobApplication);
                 Job job = jobService.findById(jobId);
                 notificationService.createAndSendNotification("New CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
@@ -212,6 +214,7 @@ public class JobController {
                         .userId(userDTO.getId())
                         .cvId(cv.getId())
                         .jobId(jobId)
+                        .letter(letter == null ? "" : letter)
                         .build();
                 jobService.applyForJob(jobId, applyJobRequestDTO);
                 sendNewApplicationNotification(jobId, userDTO);

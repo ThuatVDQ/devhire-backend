@@ -231,6 +231,7 @@ public class JobService implements IJobService{
                 .job(job)
                 .cv(cv)
                 .user(user)
+                .letter(applyJobRequestDTO.getLetter())
                 .status(JobApplicationStatus.IN_PROGRESS)
                 .build();
         job.setApplyNumber(job.getApplyNumber() + 1);
