@@ -235,16 +235,18 @@ public class CompanyService implements ICompanyService {
 
             companyImageRepository.deleteAll(imagesToRemove);
         }
-        for (MultipartFile image : images) {
-            if (fileUtil.isImageFormatValid(image)) {
-                String filename = fileUtil.storeFile(image);
-                CompanyImage companyImage = CompanyImage.builder()
-                        .imageUrl(filename)
-                        .company(company)
-                        .build();
-                companyImageRepository.save(companyImage);
-            } else {
-                throw new IOException("Invalid image format");
+        if (images!=null) {
+            for (MultipartFile image : images) {
+                if (fileUtil.isImageFormatValid(image)) {
+                    String filename = fileUtil.storeFile(image);
+                    CompanyImage companyImage = CompanyImage.builder()
+                            .imageUrl(filename)
+                            .company(company)
+                            .build();
+                    companyImageRepository.save(companyImage);
+                } else {
+                    throw new IOException("Invalid image format");
+                }
             }
         }
     }
