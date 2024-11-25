@@ -1,5 +1,7 @@
 package com.hcmute.devhire.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmute.devhire.DTOs.CompanyDTO;
 import com.hcmute.devhire.entities.Address;
 import com.hcmute.devhire.entities.Company;
@@ -147,21 +149,27 @@ public class CompanyController {
         }
     }
 
-    @PutMapping(value = "/uploadCompanyImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadCompanyImage(
-            @RequestParam("images") MultipartFile[] images
+    @PutMapping(value = "/updateImages", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateCompanyImages(
+            @RequestParam("oldImages") String oldImagesJson,
+            @RequestParam(value = "newImages", required = false) MultipartFile[] newImages
     ) {
         try {
             String username = getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.badRequest().body("Unauthorized: No user found.");
             }
-            companyService.uploadCompanyImage(images, username);
-            return ResponseEntity.ok("Upload image for company successfully");
+
+            List<String> oldImages = new ObjectMapper().readValue(oldImagesJson, new TypeReference<>() {});
+
+            companyService.updateCompanyImages(oldImages, newImages, username);
+
+            return ResponseEntity.ok("Company images updated successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @PutMapping(value = "/upload-logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadLogo(

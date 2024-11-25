@@ -226,8 +226,15 @@ public class CompanyService implements ICompanyService {
     }
 
     @Override
-    public void uploadCompanyImage(MultipartFile[] images, String username) throws IOException {
+    public void updateCompanyImages(List<String> oldImages, MultipartFile[] images, String username) throws IOException {
         Company company = companyRepository.findByUser(username);
+        if (oldImages != null) {
+            List<CompanyImage> imagesToRemove = company.getCompanyImages().stream()
+                    .filter(companyImage -> !oldImages.contains(companyImage.getImageUrl()))
+                    .toList();
+
+            companyImageRepository.deleteAll(imagesToRemove);
+        }
         for (MultipartFile image : images) {
             if (fileUtil.isImageFormatValid(image)) {
                 String filename = fileUtil.storeFile(image);
