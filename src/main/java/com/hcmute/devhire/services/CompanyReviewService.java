@@ -17,6 +17,7 @@ public class CompanyReviewService implements ICompanyReviewService {
     private final CompanyReviewRepository companyReviewRepository;
     private final ICompanyService companyService;
     private final IUserService userService;
+    private final INotificationService notificationService;
     @Override
     public CompanyReview addReview(Long companyId, String username, CompanyReviewDTO companyReviewDTO) throws Exception {
         Company company = companyService.getCompanyByID(companyId);
@@ -29,6 +30,8 @@ public class CompanyReviewService implements ICompanyReviewService {
                 .rating(companyReviewDTO.getRating())
                 .comment(companyReviewDTO.getComment())
                 .build();
+        notificationService.createAndSendNotification("User " + user.getFullName() + " just reviewed your company", company.getCreatedBy().getUsername());
+        notificationService.sendNotificationToAdmin("User " + user.getFullName() + " just reviewed company " + company.getName());
         return companyReviewRepository.save(companyReview);
     }
 
