@@ -38,6 +38,11 @@ public class CompanyDTO {
 
     @JsonProperty("web_url")
     private String webUrl;
+
+
+    @JsonProperty("images")
+    private List<String> images;
+
     private String status;
     private UserDTO createBy;
     private List<JobDTO> jobs;

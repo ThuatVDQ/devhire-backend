@@ -147,6 +147,22 @@ public class CompanyController {
         }
     }
 
+    @PutMapping(value = "/uploadCompanyImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadCompanyImage(
+            @RequestParam("images") MultipartFile[] images
+    ) {
+        try {
+            String username = getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.badRequest().body("Unauthorized: No user found.");
+            }
+            companyService.uploadCompanyImage(images, username);
+            return ResponseEntity.ok("Upload image for company successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PutMapping(value = "/upload-logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadLogo(
             @RequestParam("file") MultipartFile file
