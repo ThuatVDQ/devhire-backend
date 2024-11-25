@@ -176,6 +176,11 @@ public class CompanyService implements ICompanyService {
     }
 
     @Override
+    public Company getCompanyByID(Long companyId) throws Exception {
+        return companyRepository.findById(companyId).orElseThrow(() -> new Exception("Company not found"));
+    }
+
+    @Override
     public void uploadLogo(MultipartFile file, String username) throws IOException {
         if (fileUtil.isImageFormatValid(file)) {
             String filename = fileUtil.storeFile(file);

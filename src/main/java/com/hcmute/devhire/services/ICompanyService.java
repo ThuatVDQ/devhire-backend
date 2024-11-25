@@ -21,6 +21,7 @@ public interface ICompanyService {
     Set<Skill> getAllSkillsForCompany(Long companyId);
     Set<Address> getAllAddressesForCompany(Long companyId);
     CompanyDTO getCompanyById(Long companyId) throws Exception;
+    Company getCompanyByID(Long companyId) throws Exception;
     void uploadLogo(MultipartFile file, String username) throws IOException;
     Page<CompanyDTO> searchCompanies(Pageable pageable, String keyword) throws Exception;
     int countCompanies() throws Exception;
