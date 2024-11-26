@@ -110,6 +110,7 @@ public class JobController {
                         .address(job.getCompany().getAddress() == null ? "" : job.getCompany().getAddress())
                         .webUrl(job.getCompany().getWebUrl() == null ? "" : job.getCompany().getWebUrl())
                         .id(job.getCompany().getId())
+                        .images(job.getCompany().getCompanyImages().stream().map(CompanyImage::getImageUrl).toList())
                         .build();
             }
             JobDTO jobDTO = JobDTO.builder()
