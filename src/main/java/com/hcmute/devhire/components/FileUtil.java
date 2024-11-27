@@ -57,4 +57,8 @@ public class FileUtil {
 
         return uniqueFilename;
     }
+    public void deleteFile(String filename) throws IOException {
+        Path path = Paths.get("uploads", filename);
+        Files.deleteIfExists(path);
+    }
 }

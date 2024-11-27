@@ -229,23 +229,26 @@ public class CompanyService implements ICompanyService {
     public void updateCompanyImages(List<String> oldImages, MultipartFile[] images, String username) throws IOException {
         Company company = companyRepository.findByUser(username);
         if (oldImages != null) {
-            List<CompanyImage> imagesToRemove = company.getCompanyImages().stream()
-                    .filter(companyImage -> !oldImages.contains(companyImage.getImageUrl()))
-                    .toList();
-
-            companyImageRepository.deleteAll(imagesToRemove);
+            List<CompanyImage> imagesToRemove = companyImageRepository.findAllByCompanyAndImageUrlNotIn(company, oldImages);
+            for (CompanyImage image : imagesToRemove) {
+                fileUtil.deleteFile(image.getImageUrl());
+                companyImageRepository.delete(image);
+            }
         }
-        if (images!=null) {
+
+        if (images != null) {
             for (MultipartFile image : images) {
                 if (fileUtil.isImageFormatValid(image)) {
                     String filename = fileUtil.storeFile(image);
+
                     CompanyImage companyImage = CompanyImage.builder()
                             .imageUrl(filename)
                             .company(company)
                             .build();
+
                     companyImageRepository.save(companyImage);
                 } else {
-                    throw new IOException("Invalid image format");
+                    throw new IOException("Invalid image format for file: " + image.getOriginalFilename());
                 }
             }
         }
