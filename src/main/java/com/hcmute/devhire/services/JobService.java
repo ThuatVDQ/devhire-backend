@@ -214,7 +214,10 @@ public class JobService implements IJobService{
 
     @Override
     public Job findById(Long jobId) throws Exception {
-        return jobRepository.findById(jobId).orElseThrow(() -> new Exception("Job not found"));
+        Job job = jobRepository.findById(jobId).orElseThrow(()-> new Exception("Job not found"));
+        job.setViews(job.getViews() + 1);
+        jobRepository.save(job);
+        return job;
     }
 
     @Override

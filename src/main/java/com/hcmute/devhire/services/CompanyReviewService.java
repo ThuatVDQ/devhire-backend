@@ -40,6 +40,7 @@ public class CompanyReviewService implements ICompanyReviewService {
                 .rating(companyReview.getRating())
                 .comment(companyReview.getComment())
                 .fullName(companyReview.getUser().getFullName())
+                .createdAt(companyReview.getCreatedAt())
                 .build();
     }
 
