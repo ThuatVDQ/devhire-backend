@@ -1,6 +1,11 @@
 package com.hcmute.devhire.services;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
@@ -12,34 +17,46 @@ import com.hcmute.devhire.utils.Status;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import com.hcmute.devhire.components.JwtUtil;
+import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Random;
-
-
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class UserService implements IUserService{
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
+
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+    private String googleClientSecret;
+
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
+    private String googleRedirectUri;
+
+    @Value("${spring.security.oauth2.client.registration.google.user-info-uri}")
+    private String googleUserInfoUri;
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final IEmailService emailService;
     private final JwtUtil jwtUtil;
+
     @Override
     @Transactional
     public User createUser(UserDTO userDTO) throws Exception {
@@ -240,6 +257,86 @@ public class UserService implements IUserService{
         }
     }
 
+    @Override
+    public String generateAuthUrl() throws Exception {
+        try {
+            GoogleAuthorizationCodeRequestUrl urlBuilder = new GoogleAuthorizationCodeRequestUrl(
+                    googleClientId,
+                    googleRedirectUri,
+                    Arrays.asList("email", "profile", "openid"));
+            return urlBuilder.build();
+        } catch (Exception e) {
+            throw new Exception("Failed to generate auth url");
+        }
+    }
+
+    @Override
+    public UserDTO authenticateAndFetchProfile(String code) throws IOException {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+
+        String accessToken = new GoogleAuthorizationCodeTokenRequest(
+                new NetHttpTransport(), new GsonFactory(),
+                googleClientId,
+                googleClientSecret,
+                code,
+                googleRedirectUri
+        ).execute().getAccessToken();
+
+        restTemplate.getInterceptors().add((req, body, executionContext) -> {
+            req.getHeaders().set("Authorization", "Bearer " + accessToken);
+            return executionContext.execute(req, body);
+        });
+
+        String responseBody = restTemplate.getForEntity(googleUserInfoUri, String.class).getBody();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> userInfo = objectMapper.readValue(responseBody, Map.class);
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setGoogleAccountId((String) userInfo.get("sub"));
+        userDTO.setFullName((String) userInfo.get("name"));
+        userDTO.setEmail((String) userInfo.get("email"));
+        userDTO.setAvatarUrl((String) userInfo.get("picture"));
+
+        return userDTO;
+    }
+
+    @Override
+    public String loginGoogle(UserDTO userDTO) throws Exception {
+        Optional<User> optionalUser = userRepository.findByGoogleAccountId(userDTO.getGoogleAccountId());
+        Role role = roleRepository.findById(
+                userDTO.getRoleId()).orElseThrow(() -> new Exception("Role not found"));
+        Optional<User> existingUser =userRepository.findByEmail(userDTO.getEmail());
+        if (userDTO.isGoogleAccountIdValid()) {
+            if (optionalUser.isEmpty()) {
+                User newUser = User.builder()
+                        .fullName(Optional.ofNullable(userDTO.getFullName()).orElse(""))
+                        .email(Optional.ofNullable(userDTO.getEmail()).orElse(""))
+                        .avatarUrl(Optional.ofNullable(userDTO.getAvatarUrl()).orElse(""))
+                        .role(role)
+                        .googleAccountId(userDTO.getGoogleAccountId())
+                        .password("") // Mật khẩu trống cho đăng nhập mạng xã hội
+                        .enabled(true)
+                        .status(Status.ACTIVE)
+                        .build();
+
+                newUser = userRepository.save(newUser);
+                optionalUser = Optional.of(newUser);
+            } else if (existingUser.isPresent()) {
+                User user = existingUser.get();
+                user.setGoogleAccountId(userDTO.getGoogleAccountId());
+                userRepository.save(user);
+                return this.login(user.getEmail(), "", user.getRole().getId());
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid social account information.");
+        }
+        User user = optionalUser.get();
+
+        return this.login(user.getEmail(), "", user.getRole().getId());
+    }
+
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
@@ -272,16 +369,20 @@ public class UserService implements IUserService{
         Optional<User> user = userRepository.findByEmail(username);
         if (user.isPresent()) {
             User existingUser = user.get();
-
-            if (!passwordEncoder.matches(password, existingUser.getPassword())) {
-                throw new Exception("Invalid phone number or password");
-            }
             if (!Objects.equals(existingUser.getRole().getId(), roleId)) {
                 throw new Exception("Invalid role");
             }
 
+            if (existingUser.getGoogleAccountId() != null) {
+                /*UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+                authenticationManager.authenticate(authenticationToken);*/
+                return jwtUtil.generateToken(existingUser);
+            }
+
+            if (!passwordEncoder.matches(password, existingUser.getPassword())) {
+                throw new Exception("Invalid phone number or password");
+            }
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-            //authenticate with java spring security
             authenticationManager.authenticate(authenticationToken);
 
             if (!existingUser.isEnabled()) {

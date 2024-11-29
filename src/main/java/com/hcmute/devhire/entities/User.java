@@ -60,6 +60,9 @@ public class User extends BaseEntity implements UserDetails {
 
     private boolean enabled = false;
 
+    @Column(name = "google_account_id")
+    private String googleAccountId;
+
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;

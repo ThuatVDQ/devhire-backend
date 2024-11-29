@@ -1,6 +1,7 @@
 package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.CompanyReviewDTO;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.CompanyReview;
 import com.hcmute.devhire.responses.CompanyReviewListResponse;
 import com.hcmute.devhire.services.ICompanyReviewService;
@@ -32,7 +33,7 @@ public class ReviewController {
             return ResponseEntity.badRequest().body("Invalid input");
         }
 
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         try {
             CompanyReview savedReview = companyReviewService.addReview(companyId, username, companyReviewDTO);
             return ResponseEntity.ok(savedReview);
@@ -40,16 +41,6 @@ public class ReviewController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    private String getAuthenticatedUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            return userDetails.getUsername();
-        }
-        return null;
-    }
-
 
     @GetMapping("/{companyId}")
     public ResponseEntity<?> getReviews(

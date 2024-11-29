@@ -1,5 +1,6 @@
 package com.hcmute.devhire.controllers;
 
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.JobListResponse;
@@ -24,7 +25,7 @@ public class FavoriteJobController {
     @GetMapping("/favorite")
     public ResponseEntity<?> getFavoriteJobs() {
         try {
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.badRequest().body("Unauthorized: No user found.");
             }
@@ -42,7 +43,7 @@ public class FavoriteJobController {
     @DeleteMapping("/remove")
     public ResponseEntity<String> removeFavorite(@RequestParam Long jobId) throws Exception {
         try {
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.status(401).body("Unauthorized: No user found.");
             }
@@ -62,12 +63,4 @@ public class FavoriteJobController {
         }
     }
 
-    private String getAuthenticatedUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            return userDetails.getUsername();
-        }
-        return null;
-    }
 }

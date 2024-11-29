@@ -2,10 +2,12 @@ package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.components.FileUtil;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.LoginResponse;
 import com.hcmute.devhire.services.INotificationService;
 import com.hcmute.devhire.services.IUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,9 +19,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.security.oauth2.jwt.Jwt;
 import java.io.IOException;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -29,12 +34,13 @@ public class UserController {
     private final IUserService userService;
     private final FileUtil fileUtil;
     private final INotificationService notificationService;
+    private final JwtUtil jwtUtil;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
         try {
 
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
 
             UserDTO userDTO = userService.getProfile(username);
             if (userDTO == null) {
@@ -174,7 +180,7 @@ public class UserController {
                 List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
                 return ResponseEntity.badRequest().body(errorMessage);
             }
-            String email = getAuthenticatedUsername();
+            String email = JwtUtil.getAuthenticatedUsername();
             if (email == null) {
                 return ResponseEntity.badRequest().body("Unauthorized: No user found.");
             }
@@ -201,7 +207,7 @@ public class UserController {
     public ResponseEntity<?> uploadAvatar(
             @RequestParam("file") MultipartFile file
     ) throws IOException {
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
 
         if (username == null) {
             return ResponseEntity.status(401).body("Unauthorized: No user found.");
@@ -228,7 +234,7 @@ public class UserController {
     }
     @PutMapping("/deleteAvatar")
     public ResponseEntity<?> deleteAvatar() {
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
 
         if (username == null) {
             return ResponseEntity.status(401).body("Unauthorized: No user found.");
@@ -251,7 +257,7 @@ public class UserController {
                 List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
                 return ResponseEntity.badRequest().body(errorMessage);
             }
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.status(401).body("Unauthorized: No user found.");
             }
@@ -263,12 +269,60 @@ public class UserController {
         }
     }
 
-    private String getAuthenticatedUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    @GetMapping("/auth/google")
+    public ResponseEntity<?> loginGoogle() {
+        try {
+            String authUrl = userService.generateAuthUrl();
+            if (authUrl == null) {
+                return ResponseEntity.badRequest().body("Invalid login type");
+            }
 
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            return userDetails.getUsername();
+            return ResponseEntity.ok(authUrl);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to generate auth url");
         }
-        return null;
     }
+
+    @GetMapping("/auth/google/callback")
+    public ResponseEntity<?> callback(
+            @RequestParam("code") String code,
+            @RequestParam("role_id") Long roleId,
+            HttpServletRequest request)
+    {
+        try {
+            UserDTO userInfo = userService.authenticateAndFetchProfile(code);
+            if (userInfo == null) {
+                return ResponseEntity.badRequest().body("Failed to authenticate");
+            }
+            userInfo.setRoleId(roleId);
+
+            return this.loginGoogle(userInfo, request);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(LoginResponse
+                    .builder()
+                    .message("Login failed: " + e.getMessage())
+                    .token(null)
+                    .roleId(null)
+                    .build()
+            );
+        }
+    }
+
+    private ResponseEntity<?> loginGoogle(
+            @RequestBody UserDTO userDTO,
+            HttpServletRequest request
+    ) throws Exception {
+        String token = userService.loginGoogle(userDTO);
+
+        String username = jwtUtil.extractUsername(token);
+        User userDetail = userService.findByUserName(username);
+        LoginResponse loginResponse = LoginResponse.builder()
+                .message("Login successfully")
+                .token(token)
+                .roleId(userDetail.getRole().getId())
+                .build();
+
+        return ResponseEntity.ok().body(loginResponse);
+    }
+
 }

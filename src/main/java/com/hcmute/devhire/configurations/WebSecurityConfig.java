@@ -6,16 +6,16 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-
 import java.util.Collections;
 
 @Configuration
@@ -34,9 +34,12 @@ public class WebSecurityConfig {
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .headers(headers -> headers
-                        .contentSecurityPolicy(csp -> csp
-                                .policyDirectives(
+                .oauth2Login(oauth2Login -> oauth2Login
+                        .loginPage("/login"))
+                .oauth2ResourceServer(c -> c.jwt(Customizer.withDefaults())
+                );
+        http.headers(headers ->
+                        headers.contentSecurityPolicy(csp -> csp.policyDirectives(
                                         "default-src 'self'; " +
                                                 "script-src 'self' chrome-extension://a85f0f65-7619-4b26-abab-40364e0e3181;" +
                                                 "img-src 'self' data * ;" +

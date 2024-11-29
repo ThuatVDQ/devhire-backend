@@ -2,6 +2,7 @@ package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.components.FileUtil;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.services.*;
@@ -47,7 +48,7 @@ public class JobController {
             return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
         }
         try {
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
 
             PageRequest pageRequest = PageRequest.of(
                     page, limit,
@@ -71,7 +72,7 @@ public class JobController {
     public ResponseEntity<?> getJob(
             @PathVariable("jobId") Long jobId
     ) {
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         try {
             boolean isLiked = false;
             String applyStatus = null;
@@ -147,19 +148,9 @@ public class JobController {
             List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
             return ResponseEntity.badRequest().body(errorMessage);
         }
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = null;
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
-        }
-
-        if (authentication.getPrincipal() instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-        }
-
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not retrieve authenticated username");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
 
         try {
@@ -191,7 +182,7 @@ public class JobController {
                 return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                         .body("File must be an image or a PDF");
             }
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
             }
@@ -266,7 +257,7 @@ public class JobController {
             return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
         }
 
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.badRequest().body("User is not authenticated");
         }
@@ -299,7 +290,7 @@ public class JobController {
             @PathVariable("companyId") Long companyId
     ) {
         try {
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             List<JobDTO> jobDTO = jobService.getJobsByCompanyId(companyId, username);
 
             if (jobDTO.isEmpty()) {
@@ -315,7 +306,7 @@ public class JobController {
             @PathVariable("jobId") Long jobId
     ) {
         try {
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
             }
@@ -493,7 +484,7 @@ public class JobController {
         if (page < 0 || limit <= 0) {
             return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
         }
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         try {
 
             PageRequest pageRequest = PageRequest.of(
@@ -524,7 +515,7 @@ public class JobController {
             return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
         }
 
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.badRequest().body("User is not authenticated");
         }
@@ -554,7 +545,7 @@ public class JobController {
 
     @GetMapping("/total-posted")
     public ResponseEntity<?> getTotalPostedJobs() {
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
@@ -569,7 +560,7 @@ public class JobController {
 
     @GetMapping("/total-pending")
     public ResponseEntity<?> getTotalPendingJobs() {
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
@@ -584,7 +575,7 @@ public class JobController {
 
     @GetMapping("/latest")
     public ResponseEntity<?> getLatestJobsByCompany() {
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
@@ -613,7 +604,7 @@ public class JobController {
                 return ResponseEntity.badRequest().body("Job not found");
             }
 
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
 
             if (username == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not retrieve authenticated username");
@@ -633,14 +624,4 @@ public class JobController {
         }
     }
 
-    public String getAuthenticatedUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = null;
-
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-        }
-
-        return username;
-    }
 }

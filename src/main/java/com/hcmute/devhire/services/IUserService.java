@@ -4,12 +4,11 @@ package com.hcmute.devhire.services;
 import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.UserResponse;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public interface IUserService {
     User createUser(UserDTO userDTO) throws Exception;
@@ -32,4 +31,7 @@ public interface IUserService {
     List<User> findAdmins() throws Exception;
     void changeStatusUser(String status, Long id) throws Exception;
     List<UserDTO> get5LatestUsers() throws Exception;
+    String generateAuthUrl() throws Exception;
+    UserDTO authenticateAndFetchProfile(String code) throws IOException;
+    String loginGoogle(UserDTO userDTO) throws Exception;
 }

@@ -3,7 +3,10 @@ package com.hcmute.devhire.components;
 import com.hcmute.devhire.entities.User;
 import io.jsonwebtoken.io.Encoders;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Claims;
@@ -13,6 +16,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,5 +92,20 @@ public class JwtUtil {
     public boolean validateToken(String token, UserDetails userDetails) {
         String username = this.extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public static String getAuthenticatedUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            Instant expiration = jwt.getClaimAsInstant("exp");
+            if (expiration != null && expiration.isAfter(Instant.now())) {
+                return jwt.getClaimAsString("sub");
+            } else {
+                System.out.println("Token has expired");
+                return null;
+            }
+        }
+        return null;
     }
 }

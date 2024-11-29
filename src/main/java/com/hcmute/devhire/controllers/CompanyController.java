@@ -3,6 +3,7 @@ package com.hcmute.devhire.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmute.devhire.DTOs.CompanyDTO;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.Address;
 import com.hcmute.devhire.entities.Company;
 import com.hcmute.devhire.entities.Skill;
@@ -10,7 +11,6 @@ import com.hcmute.devhire.responses.CompanyListResponse;
 import com.hcmute.devhire.services.CompanyService;
 import com.hcmute.devhire.services.ICompanyService;
 import com.hcmute.devhire.services.INotificationService;
-import com.hcmute.devhire.services.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,9 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -85,7 +82,7 @@ public class CompanyController {
             return ResponseEntity.badRequest().body(errorMessage);
         }
         try {
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.badRequest().body("User not found");
             }
@@ -96,25 +93,13 @@ public class CompanyController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    private String getAuthenticatedUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            return userDetails.getUsername();
-        }
-        return null;
-    }
 
     @GetMapping("/profile")
     public  ResponseEntity<?> getByCreated(){
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = null;
-
-            if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-                username = userDetails.getUsername();
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+            String username = JwtUtil.getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.status(401).body("Unauthorized: No user found.");
             }
 
             CompanyDTO companyDTO = companyService.getByUser(username);
@@ -137,7 +122,7 @@ public class CompanyController {
                 List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
                 return ResponseEntity.badRequest().body(errorMessage);
             }
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.status(401).body("Unauthorized: No user found.");
             }
@@ -155,7 +140,7 @@ public class CompanyController {
             @RequestParam(value = "newImages", required = false) MultipartFile[] newImages
     ) {
         try {
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.badRequest().body("Unauthorized: No user found.");
             }
@@ -176,7 +161,7 @@ public class CompanyController {
             @RequestParam("file") MultipartFile file
     ) {
         try {
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.badRequest().body("Unauthorized: No user found.");
             }
@@ -190,7 +175,7 @@ public class CompanyController {
     @GetMapping("/skills")
     public ResponseEntity<?> getAllSkillsForCompany() {
         try {
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.badRequest().body("User not found");
             }
@@ -215,7 +200,7 @@ public class CompanyController {
     @GetMapping("/addresses")
     public ResponseEntity<?> getAllAddressesForCompany() {
         try {
-            String username = getAuthenticatedUsername();
+            String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.badRequest().body("User not found");
             }

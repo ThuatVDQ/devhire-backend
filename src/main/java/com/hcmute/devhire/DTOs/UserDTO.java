@@ -41,4 +41,11 @@ public class UserDTO {
 
     @JsonProperty("role_name")
     private String roleName;
+
+    @JsonProperty("google_account_id")
+    private String googleAccountId;
+
+    public boolean isGoogleAccountIdValid() {
+        return googleAccountId != null && !googleAccountId.isEmpty();
+    }
 }

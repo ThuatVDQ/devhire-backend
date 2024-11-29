@@ -2,6 +2,7 @@ package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.Role;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.*;
@@ -233,12 +234,7 @@ public class AdminController {
     }
 
     public boolean isUserAdmin() throws Exception {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = null;
-
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-        }
+        String username = JwtUtil.getAuthenticatedUsername();
 
         if (username == null) {
             return false;

@@ -2,6 +2,7 @@ package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.EmailRequestDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.entities.User;
@@ -174,7 +175,7 @@ public class JobApplicationController {
 
     @GetMapping("/total")
     public ResponseEntity<?> getTotalJobApplication() {
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.badRequest().body("User not found");
         }
@@ -187,7 +188,7 @@ public class JobApplicationController {
 
     @GetMapping("/count-per-job")
     public ResponseEntity<?> countPerJob() {
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.badRequest().body("User not found");
         }
@@ -202,7 +203,7 @@ public class JobApplicationController {
     public ResponseEntity<?> countMonthly(
             @RequestParam(defaultValue = "2024") int year
     ) {
-        String username = getAuthenticatedUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.badRequest().body("User not found");
         }
@@ -213,14 +214,4 @@ public class JobApplicationController {
         }
     }
 
-    public String getAuthenticatedUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = null;
-
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-        }
-
-        return username;
-    }
 }

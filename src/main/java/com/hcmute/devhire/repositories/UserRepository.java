@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     boolean existByEmail(String email);
     Optional<User> findByPhone(String phone);
     Optional<User> findByEmail(String email);
-
+    Optional<User> findByGoogleAccountId(String id);
     @Query("SELECT COUNT(u) FROM User u")
     int countUsers();
 
@@ -27,4 +27,5 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     List<User> findAllByRoleName(String roleName);
 
     List<User> findTop5ByOrderByCreatedAtDesc();
+
 }

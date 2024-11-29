@@ -1,6 +1,7 @@
 package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.NotificationDTO;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.Notification;
 import com.hcmute.devhire.services.INotificationService;
 import jakarta.validation.Valid;
@@ -21,7 +22,7 @@ public class NotificationController {
 
     @GetMapping("/")
     public ResponseEntity<?> getUserNotifications() throws Exception {
-        String username = getUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
@@ -65,7 +66,7 @@ public class NotificationController {
 
     @PutMapping("/mark-all-read")
     public ResponseEntity<?> markAllAsRead() {
-        String username = getUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
@@ -79,7 +80,7 @@ public class NotificationController {
 
     @GetMapping("/unread-count")
     public ResponseEntity<?> getUnreadNotificationCount() {
-        String username = getUsername();
+        String username = JwtUtil.getAuthenticatedUsername();
         if (username == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
@@ -91,11 +92,4 @@ public class NotificationController {
         }
     }
 
-    private String getUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            return userDetails.getUsername();
-        }
-        return null;
-    }
 }
