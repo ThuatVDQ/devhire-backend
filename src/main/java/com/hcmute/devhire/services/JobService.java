@@ -436,6 +436,7 @@ public class JobService implements IJobService{
                 .salaryStart(jobApplication.getJob().getSalaryStart())
                 .type(jobApplication.getJob().getType().name())
                 .currency(jobApplication.getJob().getCurrency().name())
+                .deadline(jobApplication.getJob().getDeadline())
                 .experience(jobApplication.getJob().getExperience())
                 .position(jobApplication.getJob().getPosition())
                 .level(jobApplication.getJob().getLevel())
