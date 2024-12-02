@@ -4,27 +4,25 @@ import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.User;
+import com.hcmute.devhire.responses.ApplicationListResponse;
 import com.hcmute.devhire.responses.LoginResponse;
+import com.hcmute.devhire.services.IJobApplicationService;
 import com.hcmute.devhire.services.INotificationService;
 import com.hcmute.devhire.services.IUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.FieldError;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.security.oauth2.jwt.Jwt;
 import java.io.IOException;
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -35,6 +33,7 @@ public class UserController {
     private final FileUtil fileUtil;
     private final INotificationService notificationService;
     private final JwtUtil jwtUtil;
+    private final IJobApplicationService jobApplicationService;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
@@ -305,6 +304,44 @@ public class UserController {
                     .roleId(null)
                     .build()
             );
+        }
+    }
+
+    @GetMapping("/getApplications")
+    public ResponseEntity<?> getApplications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        if (page < 0 || limit <= 0) {
+            return ResponseEntity.badRequest().body("Page must be >= 0 and size must be > 0.");
+        }
+
+        try {
+            PageRequest pageRequest = PageRequest.of(
+                    page, limit,
+                    Sort.by("id").descending()
+            );
+            String username = JwtUtil.getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.badRequest().body("Unauthorized: No user found.");
+            }
+            User user = userService.findByUserName(username);
+
+            Page<JobApplicationDTO> applications = jobApplicationService.getByUserId(user.getId(), pageRequest);
+
+            if (applications.isEmpty()) {
+                return ResponseEntity.badRequest().body("No applications found");
+            }
+            ApplicationListResponse response = ApplicationListResponse.builder()
+                    .applications(applications.getContent())
+                    .totalPages(applications.getTotalPages())
+                    .currentPage(page)
+                    .pageSize(limit)
+                    .totalElements(applications.getTotalElements())
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
