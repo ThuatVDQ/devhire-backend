@@ -5,6 +5,8 @@ import com.hcmute.devhire.responses.DashboardResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -43,9 +45,14 @@ public class AdminService implements IAdminService {
     }
 
     private double calculateGrowth(int current, int previous) {
+        double growth;
         if (previous == 0) {
             return current > 0 ? 100.0 : 0.0;
+        }else {
+            growth = ((double) (current - previous) / previous) * 100;
         }
-        return ((double) (current - previous) / previous) * 100;
+
+        BigDecimal roundedGrowth = new BigDecimal(growth).setScale(2, RoundingMode.HALF_UP);
+        return roundedGrowth.doubleValue();
     }
 }
