@@ -8,6 +8,7 @@ import com.hcmute.devhire.utils.JobType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class Job extends BaseEntity {
     private String benefit;
 
     @Column(name = "deadline")
-    private Date deadline;
+    private LocalDateTime deadline;
 
     @Column(name = "apply_number")
     private int applyNumber;

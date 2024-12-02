@@ -58,7 +58,7 @@ public class JobDTO {
     private String benefit;
 
     @NotNull(message = "Deadline cannot be blank")
-    private Date deadline;
+    private LocalDateTime deadline;
 
     @NotNull(message = "Slots cannot be blank")
     private int slots;
