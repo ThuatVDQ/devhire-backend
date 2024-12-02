@@ -228,8 +228,14 @@ public class CompanyService implements ICompanyService {
     @Override
     public void updateCompanyImages(List<String> oldImages, MultipartFile[] images, String username) throws IOException {
         Company company = companyRepository.findByUser(username);
-        if (oldImages != null) {
+        if (oldImages.size() > 0) {
             List<CompanyImage> imagesToRemove = companyImageRepository.findAllByCompanyAndImageUrlNotIn(company, oldImages);
+            for (CompanyImage image : imagesToRemove) {
+                fileUtil.deleteFile(image.getImageUrl());
+                companyImageRepository.delete(image);
+            }
+        } else {
+            List<CompanyImage> imagesToRemove = companyImageRepository.findByCompanyId(company.getId());
             for (CompanyImage image : imagesToRemove) {
                 fileUtil.deleteFile(image.getImageUrl());
                 companyImageRepository.delete(image);
