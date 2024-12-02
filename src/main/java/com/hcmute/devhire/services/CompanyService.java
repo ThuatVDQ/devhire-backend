@@ -11,6 +11,7 @@ import com.hcmute.devhire.repositories.CompanyRepository;
 import com.hcmute.devhire.repositories.JobRepository;
 import com.hcmute.devhire.repositories.specification.CompanySpecifications;
 import com.hcmute.devhire.repositories.specification.JobSpecifications;
+import com.hcmute.devhire.utils.JobStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
@@ -86,6 +87,11 @@ public class CompanyService implements ICompanyService {
 
         List<String> images = companyImageService.getImageUrlsByCompanyId(company.getId());
 
+        List<Job> jobs = company.getJobs();
+        jobs = jobs.stream()
+                .filter(job -> job.getStatus().equals(JobStatus.OPEN) || job.getStatus().equals(JobStatus.HOT))
+                .toList();
+
         return CompanyDTO.builder()
                 .id(company.getId())
                 .name(company.getName())
@@ -98,7 +104,7 @@ public class CompanyService implements ICompanyService {
                 .webUrl(company.getWebUrl())
                 .scale(company.getScale())
                 .status(company.getStatus())
-                .totalJob(company.getJobs().size())
+                .totalJob(jobs.size())
                 .images(images == null ? List.of() : images)
                 .build();
     }
