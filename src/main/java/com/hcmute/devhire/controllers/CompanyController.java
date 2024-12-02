@@ -45,7 +45,7 @@ public class CompanyController {
         try {
             PageRequest pageRequest = PageRequest.of(
                     page, limit,
-                    Sort.by("id").ascending()
+                    Sort.by("id").descending()
             );
             Page<CompanyDTO> companyPage = companyService.getAllCompanies(pageRequest);
             CompanyListResponse response = CompanyListResponse.builder()

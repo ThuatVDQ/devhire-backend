@@ -103,7 +103,7 @@ public class AdminController {
         try {
             PageRequest pageRequest = PageRequest.of(
                     page, limit,
-                    Sort.by("id").ascending()
+                    Sort.by("id").descending()
             );
             if (!isUserAdmin()) {
                 return ResponseEntity.badRequest()
@@ -137,7 +137,7 @@ public class AdminController {
         try {
             PageRequest pageRequest = PageRequest.of(
                     page, limit,
-                    Sort.by("id").ascending()
+                    Sort.by("id").descending()
             );
             if (!isUserAdmin()) {
                 return ResponseEntity.badRequest()
