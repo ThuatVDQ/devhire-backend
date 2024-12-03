@@ -34,4 +34,5 @@ public interface IUserService {
     String generateAuthUrl() throws Exception;
     UserDTO authenticateAndFetchProfile(String code) throws IOException;
     String loginGoogle(UserDTO userDTO) throws Exception;
+    void contactAdmin(EmailRequestDTO emailRequestDTO) throws Exception;
 }

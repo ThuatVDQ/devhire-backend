@@ -362,4 +362,18 @@ public class UserController {
         return ResponseEntity.ok().body(loginResponse);
     }
 
+    @PostMapping("/contact")
+    public ResponseEntity<?> contact(@Valid @RequestBody EmailRequestDTO emailRequestDTO, BindingResult result) {
+        if(result.hasErrors()) {
+            List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
+        try {
+            userService.contactAdmin(emailRequestDTO);
+            return ResponseEntity.ok("Message sent successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

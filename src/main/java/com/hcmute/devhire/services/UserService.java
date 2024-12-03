@@ -337,6 +337,33 @@ public class UserService implements IUserService{
         return this.login(user.getEmail(), "", user.getRole().getId());
     }
 
+    @Override
+    public void contactAdmin(EmailRequestDTO emailRequestDTO) throws Exception {
+        String htmlMessage = generateHtmlMessage(emailRequestDTO);
+        try {
+            List<User> admins = userRepository.findAllByRoleName(Role.ADMIN);
+            for (User admin : admins) {
+                emailService.sendEmail(admin.getEmail(), emailRequestDTO.getSubject(), htmlMessage);
+            }
+        } catch (MessagingException e) {
+            throw new Exception("Failed to send email");
+        }
+    }
+
+    private String generateHtmlMessage(EmailRequestDTO emailRequestDTO) {
+        return "<html>"
+                + "<body style=\"font-family: Arial, sans-serif;\">"
+                + "<div style=\"background-color: #f5f5f5; padding: 20px; border-radius: 5px;\">"
+                + "<h2 style=\"color: #333; text-align: center;\">You have a new message from " + emailRequestDTO.getEmail() + "</h2>"
+                + "<p style=\"font-size: 16px;\">"
+                + "<strong>Subject: </strong>" + emailRequestDTO.getSubject() + "<br><br>"
+                + "<strong>Message: </strong><br>" + emailRequestDTO.getContent()
+                + "</p>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
+    }
+
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
