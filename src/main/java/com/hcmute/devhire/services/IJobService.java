@@ -7,6 +7,7 @@ import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.responses.MonthlyCountResponse;
+import com.hcmute.devhire.utils.JobStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -38,4 +39,5 @@ public interface IJobService {
     List<MonthlyCountResponse> countJobsByMonth(int year) throws Exception;
     void closeJob(Long jobId) throws Exception;
     List<JobDTO> get5LatestJobs() throws Exception;
+    int countJobsByStatusIn(List<JobStatus> statuses) throws Exception;
 }

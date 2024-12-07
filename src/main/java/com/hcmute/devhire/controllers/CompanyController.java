@@ -251,4 +251,14 @@ public class CompanyController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/total")
+    public ResponseEntity<?> getTotalCompanies() {
+        try {
+            int totalCompanies = companyService.countCompanies();
+            return ResponseEntity.ok(totalCompanies);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

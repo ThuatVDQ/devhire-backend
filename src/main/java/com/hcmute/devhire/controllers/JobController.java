@@ -624,4 +624,13 @@ public class JobController {
         }
     }
 
+    @GetMapping("/total")
+    public ResponseEntity<?> getTotalJobs() {
+        try {
+            int totalJobs = jobService.countJobsByStatusIn(List.of(JobStatus.OPEN, JobStatus.HOT));
+            return ResponseEntity.ok(totalJobs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

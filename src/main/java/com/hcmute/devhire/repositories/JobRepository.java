@@ -3,6 +3,7 @@ package com.hcmute.devhire.repositories;
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.responses.MonthlyCountResponse;
 import com.hcmute.devhire.utils.JobStatus;
+import com.hcmute.devhire.utils.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,6 +33,8 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
     @Query("SELECT COUNT(j) FROM Job j")
     int countJobs();
+
+    int countJobsByStatusIn(List<JobStatus> statuses);
 
     @Query("SELECT COUNT(j) FROM Job j WHERE MONTH(j.createdAt) = ?1 AND YEAR(j.createdAt) = ?2")
     int countJobsMonthly(int month, int year);

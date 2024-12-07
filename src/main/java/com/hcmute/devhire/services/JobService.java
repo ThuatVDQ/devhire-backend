@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -599,5 +598,10 @@ public class JobService implements IJobService{
         } catch (Exception e) {
             throw new Exception("Error fetching latest jobs: " + e.getMessage());
         }
+    }
+
+    @Override
+    public int countJobsByStatusIn(List<JobStatus> statuses) throws Exception {
+        return jobRepository.countJobsByStatusIn(statuses);
     }
 }
