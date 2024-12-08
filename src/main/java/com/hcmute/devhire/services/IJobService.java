@@ -16,7 +16,7 @@ import java.util.List;
 public interface IJobService {
     Job createJob(JobDTO jobDTO, String username) throws Exception;
     Page<JobDTO> getAllJobs(PageRequest pageRequest, String username) throws Exception;
-    Page<JobDTO> getAllJobsAdmin(PageRequest pageRequest, String status, String type,  String username) throws Exception;
+    Page<JobDTO> getAllJobsAdmin(PageRequest pageRequest, String keyword, String status, String type,  String username) throws Exception;
     Job findById(Long jobId) throws Exception;
     JobApplication applyForJob(Long jobId, ApplyJobRequestDTO applyJobRequestDTO) throws Exception;
 

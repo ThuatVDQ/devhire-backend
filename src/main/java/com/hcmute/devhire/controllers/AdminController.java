@@ -123,6 +123,7 @@ public class AdminController {
 
     @GetMapping("/getAllJobs")
     public ResponseEntity<?> getAllJobs(
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String type,
             @RequestParam(defaultValue = "0") int page,
@@ -140,7 +141,7 @@ public class AdminController {
                 return ResponseEntity.badRequest()
                         .body("Error: You are not an admin");
             }
-            Page<JobDTO> jobs = jobService.getAllJobsAdmin(pageRequest, status, type, null);
+            Page<JobDTO> jobs = jobService.getAllJobsAdmin(pageRequest, keyword, status, type, null);
             JobListResponse jobListResponse = JobListResponse.builder()
                     .jobs(jobs.getContent())
                     .totalPages(jobs.getTotalPages())

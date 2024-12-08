@@ -122,8 +122,12 @@ public class JobService implements IJobService{
     }
 
     @Override
-    public Page<JobDTO> getAllJobsAdmin(PageRequest pageRequest, String status, String type,  String username) throws Exception {
+    public Page<JobDTO> getAllJobsAdmin(PageRequest pageRequest, String keyword, String status, String type,  String username) throws Exception {
         Specification<Job> spec = Specification.where(null);
+        if (keyword != null && !keyword.isEmpty()) {
+            spec = spec.and(JobSpecifications.hasKeyword(keyword));
+        }
+
         if (type != null && !type.isEmpty()) {
             spec = spec.and(JobSpecifications.hasJobType(type));
         }
