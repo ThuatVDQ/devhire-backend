@@ -42,4 +42,5 @@ public interface IJobService {
     int countJobsByStatusIn(List<JobStatus> statuses) throws Exception;
 
     void increaseView(Long jobId) throws Exception;
+    List<JobDTO> getRelatedJobs(Long jobId) throws Exception;
 }
