@@ -636,4 +636,16 @@ public class JobController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/related")
+    public ResponseEntity<?> getRelatedJobs(
+            @RequestParam Long jobId
+    ) {
+        try {
+            List<JobDTO> relatedJobs = jobService.getRelatedJobs(jobId);
+            return ResponseEntity.ok(relatedJobs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

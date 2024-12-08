@@ -10,17 +10,22 @@ import com.hcmute.devhire.utils.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class JobService implements IJobService{
+public class JobService implements IJobService {
     private final JobRepository jobRepository;
     private final ICategoryService categoryService;
     private final JobAddressRepository jobAddressRepository;
@@ -108,7 +113,7 @@ public class JobService implements IJobService{
     @Override
     public Page<JobDTO> getAllJobs(PageRequest pageRequest, String username) throws Exception {
         List<JobStatus> statuses = List.of(JobStatus.OPEN, JobStatus.HOT);
-        Page<Job> jobs= jobRepository.findByStatusIn(statuses, pageRequest);
+        Page<Job> jobs = jobRepository.findByStatusIn(statuses, pageRequest);
         if (jobs.isEmpty()) {
             throw new Exception("No jobs found");
         }
@@ -122,7 +127,7 @@ public class JobService implements IJobService{
     }
 
     @Override
-    public Page<JobDTO> getAllJobsAdmin(PageRequest pageRequest, String status, String type,  String username) throws Exception {
+    public Page<JobDTO> getAllJobsAdmin(PageRequest pageRequest, String status, String type, String username) throws Exception {
         Specification<Job> spec = Specification.where(null);
         if (type != null && !type.isEmpty()) {
             spec = spec.and(JobSpecifications.hasJobType(type));
@@ -130,7 +135,7 @@ public class JobService implements IJobService{
         if (status != null && !status.isEmpty()) {
             spec = spec.and(JobSpecifications.hasStatus(status));
         }
-        Page<Job> jobs= jobRepository.findAll(spec, pageRequest);
+        Page<Job> jobs = jobRepository.findAll(spec, pageRequest);
 
         if (jobs.isEmpty()) {
             throw new Exception("No jobs found");
@@ -214,7 +219,7 @@ public class JobService implements IJobService{
 
     @Override
     public Job findById(Long jobId) throws Exception {
-        return jobRepository.findById(jobId).orElseThrow(()-> new Exception("Job not found"));
+        return jobRepository.findById(jobId).orElseThrow(() -> new Exception("Job not found"));
     }
 
     @Override
@@ -406,7 +411,7 @@ public class JobService implements IJobService{
         List<JobStatus> statuses = List.of(JobStatus.OPEN, JobStatus.HOT);
         spec = spec.and(JobSpecifications.hasStatuses(statuses));
 
-        Page<Job> jobs = jobRepository.findAll(spec,pageRequest);
+        Page<Job> jobs = jobRepository.findAll(spec, pageRequest);
         return jobs.map(job -> {
             try {
                 return convertDTO(job, username);
@@ -605,8 +610,51 @@ public class JobService implements IJobService{
 
     @Override
     public void increaseView(Long jobId) throws Exception {
-        Job job = jobRepository.findById(jobId).orElseThrow(()-> new Exception("Job not found"));
+        Job job = jobRepository.findById(jobId).orElseThrow(() -> new Exception("Job not found"));
         job.setViews(job.getViews() + 1);
         jobRepository.save(job);
+    }
+
+    @Override
+    public List<JobDTO> getRelatedJobs(Long jobId) throws Exception {
+        Job job = jobRepository.findById(jobId).orElseThrow(() -> new Exception("Job not found"));
+
+        Specification<Job> spec = Specification
+                .where(JobSpecifications.hasSameSkills(jobId))
+                .and(JobSpecifications.hasStatuses(List.of(JobStatus.OPEN, JobStatus.HOT)));
+
+        Pageable pageable = PageRequest.of(0, 6);
+        List<Job> similarJobs = jobRepository.findAll(spec, pageable).getContent();
+
+        if (similarJobs.size() < 6) {
+            Specification<Job> extendedSpec = Specification
+                    .where(JobSpecifications.hasStatuses(List.of(JobStatus.OPEN, JobStatus.HOT)));
+
+            Pageable additionalPageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("views")));
+            List<Job> additionalJobs = jobRepository.findAll(extendedSpec, additionalPageable).getContent();
+
+            Set<Job> jobSet = new HashSet<>(similarJobs);
+
+            for (Job additionalJob : additionalJobs) {
+                if (jobSet.size() >= 6) {
+                    break;
+                }
+                if (!jobSet.contains(additionalJob)) {
+                    jobSet.add(additionalJob);
+                }
+            }
+
+            similarJobs = new ArrayList<>(jobSet);
+        }
+
+        return similarJobs.stream()
+                .map(j -> {
+                    try {
+                        return convertDTO(j, null);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .toList();
     }
 }
