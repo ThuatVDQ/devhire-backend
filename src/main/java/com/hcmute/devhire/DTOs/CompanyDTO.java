@@ -47,4 +47,5 @@ public class CompanyDTO {
     private UserDTO createBy;
     private List<JobDTO> jobs;
     private int totalJob;
+    private int totalReviews;
 }

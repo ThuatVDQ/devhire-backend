@@ -105,6 +105,7 @@ public class CompanyService implements ICompanyService {
                 .scale(company.getScale())
                 .status(company.getStatus())
                 .totalJob(jobs.size())
+                .totalReviews(company.getCompanyReviews().size())
                 .images(images == null ? List.of() : images)
                 .build();
     }
