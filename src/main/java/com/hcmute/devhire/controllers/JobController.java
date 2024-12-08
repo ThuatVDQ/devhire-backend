@@ -136,6 +136,7 @@ public class JobController {
                     .applyStatus(applyStatus)
                     .category(CategoryDTO.builder().name(job.getCategory().getName()).id(job.getCategory().getId()).build())
                     .build();
+            jobService.increaseView(jobId);
             return ResponseEntity.ok(jobDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

@@ -40,4 +40,6 @@ public interface IJobService {
     void closeJob(Long jobId) throws Exception;
     List<JobDTO> get5LatestJobs() throws Exception;
     int countJobsByStatusIn(List<JobStatus> statuses) throws Exception;
+
+    void increaseView(Long jobId) throws Exception;
 }

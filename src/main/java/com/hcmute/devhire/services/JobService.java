@@ -214,10 +214,7 @@ public class JobService implements IJobService{
 
     @Override
     public Job findById(Long jobId) throws Exception {
-        Job job = jobRepository.findById(jobId).orElseThrow(()-> new Exception("Job not found"));
-        job.setViews(job.getViews() + 1);
-        jobRepository.save(job);
-        return job;
+        return jobRepository.findById(jobId).orElseThrow(()-> new Exception("Job not found"));
     }
 
     @Override
@@ -604,5 +601,12 @@ public class JobService implements IJobService{
     @Override
     public int countJobsByStatusIn(List<JobStatus> statuses) throws Exception {
         return jobRepository.countJobsByStatusIn(statuses);
+    }
+
+    @Override
+    public void increaseView(Long jobId) throws Exception {
+        Job job = jobRepository.findById(jobId).orElseThrow(()-> new Exception("Job not found"));
+        job.setViews(job.getViews() + 1);
+        jobRepository.save(job);
     }
 }
