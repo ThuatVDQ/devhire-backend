@@ -66,6 +66,9 @@ public class JobDTO {
     @JsonProperty("apply_number")
     private int applyNumber;
 
+    @JsonProperty("updated_at")
+    private  LocalDateTime updatedAt;
+
     @JsonProperty("like_number")
     private int likeNumber;
     private int views;

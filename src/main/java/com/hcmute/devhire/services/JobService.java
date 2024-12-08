@@ -196,6 +196,7 @@ public class JobService implements IJobService{
                 .requirement(job.getRequirement())
                 .benefit(job.getBenefit())
                 .deadline(job.getDeadline())
+                .updatedAt(job.getUpdatedAt())
                 .slots(job.getSlots())
                 .status(job.getStatus().name())
                 .addresses(addressDTOs)
