@@ -69,6 +69,9 @@ public class JobDTO {
     @JsonProperty("updated_at")
     private  LocalDateTime updatedAt;
 
+    @JsonProperty("created_at")
+    private  LocalDateTime createdAt;
+
     @JsonProperty("like_number")
     private int likeNumber;
     private int views;
@@ -84,6 +87,9 @@ public class JobDTO {
 
     @JsonProperty("is_favorite")
     private boolean isFavorite;
+
+    @JsonProperty("is_close")
+    private boolean isClose;
 
     @JsonProperty("apply_status")
     private String applyStatus;

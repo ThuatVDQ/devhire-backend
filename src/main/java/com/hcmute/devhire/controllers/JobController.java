@@ -129,6 +129,7 @@ public class JobController {
                     .benefit(job.getBenefit())
                     .deadline(job.getDeadline())
                     .updatedAt(job.getUpdatedAt())
+                    .createdAt(job.getCreatedAt())
                     .slots(job.getSlots())
                     .status(job.getStatus().name())
                     .addresses(addressDTOs)
