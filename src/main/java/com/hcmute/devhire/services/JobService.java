@@ -651,7 +651,8 @@ public class JobService implements IJobService {
                 if (jobSet.size() >= 6) {
                     break;
                 }
-                if (!jobSet.contains(additionalJob)) {
+
+                if (!jobSet.contains(additionalJob) || additionalJob.getId().equals(jobId)) {
                     jobSet.add(additionalJob);
                 }
             }
