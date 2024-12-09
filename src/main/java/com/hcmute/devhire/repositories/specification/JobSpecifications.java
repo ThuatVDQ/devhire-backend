@@ -11,7 +11,15 @@ import java.util.List;
 
 public class JobSpecifications {
     public static Specification<Job> hasKeyword(String keyword) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("title"), "%" + keyword + "%");
+        return (root, query, criteriaBuilder) -> {
+            Join<Job, JobSkill> jobSkills = root.join("jobSkills");
+            Join<JobSkill, Skill> skill = jobSkills.join("skill");
+
+            Predicate titleCondition = criteriaBuilder.like(root.get("title"), "%" + keyword + "%");
+            Predicate skillCondition = criteriaBuilder.like(skill.get("name"), "%" + keyword + "%");
+
+            return criteriaBuilder.or(titleCondition, skillCondition);
+        };
     }
 
     public static Specification<Job> hasLocation(String location) {
