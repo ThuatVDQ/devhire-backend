@@ -4,10 +4,7 @@ import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.JobSkill;
 import com.hcmute.devhire.entities.Skill;
 import com.hcmute.devhire.utils.JobStatus;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -39,18 +36,20 @@ public class JobSpecifications {
 
     public static Specification<Job> hasSameSkills(Long jobId) {
         return (root, query, criteriaBuilder) -> {
-            // Tạo subquery để lấy tất cả các jobId có kỹ năng chung với jobId đã cho
-            Subquery<Long> subquery = query.subquery(Long.class);
-            Root<JobSkill> jobSkillSubqueryRoot = subquery.from(JobSkill.class);
+            Join<Job, JobSkill> jobSkills = root.join("jobSkills");
 
-            // Lấy kỹ năng của công việc có jobId đã cho
-            subquery.select(jobSkillSubqueryRoot.get("job").get("id"))
-                    .where(criteriaBuilder.equal(jobSkillSubqueryRoot.get("job").get("id"), jobId));
+            Join<JobSkill, Skill> skill = jobSkills.join("skill");
 
-            // So sánh công việc chính (root) với kết quả từ subquery để tìm các công việc có chung kỹ năng
-            return criteriaBuilder.in(root.get("id")).value(subquery);
+            Predicate jobCondition = criteriaBuilder.equal(jobSkills.get("job").get("id"), jobId);
+
+            Predicate excludeCurrentJob = criteriaBuilder.notEqual(root.get("id"), jobId);
+
+            Predicate condition = criteriaBuilder.and(jobCondition, excludeCurrentJob);
+
+            return condition;
         };
     }
+
 
 
     public static Specification<Job> hasCompanyId(Long companyId) {

@@ -212,6 +212,7 @@ public class JobService implements IJobService {
                 .updatedAt(job.getUpdatedAt())
                 .createdAt(job.getCreatedAt())
                 .slots(job.getSlots())
+                .views(job.getViews())
                 .status(job.getStatus().name())
                 .addresses(addressDTOs)
                 .skills(skillDTOs)
@@ -635,21 +636,16 @@ public class JobService implements IJobService {
     public List<JobDTO> getRelatedJobs(Long jobId) throws Exception {
         Job job = jobRepository.findById(jobId).orElseThrow(() -> new Exception("Job not found"));
 
-        Specification<Job> spec = Specification
-                .where(JobSpecifications.hasSameSkills(jobId))
-                .and(JobSpecifications.hasStatuses(List.of(JobStatus.OPEN, JobStatus.HOT)));
+        List<Job> relatedJobs = jobRepository.getRelatedJobs(jobId, List.of(JobStatus.OPEN, JobStatus.HOT));
 
-        Pageable pageable = PageRequest.of(0, 6);
-        List<Job> similarJobs = jobRepository.findAll(spec, pageable).getContent();
+        if (relatedJobs.size() < 6) {
+            Specification<Job> spec = Specification.where(JobSpecifications.hasStatuses(List.of(JobStatus.OPEN, JobStatus.HOT)));
 
-        if (similarJobs.size() < 6) {
-            Specification<Job> extendedSpec = Specification
-                    .where(JobSpecifications.hasStatuses(List.of(JobStatus.OPEN, JobStatus.HOT)));
+            Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("views")));
 
-            Pageable additionalPageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("views")));
-            List<Job> additionalJobs = jobRepository.findAll(extendedSpec, additionalPageable).getContent();
+            List<Job> additionalJobs = jobRepository.findAll(spec, pageable).getContent();
 
-            Set<Job> jobSet = new HashSet<>(similarJobs);
+            Set<Job> jobSet = new HashSet<>(relatedJobs);
 
             for (Job additionalJob : additionalJobs) {
                 if (jobSet.size() >= 6) {
@@ -660,18 +656,18 @@ public class JobService implements IJobService {
                 }
             }
 
-            similarJobs = new ArrayList<>(jobSet);
+            relatedJobs = new ArrayList<>(jobSet);
         }
 
-        return similarJobs.stream()
-                .map(j -> {
+        return relatedJobs.stream()
+                .map(relatedJob -> {
                     try {
-                        return convertDTO(j, null);
+                        return convertDTO(relatedJob, null);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private boolean getIsClose(Job job) {
