@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -113,7 +114,9 @@ public class JobService implements IJobService {
     @Override
     public Page<JobDTO> getAllJobs(PageRequest pageRequest, String username) throws Exception {
         List<JobStatus> statuses = List.of(JobStatus.OPEN, JobStatus.HOT);
-        Page<Job> jobs = jobRepository.findByStatusIn(statuses, pageRequest);
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        PageRequest sortedPageRequest = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize(), sort);
+        Page<Job> jobs = jobRepository.findByStatusIn(statuses, sortedPageRequest);
         if (jobs.isEmpty()) {
             throw new Exception("No jobs found");
         }
@@ -193,6 +196,7 @@ public class JobService implements IJobService {
         }
         return JobDTO.builder()
                 .id(job.getId())
+                .isClose(getIsClose(job))
                 .title(job.getTitle())
                 .description(job.getDescription())
                 .salaryStart(job.getSalaryStart())
@@ -206,6 +210,7 @@ public class JobService implements IJobService {
                 .benefit(job.getBenefit())
                 .deadline(job.getDeadline())
                 .updatedAt(job.getUpdatedAt())
+                .createdAt(job.getCreatedAt())
                 .slots(job.getSlots())
                 .status(job.getStatus().name())
                 .addresses(addressDTOs)
@@ -352,6 +357,7 @@ public class JobService implements IJobService {
             Job job = jobRepository.findById(jobId)
                     .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
             job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, "OPEN"));
+            job.setCreatedAt(LocalDateTime.now());
             notificationService.createAndSendNotification("Congratulations! Your job listing for " + job.getTitle() + " has been approved and is now visible to applicants.", job.getCompany().getCreatedBy().getUsername());
             jobRepository.save(job);
         } catch (Exception e) {
@@ -415,7 +421,11 @@ public class JobService implements IJobService {
         List<JobStatus> statuses = List.of(JobStatus.OPEN, JobStatus.HOT);
         spec = spec.and(JobSpecifications.hasStatuses(statuses));
 
-        Page<Job> jobs = jobRepository.findAll(spec, pageRequest);
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        PageRequest sortedPageRequest = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize(), sort);
+
+        // Lấy các job với các điều kiện lọc và sắp xếp
+        Page<Job> jobs = jobRepository.findAll(spec, sortedPageRequest);
         return jobs.map(job -> {
             try {
                 return convertDTO(job, username);
@@ -437,12 +447,14 @@ public class JobService implements IJobService {
         }
         return jobApplications.map(jobApplication -> JobDTO.builder()
                 .id(jobApplication.getJob().getId())
+                .isClose(getIsClose(jobApplication.getJob()))
                 .title(jobApplication.getJob().getTitle())
                 .salaryEnd(jobApplication.getJob().getSalaryEnd())
                 .salaryStart(jobApplication.getJob().getSalaryStart())
                 .type(jobApplication.getJob().getType().name())
                 .currency(jobApplication.getJob().getCurrency().name())
                 .deadline(jobApplication.getJob().getDeadline())
+                .createdAt(jobApplication.getJob().getCreatedAt())
                 .experience(jobApplication.getJob().getExperience())
                 .position(jobApplication.getJob().getPosition())
                 .level(jobApplication.getJob().getLevel())
@@ -660,5 +672,11 @@ public class JobService implements IJobService {
                     }
                 })
                 .toList();
+    }
+
+    private boolean getIsClose(Job job) {
+        if (job.getStatus() == JobStatus.CLOSED)
+            return  true;
+        return false;
     }
 }
