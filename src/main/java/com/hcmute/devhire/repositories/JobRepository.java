@@ -49,4 +49,12 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     List<Job> findTop5ByOrderByCreatedAtDesc();
 
     List<Job> findByDeadlineBeforeAndStatusIn(LocalDateTime deadline, List<JobStatus> statuses);
+
+    @Query(value = "SELECT DISTINCT j FROM Job j " +
+            "JOIN JobSkill js1 ON j.id = js1.job.id " +
+            "JOIN JobSkill js2 ON js1.skill.id = js2.skill.id " +
+            "WHERE js2.job.id = :jobId " +
+            "AND j.id != :jobId " +
+            "AND j.status IN :statuses")
+    List<Job> getRelatedJobs(@Param("jobId") Long jobId, @Param("statuses") List<JobStatus> statuses);
 }
