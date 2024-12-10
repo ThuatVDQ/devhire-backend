@@ -641,7 +641,7 @@ public class JobService implements IJobService {
         if (relatedJobs.size() < 6) {
             Specification<Job> spec = Specification.where(JobSpecifications.hasStatuses(List.of(JobStatus.OPEN, JobStatus.HOT)));
 
-            Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("views")));
+            Pageable pageable = PageRequest.of(0, 7, Sort.by(Sort.Order.desc("views")));
 
             List<Job> additionalJobs = jobRepository.findAll(spec, pageable).getContent();
 
