@@ -7,6 +7,7 @@ import com.hcmute.devhire.repositories.specification.JobSpecifications;
 import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.responses.MonthlyCountResponse;
 import com.hcmute.devhire.utils.*;
+import com.hcmute.devhire.utils.Currency;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,11 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -641,18 +638,18 @@ public class JobService implements IJobService {
         if (relatedJobs.size() < 6) {
             Specification<Job> spec = Specification.where(JobSpecifications.hasStatuses(List.of(JobStatus.OPEN, JobStatus.HOT)));
 
-            Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("views")));
+            Pageable pageable = PageRequest.of(0, 7, Sort.by(Sort.Order.desc("views")));
 
             List<Job> additionalJobs = jobRepository.findAll(spec, pageable).getContent();
 
-            Set<Job> jobSet = new HashSet<>(relatedJobs);
+            Set<Job> jobSet = new LinkedHashSet<>(relatedJobs);
 
             for (Job additionalJob : additionalJobs) {
                 if (jobSet.size() >= 6) {
                     break;
                 }
 
-                if (!jobSet.contains(additionalJob) || additionalJob.getId().equals(jobId)) {
+                if (!jobSet.contains(additionalJob) && !additionalJob.getId().equals(jobId)) {
                     jobSet.add(additionalJob);
                 }
             }
