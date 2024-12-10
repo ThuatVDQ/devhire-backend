@@ -645,19 +645,15 @@ public class JobService implements IJobService {
 
             List<Job> additionalJobs = jobRepository.findAll(spec, pageable).getContent();
 
-            Set<Job> jobSet = new HashSet<>(relatedJobs);
-
             for (Job additionalJob : additionalJobs) {
-                if (jobSet.size() >= 6) {
+                if (relatedJobs.size() >= 6) {
                     break;
                 }
 
-                if (!jobSet.contains(additionalJob) || additionalJob.getId().equals(jobId)) {
-                    jobSet.add(additionalJob);
+                if (!relatedJobs.contains(additionalJob) && !additionalJob.getId().equals(jobId)) {
+                    relatedJobs.add(additionalJob);
                 }
             }
-
-            relatedJobs = new ArrayList<>(jobSet);
         }
 
         return relatedJobs.stream()
