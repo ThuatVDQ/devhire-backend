@@ -61,6 +61,7 @@ public class JobApplicationService implements IJobApplicationService{
 
     @Override
     public void updateJobApplication(JobApplication jobApplication) {
+        jobApplication.setStatus(JobApplicationStatus.IN_PROGRESS);
         jobApplicationRepository.save(jobApplication);
     }
 

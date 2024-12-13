@@ -25,6 +25,9 @@ public class CV extends BaseEntity {
     @Column(name = "cv_url", length = 255)
     private String cvUrl;
 
+    @Column(name = "name", length = 255)
+    private String name;
+
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference

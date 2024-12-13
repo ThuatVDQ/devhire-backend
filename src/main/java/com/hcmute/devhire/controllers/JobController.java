@@ -169,54 +169,92 @@ public class JobController {
     @PostMapping(value = "/{jobId}/apply", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> applyJob(
             @PathVariable("jobId") Long jobId,
-            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "cvId", required = false) Long cvId,
             @RequestParam("letter") String letter
     ) {
         try {
-            if (file == null || file.isEmpty()) {
-                return ResponseEntity.badRequest().body("No file uploaded");
-            }
-
-            if (!fileUtil.isFileSizeValid(file)) { // >10mb
-                return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                        .body("File is too large! Maximum size is 10MB");
-            }
-
-            if (!fileUtil.isImageOrPdfFormatValid(file)) {
-                return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                        .body("File must be an image or a PDF");
-            }
             String username = JwtUtil.getAuthenticatedUsername();
             if (username == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
             }
+
             UserDTO userDTO = userService.findByUsername(username);
 
+            // Kiểm tra nếu đã ứng tuyển cho công việc này
             Optional<JobApplication> existingApplication = jobApplicationService.findApplicationByJobIdAndUserId(jobId, userDTO.getId());
 
-            CVDTO cvDTO = cvService.uploadCV(userDTO.getId(), file);
-            CV cv = cvService.createCV(cvDTO);
-            if (existingApplication.isPresent()) {
-                JobApplication jobApplication = existingApplication.get();
-                jobApplication.setCv(cv);
-                jobApplication.setLetter(letter == null ? "" : letter);
-                jobApplicationService.updateJobApplication(jobApplication);
-                Job job = jobService.findById(jobId);
-                notificationService.createAndSendNotification("New CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
-                notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has updated CV for job " + job.getTitle());
-                return ResponseEntity.ok().body("Updated CV for existing application");
+            if (file != null && !file.isEmpty()) {
+                // Xử lý trường hợp tải lên file CV
+                if (!fileUtil.isFileSizeValid(file)) { // >10MB
+                    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                            .body("File is too large! Maximum size is 10MB");
+                }
+
+                if (!fileUtil.isImageOrPdfFormatValid(file)) {
+                    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                            .body("File must be an image or a PDF");
+                }
+
+                // Tải CV lên
+                CVDTO cvDTO = cvService.uploadCV(userDTO.getId(), userDTO.getFullName() + "_cv", file);
+                CV cv = cvService.createCV(cvDTO);
+
+                // Cập nhật nếu đã có ứng tuyển
+                if (existingApplication.isPresent()) {
+                    JobApplication jobApplication = existingApplication.get();
+                    jobApplication.setCv(cv);
+                    jobApplication.setLetter(letter == null ? "" : letter);
+                    jobApplicationService.updateJobApplication(jobApplication);
+                    Job job = jobService.findById(jobId);
+                    notificationService.createAndSendNotification("New CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
+                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has updated CV for job " + job.getTitle());
+                    return ResponseEntity.ok().body("Updated CV for existing application");
+                } else {
+                    ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
+                            .userId(userDTO.getId())
+                            .cvId(cv.getId())
+                            .jobId(jobId)
+                            .letter(letter == null ? "" : letter)
+                            .build();
+                    jobService.applyForJob(jobId, applyJobRequestDTO);
+                    sendNewApplicationNotification(jobId, letter, userDTO);
+                    Job job = jobService.findById(jobId);
+                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has applied for job " + job.getTitle());
+                    return ResponseEntity.ok().body("Applied successfully with uploaded CV");
+                }
+            } else if (cvId != null) {
+                // Xử lý trường hợp chỉ có cvId
+                if (existingApplication.isPresent()) {
+                    // Cập nhật ứng tuyển nếu đã có và có cvId
+                    JobApplication jobApplication = existingApplication.get();
+                    CV cv = cvService.findById(cvId);
+                    if (cv == null) {
+                        return ResponseEntity.badRequest().body("CV not found");
+                    }
+                    jobApplication.setCv(cv);
+                    jobApplication.setLetter(letter == null ? "" : letter);
+                    jobApplicationService.updateJobApplication(jobApplication);
+                    Job job = jobService.findById(jobId);
+                    notificationService.createAndSendNotification("CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
+                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has updated CV for job " + job.getTitle());
+                    return ResponseEntity.ok().body("Updated CV for existing application using cvId");
+                } else {
+                    // Tạo mới một đơn ứng tuyển nếu chưa ứng tuyển
+                    ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
+                            .userId(userDTO.getId())
+                            .cvId(cvId)  // Sử dụng cvId
+                            .jobId(jobId)
+                            .letter(letter == null ? "" : letter)
+                            .build();
+                    jobService.applyForJob(jobId, applyJobRequestDTO);
+                    sendNewApplicationNotification(jobId, letter, userDTO);
+                    Job job = jobService.findById(jobId);
+                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has applied for job " + job.getTitle());
+                    return ResponseEntity.ok().body("Applied successfully with cvId");
+                }
             } else {
-                ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
-                        .userId(userDTO.getId())
-                        .cvId(cv.getId())
-                        .jobId(jobId)
-                        .letter(letter == null ? "" : letter)
-                        .build();
-                jobService.applyForJob(jobId, applyJobRequestDTO);
-                sendNewApplicationNotification(jobId, letter, userDTO);
-                Job job = jobService.findById(jobId);
-                notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has applied for job " + job.getTitle());
-                return ResponseEntity.ok().body("Applied successfully");
+                return ResponseEntity.badRequest().body("Please upload a file or provide a cvId");
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

@@ -5,11 +5,13 @@ import com.hcmute.devhire.entities.CV;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 public interface ICVService {
     CV createCV(CVDTO cvDTO) throws Exception;
-    CV findByUserId(Long userId);
-    CVDTO findById(Long id);
-    CVDTO uploadCV(Long userId, MultipartFile file) throws IOException;
+    List<CV> findByUserId(Long userId);
+    CV findById(Long id);
+    CVDTO getById(Long id);
+    CVDTO uploadCV(Long userId, String name, MultipartFile file) throws IOException;
 }
