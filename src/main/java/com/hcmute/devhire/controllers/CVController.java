@@ -138,4 +138,28 @@ public class CVController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllCVs() {
+        try {
+            String username = JwtUtil.getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.badRequest().body("User not found");
+            }
+            User user = userService.findByUserName(username);
+            List<CV> cvs = cvService.findByUserId(user.getId());
+
+            if (cvs.isEmpty()) {
+                return ResponseEntity.badRequest().body("CV not found");
+            }
+
+            return ResponseEntity.ok(cvs.stream().map(cv -> CVDTO.builder()
+                    .id(cv.getId())
+                    .cvUrl(cv.getCvUrl())
+                    .name(cv.getName())
+                    .build()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
