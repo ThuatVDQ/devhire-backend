@@ -8,7 +8,6 @@ import com.hcmute.devhire.entities.Address;
 import com.hcmute.devhire.entities.Company;
 import com.hcmute.devhire.entities.Skill;
 import com.hcmute.devhire.responses.CompanyListResponse;
-import com.hcmute.devhire.services.CompanyService;
 import com.hcmute.devhire.services.ICompanyService;
 import com.hcmute.devhire.services.INotificationService;
 import jakarta.validation.Valid;
@@ -24,7 +23,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -257,6 +255,18 @@ public class CompanyController {
         try {
             int totalCompanies = companyService.countCompanies();
             return ResponseEntity.ok(totalCompanies);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/related")
+    public ResponseEntity<?> getRelatedCompanies(
+            @RequestParam Long companyId
+    ) {
+        try {
+            List<CompanyDTO> relatedCompanies = companyService.getRelatedCompanies(companyId);
+            return ResponseEntity.ok(relatedCompanies);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

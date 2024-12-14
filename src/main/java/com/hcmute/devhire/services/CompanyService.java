@@ -17,6 +17,7 @@ import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -265,5 +266,35 @@ public class CompanyService implements ICompanyService {
                 }
             }
         }
+    }
+
+    @Override
+    public List<CompanyDTO> getRelatedCompanies(Long companyId) throws Exception {
+        Company company = companyRepository.findById(companyId).orElseThrow(() -> new Exception("Company not found"));
+        Pageable pageable = PageRequest.of(0, 7);
+
+        List<Company> relatedCompanies = companyRepository.getRelatedCompanies(companyId, pageable);
+        if (relatedCompanies.size() < 6) {
+            Pageable randomPageable = PageRequest.of(0, 12);
+            List<Company> additionalCompanies = companyRepository.findRandomCompanies(randomPageable);
+
+            for (Company additionalCompany : additionalCompanies) {
+                if (relatedCompanies.size() >= 6) {
+                    break;
+                }
+                if (!relatedCompanies.contains(additionalCompany) && !additionalCompany.getId().equals(companyId)) {
+                    relatedCompanies.add(additionalCompany);
+                }
+            }
+        }
+        return relatedCompanies.stream()
+                .map(relatedCompany -> {
+                    try {
+                        return convertDTO(relatedCompany);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
     }
 }
