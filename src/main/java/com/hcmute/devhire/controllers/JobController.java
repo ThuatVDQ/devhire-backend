@@ -238,7 +238,7 @@ public class JobController {
                     Job job = jobService.findById(jobId);
                     notificationService.createAndSendNotification("CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
                     notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has updated CV for job " + job.getTitle());
-                    return ResponseEntity.ok().body("Updated CV for existing application using cvId");
+                    return ResponseEntity.ok().body("Updated CV for existing application using old CV");
                 } else {
                     // Tạo mới một đơn ứng tuyển nếu chưa ứng tuyển
                     ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
@@ -251,7 +251,7 @@ public class JobController {
                     sendNewApplicationNotification(jobId, letter, userDTO);
                     Job job = jobService.findById(jobId);
                     notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has applied for job " + job.getTitle());
-                    return ResponseEntity.ok().body("Applied successfully with cvId");
+                    return ResponseEntity.ok().body("Applied successfully with old CV");
                 }
             } else {
                 return ResponseEntity.badRequest().body("Please upload a file or provide a cvId");
