@@ -43,4 +43,5 @@ public interface IJobService {
 
     void increaseView(Long jobId) throws Exception;
     List<JobDTO> getRelatedJobs(Long jobId) throws Exception;
+    List<JobDTO> getJobsByCompanyIdForCandidate(Long companyId) throws Exception;
 }

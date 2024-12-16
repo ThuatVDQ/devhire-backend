@@ -667,6 +667,21 @@ public class JobService implements IJobService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<JobDTO> getJobsByCompanyIdForCandidate(Long companyId) throws Exception {
+        List<Job> jobs = jobRepository.findByCompanyId(companyId);
+        return jobs.stream()
+                .filter(job -> job.getStatus() == JobStatus.OPEN || job.getStatus() == JobStatus.HOT)
+                .map(job -> {
+                    try {
+                        return convertDTO(job, null);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
     private boolean getIsClose(Job job) {
         if (job.getStatus() == JobStatus.CLOSED)
             return  true;

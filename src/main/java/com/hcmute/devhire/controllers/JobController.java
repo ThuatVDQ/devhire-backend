@@ -327,6 +327,22 @@ public class JobController {
         }
     }
 
+    @GetMapping("/candidate/company")
+    public ResponseEntity<?> getJobsByCompanyForCandidate(
+            @RequestParam Long companyId
+    ) {
+        try {
+            List<JobDTO> jobDTO = jobService.getJobsByCompanyIdForCandidate(companyId);
+
+            if (jobDTO.isEmpty()) {
+                return ResponseEntity.badRequest().body("No jobs found for the company");
+            }
+            return ResponseEntity.ok(jobDTO);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/company/{companyId}")
     public ResponseEntity<?> getJobsByCompanyId(
             @PathVariable("companyId") Long companyId
