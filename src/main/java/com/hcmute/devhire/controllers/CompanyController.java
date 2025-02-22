@@ -3,6 +3,7 @@ package com.hcmute.devhire.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmute.devhire.DTOs.CompanyDTO;
+import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.Address;
 import com.hcmute.devhire.entities.Company;
@@ -23,6 +24,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +34,8 @@ import java.util.Set;
 public class CompanyController {
     private final ICompanyService companyService;
     private final INotificationService notificationService;
+    private final FileUtil fileUtil;
+
     @GetMapping("")
     public ResponseEntity<?> getAllCompanies(
             @RequestParam(defaultValue = "0") int page,
@@ -270,5 +274,28 @@ public class CompanyController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("/verify-license")
+    public ResponseEntity<?> verifyBusinessLicense (
+            @RequestParam("license") MultipartFile license
+    ) {
+        String username = JwtUtil.getAuthenticatedUsername();
+
+        if (username == null) {
+            return ResponseEntity.status(401).body("Unauthorized: No user found.");
+        }
+
+        if (!fileUtil.isImageFormatValid(license)) {
+            return ResponseEntity.badRequest().body("Invalid image format");
+        }
+        try {
+            String filename = fileUtil.storeFile(license);
+            companyService.updateLicense(filename, username);
+            return ResponseEntity.ok("License uploaded successfully");
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error occurred while saving file: " + e.getMessage());
+        }
+
     }
 }

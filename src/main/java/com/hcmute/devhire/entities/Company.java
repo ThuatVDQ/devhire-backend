@@ -41,6 +41,9 @@ public class Company extends BaseEntity {
     @Column(name="phone", length = 20)
     private String phone;
 
+    @Column(name = "phone_verified", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean phoneVerified;
+
     @Column(name="address", length = 255)
     private String address;
 
@@ -49,6 +52,12 @@ public class Company extends BaseEntity {
 
     @Column(name="status", length = 20)
     private String status;
+
+    @Column(name = "business_license", length = 255)
+    private String businessLicense;
+
+    @Column(name = "company_status", length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'PENDING'")
+    private String companyStatus;
 
     @OneToOne
     @JoinColumn(name = "created_by")

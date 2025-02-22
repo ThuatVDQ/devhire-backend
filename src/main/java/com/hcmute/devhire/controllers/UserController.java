@@ -271,7 +271,7 @@ public class UserController {
     @GetMapping("/auth/google")
     public ResponseEntity<?> loginGoogle() {
         try {
-            String authUrl = userService.generateAuthUrl();
+            String authUrl = userService.generateAuthUrl("google");
             if (authUrl == null) {
                 return ResponseEntity.badRequest().body("Invalid login type");
             }
@@ -289,7 +289,7 @@ public class UserController {
             HttpServletRequest request)
     {
         try {
-            UserDTO userInfo = userService.authenticateAndFetchProfile(code);
+            UserDTO userInfo = userService.authenticateAndFetchProfile(code, "google");
             if (userInfo == null) {
                 return ResponseEntity.badRequest().body("Failed to authenticate");
             }
@@ -305,6 +305,62 @@ public class UserController {
                     .build()
             );
         }
+    }
+
+    @GetMapping("/auth/facebook")
+    public ResponseEntity<?> loginFacebook() {
+        try {
+            String authUrl = userService.generateAuthUrl("facebook");
+            if (authUrl == null) {
+                return ResponseEntity.badRequest().body("Invalid login type");
+            }
+
+            return ResponseEntity.ok(authUrl);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to generate auth url");
+        }
+    }
+
+    @GetMapping("/auth/facebook/callback")
+    public ResponseEntity<?> callbackFacebook(
+            @RequestParam("code") String code,
+            @RequestParam("role_id") Long roleId,
+            HttpServletRequest request)
+    {
+        try {
+            UserDTO userInfo = userService.authenticateAndFetchProfile(code, "facebook");
+            if (userInfo == null) {
+                return ResponseEntity.badRequest().body("Failed to authenticate");
+            }
+            userInfo.setRoleId(roleId);
+
+            return this.loginFacebook(userInfo, request);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(LoginResponse
+                    .builder()
+                    .message("Login failed: " + e.getMessage())
+                    .token(null)
+                    .roleId(null)
+                    .build()
+            );
+        }
+    }
+
+    private ResponseEntity<?> loginFacebook(
+            @RequestBody UserDTO userDTO,
+            HttpServletRequest request
+    ) throws Exception {
+        String token = userService.loginFacebook(userDTO);
+
+        String username = jwtUtil.extractUsername(token);
+        User userDetail = userService.findByUserName(username);
+        LoginResponse loginResponse = LoginResponse.builder()
+                .message("Login successfully")
+                .token(token)
+                .roleId(userDetail.getRole().getId())
+                .build();
+
+        return ResponseEntity.ok().body(loginResponse);
     }
 
     @GetMapping("/getApplications")

@@ -29,4 +29,5 @@ public interface ICompanyService {
     int countCompaniesMonthly(int month, int year) throws Exception;
     void updateCompanyImages(List<String> oldImages, MultipartFile[] images, String username) throws IOException;
     List<CompanyDTO> getRelatedCompanies(Long companyId) throws Exception;
+    void updateLicense(String license, String username);
 }

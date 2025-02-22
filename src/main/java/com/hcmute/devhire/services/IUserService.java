@@ -31,8 +31,9 @@ public interface IUserService {
     List<User> findAdmins() throws Exception;
     void changeStatusUser(String status, Long id) throws Exception;
     List<UserDTO> get5LatestUsers() throws Exception;
-    String generateAuthUrl() throws Exception;
-    UserDTO authenticateAndFetchProfile(String code) throws IOException;
+    String generateAuthUrl(String loginType);
+    UserDTO authenticateAndFetchProfile(String code, String loginType) throws IOException;
     String loginGoogle(UserDTO userDTO) throws Exception;
     void contactAdmin(EmailRequestDTO emailRequestDTO) throws Exception;
+    String loginFacebook(UserDTO userDTO) throws Exception;
 }

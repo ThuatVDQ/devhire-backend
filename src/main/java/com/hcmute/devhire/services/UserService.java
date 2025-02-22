@@ -1,6 +1,8 @@
 package com.hcmute.devhire.services;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
@@ -22,12 +24,14 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.util.UriComponentsBuilder;
 import com.hcmute.devhire.components.JwtUtil;
 import org.springframework.web.client.RestTemplate;
 
@@ -49,6 +53,25 @@ public class UserService implements IUserService{
 
     @Value("${spring.security.oauth2.client.registration.google.user-info-uri}")
     private String googleUserInfoUri;
+
+    @Value("${spring.security.oauth2.client.registration.facebook.client-id}")
+    private String facebookClientId;
+
+    @Value("${spring.security.oauth2.client.registration.facebook.redirect-uri}")
+    private String facebookRedirectUri;
+
+    @Value("${spring.security.oauth2.client.registration.facebook.auth-uri}")
+    private String facebookAuthUri;
+
+    @Value("${spring.security.oauth2.client.registration.facebook.token-uri}")
+    private String facebookTokenUri;
+
+    @Value("${spring.security.oauth2.client.registration.facebook.client-secret}")
+    private String facebookClientSecret;
+
+    @Value("${spring.security.oauth2.client.registration.facebook.user-info-uri}")
+    private String facebookUserInfoUri;
+
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -258,48 +281,103 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public String generateAuthUrl() throws Exception {
-        try {
+    public String generateAuthUrl(String loginType) {
+        String url = "";
+        loginType = loginType.trim().toLowerCase();
+        if (loginType.equals("google")) {
             GoogleAuthorizationCodeRequestUrl urlBuilder = new GoogleAuthorizationCodeRequestUrl(
                     googleClientId,
                     googleRedirectUri,
                     Arrays.asList("email", "profile", "openid"));
-            return urlBuilder.build();
-        } catch (Exception e) {
-            throw new Exception("Failed to generate auth url");
+            url = urlBuilder.build();
+        } else if (loginType.equals("facebook")) {
+            url = UriComponentsBuilder
+                    .fromUriString(facebookAuthUri)
+                    .queryParam("client_id", facebookClientId)
+                    .queryParam("redirect_uri", facebookRedirectUri)
+                    .queryParam("scope", "email,public_profile")
+                    .queryParam("response_type", "code")
+                    .build()
+                    .toUriString();
         }
+        return url;
     }
 
     @Override
-    public UserDTO authenticateAndFetchProfile(String code) throws IOException {
+    public UserDTO authenticateAndFetchProfile(String code, String loginType) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+        String accessToken;
 
-        String accessToken = new GoogleAuthorizationCodeTokenRequest(
-                new NetHttpTransport(), new GsonFactory(),
-                googleClientId,
-                googleClientSecret,
-                code,
-                googleRedirectUri
-        ).execute().getAccessToken();
+        switch (loginType.toLowerCase()) {
+            case "google":
+                accessToken = new GoogleAuthorizationCodeTokenRequest(
+                        new NetHttpTransport(), new GsonFactory(),
+                        googleClientId,
+                        googleClientSecret,
+                        code,
+                        googleRedirectUri
+                ).execute().getAccessToken();
 
-        restTemplate.getInterceptors().add((req, body, executionContext) -> {
-            req.getHeaders().set("Authorization", "Bearer " + accessToken);
-            return executionContext.execute(req, body);
-        });
+                restTemplate.getInterceptors().add((req, body, executionContext) -> {
+                    req.getHeaders().set("Authorization", "Bearer " + accessToken);
+                    return executionContext.execute(req, body);
+                });
 
-        String responseBody = restTemplate.getForEntity(googleUserInfoUri, String.class).getBody();
+                String responseBody = restTemplate.getForEntity(googleUserInfoUri, String.class).getBody();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> userInfo = objectMapper.readValue(responseBody, Map.class);
+                ObjectMapper objectMapper = new ObjectMapper();
+                Map<String, Object> userInfo = objectMapper.readValue(responseBody, Map.class);
 
-        UserDTO userDTO = new UserDTO();
-        userDTO.setGoogleAccountId((String) userInfo.get("sub"));
-        userDTO.setFullName((String) userInfo.get("name"));
-        userDTO.setEmail((String) userInfo.get("email"));
-        userDTO.setAvatarUrl((String) userInfo.get("picture"));
+                UserDTO userDTO = new UserDTO();
+                userDTO.setGoogleAccountId((String) userInfo.get("sub"));
+                userDTO.setFullName((String) userInfo.get("name"));
+                userDTO.setEmail((String) userInfo.get("email"));
+                userDTO.setAvatarUrl((String) userInfo.get("picture"));
 
-        return userDTO;
+                return userDTO;
+
+            case "facebook":
+                String urlGetAccessToken = UriComponentsBuilder
+                        .fromUriString(facebookTokenUri)
+                        .queryParam("client_id", facebookClientId)
+                        .queryParam("redirect_uri", facebookRedirectUri)
+                        .queryParam("client_secret", facebookClientSecret)
+                        .queryParam("code", code)
+                        .toUriString();
+
+                ResponseEntity<String> response = restTemplate.getForEntity(urlGetAccessToken, String.class);
+                ObjectMapper facebookMapper = new ObjectMapper();
+                JsonNode facebookNode = facebookMapper.readTree(response.getBody());
+                accessToken = facebookNode.get("access_token").asText();
+
+                restTemplate.getInterceptors().add((req, body, executionContext) -> {
+                    req.getHeaders().set("Authorization", "Bearer " + accessToken);
+                    return executionContext.execute(req, body);
+                });
+
+                String facebookResponseBody = restTemplate.getForEntity(facebookUserInfoUri, String.class).getBody();
+                Map<String, Object> facebookUserInfo = facebookMapper.readValue(facebookResponseBody, Map.class);
+
+                UserDTO facebookUserDTO = new UserDTO();
+                facebookUserDTO.setGoogleAccountId((String) facebookUserInfo.get("id")); // Facebook user ID
+                facebookUserDTO.setFullName((String) facebookUserInfo.get("name"));
+                facebookUserDTO.setEmail((String) facebookUserInfo.get("email"));
+
+                if (facebookUserInfo.containsKey("picture")) {
+                    Map<String, Object> pictureData = (Map<String, Object>) facebookUserInfo.get("picture");
+                    if (pictureData.containsKey("data")) {
+                        Map<String, Object> pictureUrl = (Map<String, Object>) pictureData.get("data");
+                        facebookUserDTO.setAvatarUrl((String) pictureUrl.get("url"));
+                    }
+                }
+
+                return facebookUserDTO;
+
+            default:
+                System.out.println("Unsupported login type: " + loginType);
+                return null;
+        }
     }
 
     @Override
@@ -309,7 +387,7 @@ public class UserService implements IUserService{
                 userDTO.getRoleId()).orElseThrow(() -> new Exception("Role not found"));
         Optional<User> existingUser =userRepository.findByEmail(userDTO.getEmail());
         if (userDTO.isGoogleAccountIdValid()) {
-            if (optionalUser.isEmpty()) {
+            if (optionalUser.isEmpty() && existingUser.isEmpty()) {
                 User newUser = User.builder()
                         .fullName(Optional.ofNullable(userDTO.getFullName()).orElse(""))
                         .email(Optional.ofNullable(userDTO.getEmail()).orElse(""))
@@ -348,6 +426,41 @@ public class UserService implements IUserService{
         } catch (MessagingException e) {
             throw new Exception("Failed to send email");
         }
+    }
+
+    @Override
+    public String loginFacebook(UserDTO userDTO) throws Exception {
+        Optional<User> optionalUser = userRepository.findByFacebookAccountId(userDTO.getGoogleAccountId());
+        Role role = roleRepository.findById(
+                userDTO.getRoleId()).orElseThrow(() -> new Exception("Role not found"));
+        Optional<User> existingUser =userRepository.findByEmail(userDTO.getEmail());
+        if (userDTO.isFacebookAccountIdValid()) {
+            if (optionalUser.isEmpty() && existingUser.isEmpty()) {
+                User newUser = User.builder()
+                        .fullName(Optional.ofNullable(userDTO.getFullName()).orElse(""))
+                        .email(Optional.ofNullable(userDTO.getEmail()).orElse(""))
+                        .avatarUrl(Optional.ofNullable(userDTO.getAvatarUrl()).orElse(""))
+                        .role(role)
+                        .facebookAccountId(userDTO.getFacebookAccountId())
+                        .password("") // Mật khẩu trống cho đăng nhập mạng xã hội
+                        .enabled(true)
+                        .status(Status.ACTIVE)
+                        .build();
+
+                newUser = userRepository.save(newUser);
+                optionalUser = Optional.of(newUser);
+            } else if (existingUser.isPresent()) {
+                User user = existingUser.get();
+                user.setFacebookAccountId(userDTO.getFacebookAccountId());
+                userRepository.save(user);
+                return this.login(user.getEmail(), "", user.getRole().getId());
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid social account information.");
+        }
+        User user = optionalUser.get();
+
+        return this.login(user.getEmail(), "", user.getRole().getId());
     }
 
     private String generateHtmlMessage(EmailRequestDTO emailRequestDTO) {

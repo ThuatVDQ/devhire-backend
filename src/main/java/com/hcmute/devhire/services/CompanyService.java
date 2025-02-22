@@ -297,4 +297,11 @@ public class CompanyService implements ICompanyService {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void updateLicense(String license, String username) {
+        Company company = companyRepository.findByUser(username);
+        company.setBusinessLicense(license);
+        companyRepository.save(company);
+    }
 }

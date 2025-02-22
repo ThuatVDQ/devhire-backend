@@ -18,6 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     Optional<User> findByPhone(String phone);
     Optional<User> findByEmail(String email);
     Optional<User> findByGoogleAccountId(String id);
+    Optional<User> findByFacebookAccountId(String id);
     @Query("SELECT COUNT(u) FROM User u")
     int countUsers();
 

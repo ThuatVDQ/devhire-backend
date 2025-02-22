@@ -45,7 +45,14 @@ public class UserDTO {
     @JsonProperty("google_account_id")
     private String googleAccountId;
 
+    @JsonProperty("facebook_account_id")
+    private String facebookAccountId;
+
     public boolean isGoogleAccountIdValid() {
         return googleAccountId != null && !googleAccountId.isEmpty();
+    }
+
+    public boolean isFacebookAccountIdValid() {
+        return facebookAccountId != null && !facebookAccountId.isEmpty();
     }
 }
