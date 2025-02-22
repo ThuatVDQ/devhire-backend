@@ -108,6 +108,10 @@ public class CompanyService implements ICompanyService {
                 .totalJob(jobs.size())
                 .totalReviews(company.getCompanyReviews().size())
                 .images(images == null ? List.of() : images)
+                .phoneVerified(company.getPhoneVerified())
+                .companyStatus(company.getCompanyStatus())
+                .businessLicense(company.getBusinessLicense() == null ? "" : company.getBusinessLicense())
+
                 .build();
     }
     @Override
@@ -152,6 +156,14 @@ public class CompanyService implements ICompanyService {
         }
         if (companyDTO.getAddress() != null) {
             company.setAddress(companyDTO.getAddress());
+        }
+
+        if (companyDTO.getEmail() != null) {
+            company.setEmail(companyDTO.getEmail());
+        }
+
+        if (companyDTO.getPhone() != null) {
+            company.setPhone(companyDTO.getPhone());
         }
 
         return companyRepository.save(company);

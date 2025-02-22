@@ -39,6 +39,14 @@ public class CompanyDTO {
     @JsonProperty("web_url")
     private String webUrl;
 
+    @JsonProperty("phone_verified")
+    private boolean phoneVerified;
+
+    @JsonProperty("company_status")
+    private String companyStatus;
+
+    @JsonProperty("business_license")
+    private String businessLicense;
 
     @JsonProperty("images")
     private List<String> images;

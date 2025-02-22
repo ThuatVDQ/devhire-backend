@@ -296,6 +296,40 @@ public class CompanyController {
         } catch (IOException e) {
             return ResponseEntity.status(500).body("Error occurred while saving file: " + e.getMessage());
         }
+    }
 
+    @GetMapping("/check-license")
+    public ResponseEntity<?> checkLicense() {
+        String username = JwtUtil.getAuthenticatedUsername();
+
+        if (username == null) {
+            return ResponseEntity.status(401).body("Unauthorized: No user found.");
+        }
+
+        try {
+            CompanyDTO companyDTO = companyService.getByUser(username);
+            if (companyDTO.getBusinessLicense() == null) {
+                return ResponseEntity.ok("License not uploaded");
+            }
+            return ResponseEntity.ok("License uploaded");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error occurred: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/company-status")
+    public ResponseEntity<?> getCompanyStatus() {
+        String username = JwtUtil.getAuthenticatedUsername();
+
+        if (username == null) {
+            return ResponseEntity.status(401).body("Unauthorized: No user found.");
+        }
+
+        try {
+            CompanyDTO companyDTO = companyService.getByUser(username);
+            return ResponseEntity.ok(companyDTO.getCompanyStatus());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error occurred: " + e.getMessage());
+        }
     }
 }
