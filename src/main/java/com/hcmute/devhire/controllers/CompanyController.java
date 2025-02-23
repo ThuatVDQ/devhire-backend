@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -328,6 +329,28 @@ public class CompanyController {
         try {
             CompanyDTO companyDTO = companyService.getByUser(username);
             return ResponseEntity.ok(companyDTO.getCompanyStatus());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error occurred: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/approve-company")
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> approveCompany(@RequestParam Long companyId) {
+        try {
+            companyService.approveCompany(companyId);
+            return ResponseEntity.ok("Company approved successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error occurred: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/reject-company")
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> rejectCompany(@RequestParam Long companyId, @RequestParam String reason) {
+        try {
+            companyService.rejectCompany(companyId, reason);
+            return ResponseEntity.ok("Company rejected successfully");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error occurred: " + e.getMessage());
         }

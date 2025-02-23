@@ -1,6 +1,7 @@
 package com.hcmute.devhire.configurations;
 
 import com.hcmute.devhire.components.JwtFilter;
+import com.hcmute.devhire.entities.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -16,11 +17,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
 import java.util.Collections;
 
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@EnableWebMvc
 public class WebSecurityConfig {
     private final JwtFilter jwtFilter;
 

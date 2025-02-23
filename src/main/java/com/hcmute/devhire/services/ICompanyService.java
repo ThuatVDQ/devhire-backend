@@ -30,4 +30,6 @@ public interface ICompanyService {
     void updateCompanyImages(List<String> oldImages, MultipartFile[] images, String username) throws IOException;
     List<CompanyDTO> getRelatedCompanies(Long companyId) throws Exception;
     void updateLicense(String license, String username);
+    void approveCompany(Long companyId) throws Exception;
+    void rejectCompany(Long companyId, String reason) throws Exception;
 }

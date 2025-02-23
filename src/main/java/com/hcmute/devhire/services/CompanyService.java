@@ -5,12 +5,14 @@ import com.hcmute.devhire.DTOs.CompanyDTO;
 import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
 import com.hcmute.devhire.components.FileUtil;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.CompanyImageRepository;
 import com.hcmute.devhire.repositories.CompanyRepository;
 import com.hcmute.devhire.repositories.JobRepository;
 import com.hcmute.devhire.repositories.specification.CompanySpecifications;
 import com.hcmute.devhire.repositories.specification.JobSpecifications;
+import com.hcmute.devhire.utils.CompanyStatus;
 import com.hcmute.devhire.utils.JobStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -38,6 +40,7 @@ public class CompanyService implements ICompanyService {
     private final CompanyImageRepository companyImageRepository;
     private final FileUtil fileUtil;
     private final ICompanyImageService companyImageService;
+    private final INotificationService notificationService;
 
     @Override
     public Company createCompany(CompanyDTO companyDTO, String username) throws Exception {
@@ -315,5 +318,34 @@ public class CompanyService implements ICompanyService {
         Company company = companyRepository.findByUser(username);
         company.setBusinessLicense(license);
         companyRepository.save(company);
+    }
+
+    @Override
+    public void approveCompany(Long companyId) throws Exception {
+        Company company = companyRepository.findById(companyId).orElse(null);
+        String username = JwtUtil.getAuthenticatedUsername();
+        User user = userService.findByUserName(username);
+
+        if (company != null && user.getRole().getId() == 1) {
+            company.setCompanyStatus(String.valueOf(CompanyStatus.ACTIVE));
+            companyRepository.save(company);
+            notificationService.createAndSendNotification("Your company has been approved", company.getCreatedBy().getUsername());
+        } else {
+            throw new RuntimeException("Company not found or you are not authorized to approve company");
+        }
+    }
+
+    @Override
+    public void rejectCompany(Long companyId, String reason) throws Exception {
+        Company company = companyRepository.findById(companyId).orElse(null);
+        String username = JwtUtil.getAuthenticatedUsername();
+        User user = userService.findByUserName(username);
+        if (company != null && user.getRole().getId() == 1) {
+            company.setCompanyStatus(String.valueOf(CompanyStatus.REJECTED));
+            companyRepository.save(company);
+            notificationService.createAndSendNotification("Your company has been rejected with reason: " + reason, company.getCreatedBy().getUsername());
+        } else {
+            throw new RuntimeException("Company not found");
+        }
     }
 }
