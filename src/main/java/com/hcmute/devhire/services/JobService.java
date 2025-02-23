@@ -683,17 +683,16 @@ public class JobService implements IJobService {
     }
 
     @Override
-    public List<JobDTO> getJobsByCategoryIds(List<Long> categoryIds) {
-        List<Job> jobs = jobRepository.getJobsByCategoryIds(categoryIds);
-        return jobs.stream()
-                .map(job -> {
-                    try {
-                        return convertDTO(job, null);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
+    public Page<JobDTO> getJobsByCategoryIds(PageRequest pageRequest, List<Long> categoryIds) {
+        List<JobStatus> statuses = List.of(JobStatus.OPEN, JobStatus.HOT);
+        Page<Job> jobs = jobRepository.getJobsByCategoryIds(categoryIds, statuses, pageRequest);
+        return jobs.map(job -> {
+            try {
+                return convertDTO(job, null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private boolean getIsClose(Job job) {

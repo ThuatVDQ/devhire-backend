@@ -44,5 +44,5 @@ public interface IJobService {
     void increaseView(Long jobId) throws Exception;
     List<JobDTO> getRelatedJobs(Long jobId) throws Exception;
     List<JobDTO> getJobsByCompanyIdForCandidate(Long companyId) throws Exception;
-    List<JobDTO> getJobsByCategoryIds(List<Long> categoryIds);
+    Page<JobDTO> getJobsByCategoryIds(PageRequest pageRequest, List<Long> categoryIds);
 }

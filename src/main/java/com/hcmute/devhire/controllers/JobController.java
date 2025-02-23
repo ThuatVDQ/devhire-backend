@@ -707,13 +707,31 @@ public class JobController {
     }
 
     @GetMapping("/category")
-    public ResponseEntity<?> getJobsByCategoryIds(@RequestParam("ids") String ids) {
+    public ResponseEntity<?> getJobsByCategoryIds(
+            @RequestParam("ids") String ids,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+            ) {
         try {
+            String username = JwtUtil.getAuthenticatedUsername();
+            PageRequest pageRequest = PageRequest.of(
+                    page, limit,
+                    Sort.by("id").ascending()
+            );
             List<Long> categoryIds = Arrays.stream(ids.split(","))
                     .map(Long::parseLong)
                     .toList();
-            List<JobDTO> jobs = jobService.getJobsByCategoryIds(categoryIds);
-            return ResponseEntity.ok(jobs);
+            Page<JobDTO> jobs = jobService.getJobsByCategoryIds(pageRequest, categoryIds);
+
+            JobListResponse response = JobListResponse.builder()
+                    .jobs(jobs.getContent())
+                    .currentPage(page)
+                    .pageSize(limit)
+                    .totalPages(jobs.getTotalPages())
+                    .totalElements(jobs.getTotalElements())
+                    .build();
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
