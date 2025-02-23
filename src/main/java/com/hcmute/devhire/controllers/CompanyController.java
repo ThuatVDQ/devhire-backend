@@ -355,4 +355,5 @@ public class CompanyController {
             return ResponseEntity.status(500).body("Error occurred: " + e.getMessage());
         }
     }
+
 }
