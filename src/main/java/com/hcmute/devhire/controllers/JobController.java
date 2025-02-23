@@ -23,8 +23,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @RestController
 @RequiredArgsConstructor
@@ -699,6 +701,19 @@ public class JobController {
         try {
             List<JobDTO> relatedJobs = jobService.getRelatedJobs(jobId);
             return ResponseEntity.ok(relatedJobs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/category")
+    public ResponseEntity<?> getJobsByCategoryIds(@RequestParam("ids") String ids) {
+        try {
+            List<Long> categoryIds = Arrays.stream(ids.split(","))
+                    .map(Long::parseLong)
+                    .toList();
+            List<JobDTO> jobs = jobService.getJobsByCategoryIds(categoryIds);
+            return ResponseEntity.ok(jobs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

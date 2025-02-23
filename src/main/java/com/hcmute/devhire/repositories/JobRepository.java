@@ -57,4 +57,7 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
             "AND j.id != :jobId " +
             "AND j.status IN :statuses")
     List<Job> getRelatedJobs(@Param("jobId") Long jobId, @Param("statuses") List<JobStatus> statuses);
+
+    @Query("SELECT j FROM Job j WHERE j.category.id IN :categoryIds")
+    List<Job> getJobsByCategoryIds(@Param("categoryIds") List<Long> categoryIds);
 }

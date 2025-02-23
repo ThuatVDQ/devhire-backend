@@ -682,6 +682,20 @@ public class JobService implements IJobService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<JobDTO> getJobsByCategoryIds(List<Long> categoryIds) {
+        List<Job> jobs = jobRepository.getJobsByCategoryIds(categoryIds);
+        return jobs.stream()
+                .map(job -> {
+                    try {
+                        return convertDTO(job, null);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
     private boolean getIsClose(Job job) {
         if (job.getStatus() == JobStatus.CLOSED)
             return  true;
