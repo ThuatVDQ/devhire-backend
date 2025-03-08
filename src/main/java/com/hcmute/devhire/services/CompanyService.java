@@ -62,7 +62,8 @@ public class CompanyService implements ICompanyService {
                 .phone(companyDTO.getPhone())
                 .webUrl(companyDTO.getWebUrl() == null ? "" : companyDTO.getWebUrl())
                 .scale(companyDTO.getScale() == 0 ? 0 : companyDTO.getScale())
-                .status("ACTIVE")
+                .phoneVerified(false)
+                .companyStatus(String.valueOf(CompanyStatus.PENDING))
                 .createdBy(userService.findById(user.getId()))
                 .build();
         return companyRepository.save(newCompany);
@@ -107,7 +108,6 @@ public class CompanyService implements ICompanyService {
                 .phone(company.getPhone())
                 .webUrl(company.getWebUrl())
                 .scale(company.getScale())
-                .status(company.getStatus())
                 .totalJob(jobs.size())
                 .totalReviews(company.getCompanyReviews().size())
                 .images(images == null ? List.of() : images)

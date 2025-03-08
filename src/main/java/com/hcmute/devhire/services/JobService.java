@@ -695,6 +695,11 @@ public class JobService implements IJobService {
         });
     }
 
+    @Override
+    public Long countJobsByCategoryId(Long categoryId) {
+        return jobRepository.countJobsByCategoryId(categoryId);
+    }
+
     private boolean getIsClose(Job job) {
         if (job.getStatus() == JobStatus.CLOSED)
             return  true;

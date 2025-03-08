@@ -1,5 +1,6 @@
 package com.hcmute.devhire.DTOs;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Data
@@ -9,4 +10,7 @@ import lombok.*;
 public class CategoryDTO {
     private Long id;
     private String name;
+
+    @JsonProperty("total_jobs")
+    private Long totalJobs;
 }

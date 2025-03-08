@@ -2,7 +2,6 @@ package com.hcmute.devhire.entities;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.List;
@@ -49,9 +48,6 @@ public class Company extends BaseEntity {
 
     @Column(name="web_url", length = 255)
     private String webUrl;
-
-    @Column(name="status", length = 20)
-    private String status;
 
     @Column(name = "business_license", length = 255)
     private String businessLicense;
