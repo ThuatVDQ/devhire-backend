@@ -11,10 +11,13 @@ import lombok.*;
 @Setter
 public class PaymentDTO {
     @JsonProperty("amount")
-    private Long amount; // Số tiền cần thanh toán
+    private Double amount; // Số tiền cần thanh toán
 
-    @JsonProperty("bankCode")
+    @JsonProperty("bank_code")
     private String bankCode; // Mã ngân hàng
+
+    @JsonProperty("subcription_id")
+    private Long subcriptionId; // Mã gói subcription
 
     @JsonProperty("language")
     private String language; // Ngôn ngữ giao diện thanh toán (vd: "vn", "en")

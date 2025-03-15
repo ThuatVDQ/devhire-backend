@@ -31,7 +31,7 @@ public class VNPayService implements IVNPayService {
         String version = "2.1.0";
         String command = "pay";
         String orderType = "other";
-        long amount = paymentDto.getAmount() * 100; // Số tiền cần nhân với 100
+        Long amount = (long) (paymentDto.getAmount() * 25000); // Số tiền cần nhân với 100
         String bankCode = paymentDto.getBankCode();
 
         String transactionReference = vnPayUtils.getRandomNumber(8); // Mã giao dịch
@@ -50,7 +50,7 @@ public class VNPayService implements IVNPayService {
             params.put("vnp_BankCode", bankCode);
         }
         params.put("vnp_TxnRef", transactionReference);
-        params.put("vnp_OrderInfo", "Thanh toan don hang:" + transactionReference);
+        params.put("vnp_OrderInfo", String.valueOf(paymentDto.getSubcriptionId()));
         params.put("vnp_OrderType", orderType);
 
         String locale = paymentDto.getLanguage();

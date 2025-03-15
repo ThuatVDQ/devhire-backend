@@ -3,7 +3,9 @@ package com.hcmute.devhire.controllers;
 import com.hcmute.devhire.DTOs.PaymentDTO;
 import com.hcmute.devhire.DTOs.PaymentQueryDTO;
 import com.hcmute.devhire.DTOs.PaymentRefundDTO;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.responses.ResponseObject;
+import com.hcmute.devhire.services.IPaymentService;
 import com.hcmute.devhire.services.IVNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -11,10 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -24,6 +23,7 @@ import java.util.List;
 @RequestMapping("/api/payments")
 public class PaymentController {
     private final IVNPayService vnPayService;
+    private final IPaymentService paymentService;
 
     @PostMapping("/create_payment_url")
     public ResponseEntity<ResponseObject> createPayment(@RequestBody PaymentDTO paymentRequest, HttpServletRequest request) {
@@ -88,6 +88,19 @@ public class PaymentController {
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .data(null)
                     .build());
+        }
+    }
+
+    @GetMapping("/payment-callback")
+    public ResponseEntity<?> handlePaymentCallback(HttpServletRequest request) {
+        String username = JwtUtil.getAuthenticatedUsername();
+        String status = request.getParameter("vnp_ResponseCode");
+        if (status.equals("00")) {
+            String subscriptionId = request.getParameter("vnp_OrderInfo");
+            paymentService.completePayment(username, Long.valueOf(subscriptionId));
+            return ResponseEntity.ok("Payment successful and subscription activated.");
+        } else {
+            return ResponseEntity.badRequest().body("Payment failed.");
         }
     }
 }
