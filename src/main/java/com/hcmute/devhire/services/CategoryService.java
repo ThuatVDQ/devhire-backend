@@ -3,7 +3,6 @@ package com.hcmute.devhire.services;
 import com.hcmute.devhire.DTOs.CategoryDTO;
 import com.hcmute.devhire.entities.Category;
 import com.hcmute.devhire.repositories.CategoryRepository;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

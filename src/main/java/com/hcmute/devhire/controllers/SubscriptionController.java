@@ -1,8 +1,10 @@
 package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.SubscriptionDTO;
+import com.hcmute.devhire.DTOs.SubscriptionRequestDTO;
 import com.hcmute.devhire.entities.Subscription;
 import com.hcmute.devhire.services.ISubscriptionService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -79,5 +81,10 @@ public class SubscriptionController {
             return ResponseEntity.badRequest()
                     .body("Error: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/purchase")
+    public ResponseEntity<?> purchaseSubscription(@RequestBody SubscriptionRequestDTO subscriptionRequestDTO, HttpServletRequest request) {
+        return ResponseEntity.ok(subscriptionService.purchaseSubscription(subscriptionRequestDTO, request));
     }
 }

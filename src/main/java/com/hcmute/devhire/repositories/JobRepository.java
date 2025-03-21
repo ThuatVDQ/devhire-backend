@@ -60,4 +60,7 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
     @Query("SELECT j FROM Job j WHERE j.category.id IN :categoryIds AND j.status IN :statuses")
     Page<Job> getJobsByCategoryIds(@Param("categoryIds") List<Long> categoryIds, @Param("statuses") List<JobStatus> statuses, Pageable pageable);
+
+    @Query("SELECT COUNT(j) FROM Job j WHERE j.category.id = :categoryId")
+    Long countJobsByCategoryId(@Param("categoryId") Long categoryId);
 }

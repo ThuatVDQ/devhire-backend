@@ -4,6 +4,7 @@ import com.hcmute.devhire.DTOs.CategoryDTO;
 import com.hcmute.devhire.entities.Category;
 import com.hcmute.devhire.services.CategoryService;
 import com.hcmute.devhire.services.ICategoryService;
+import com.hcmute.devhire.services.IJobService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +17,15 @@ import java.util.List;
 public class CategoryController {
 
     private final ICategoryService categoryService;
+    private final IJobService jobService;
 
     @GetMapping("")
     public ResponseEntity<?> getAllCategories() {
         List<CategoryDTO> categories = categoryService.getAllCategory();
+        categories.stream().map(category -> {
+            category.setTotalJobs(jobService.countJobsByCategoryId(category.getId()));
+            return category;
+        }).toList();
         return ResponseEntity.ok(categories);
     }
 
