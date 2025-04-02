@@ -29,7 +29,7 @@ public class PaymentService implements IPaymentService {
         if (paymentMethod.equals("VNPay")) {
             PaymentDTO paymentDTO = PaymentDTO.builder()
                     .amount(subscription.getPrice())
-                    .subcriptionId(subscription.getId())
+                    .subscriptionId(subscription.getId())
                     .language("vn")
                     .build();
             return vnPayService.createPaymentUrl(paymentDTO, request);

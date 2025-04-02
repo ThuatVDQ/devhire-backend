@@ -50,7 +50,7 @@ public class VNPayService implements IVNPayService {
             params.put("vnp_BankCode", bankCode);
         }
         params.put("vnp_TxnRef", transactionReference);
-        params.put("vnp_OrderInfo", String.valueOf(paymentDto.getSubcriptionId()));
+        params.put("vnp_OrderInfo", String.valueOf(paymentDto.getSubscriptionId()));
         params.put("vnp_OrderType", orderType);
 
         String locale = paymentDto.getLanguage();
