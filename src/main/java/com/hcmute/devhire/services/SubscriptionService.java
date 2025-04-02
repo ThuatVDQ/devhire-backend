@@ -31,7 +31,6 @@ public class SubscriptionService implements ISubscriptionService {
         newSubscription.setBenefit(subscriptionDTO.getBenefit());
         newSubscription.setPrice(subscriptionDTO.getPrice());
         newSubscription.setDescription(subscriptionDTO.getDescription());
-        newSubscription.setAmount(subscriptionDTO.getAmount());
         newSubscription.setStatus(Status.ACTIVE);
 
         return subscriptionRepository.save(newSubscription);
@@ -43,6 +42,12 @@ public class SubscriptionService implements ISubscriptionService {
         return subscriptions.map(this::convertDTO);
     }
 
+    @Override
+    public Page<SubscriptionDTO> getActiveSubscriptions(PageRequest pageRequest) {
+        Page<Subscription> subscriptions = subscriptionRepository.findByStatus(Status.ACTIVE, pageRequest);
+        return subscriptions.map(this::convertDTO);
+    }
+
     public SubscriptionDTO convertDTO(Subscription subscription) {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setId(subscription.getId());
@@ -50,7 +55,6 @@ public class SubscriptionService implements ISubscriptionService {
         subscriptionDTO.setBenefit(subscription.getBenefit());
         subscriptionDTO.setPrice(subscription.getPrice());
         subscriptionDTO.setDescription(subscription.getDescription());
-        subscriptionDTO.setAmount(subscription.getAmount());
         subscriptionDTO.setStatus(subscription.getStatus());
         return subscriptionDTO;
     }
