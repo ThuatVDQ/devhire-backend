@@ -22,7 +22,5 @@ public class SubscriptionDTO {
 
     private String description;
 
-    private int amount;
-
     private Status status;
 }

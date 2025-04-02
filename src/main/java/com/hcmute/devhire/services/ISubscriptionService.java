@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 public interface ISubscriptionService {
     Subscription addSubscription(SubscriptionDTO subscriptionDTO);
     Page<SubscriptionDTO> getAllSubscriptions(PageRequest pageRequest);
+    Page<SubscriptionDTO> getActiveSubscriptions(PageRequest pageRequest);
     void deleteSubscription(Long id);
     void activeSubscription(Long id);
     boolean isSubscriptionExist(String name);

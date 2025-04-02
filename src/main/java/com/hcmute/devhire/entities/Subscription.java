@@ -32,9 +32,6 @@ public class Subscription extends BaseEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "amount")
-    private int amount;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
     private Status status;

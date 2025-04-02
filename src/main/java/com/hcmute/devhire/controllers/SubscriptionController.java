@@ -20,7 +20,7 @@ import java.util.List;
 public class SubscriptionController {
     private final ISubscriptionService subscriptionService;
 
-    @GetMapping("")
+    @GetMapping("/all")
     public ResponseEntity<?> getAllSubscriptions(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "limit", defaultValue = "10") int limit
@@ -32,6 +32,25 @@ public class SubscriptionController {
                     Sort.by("id").ascending()
             );
             Page<SubscriptionDTO> subscriptions = subscriptionService.getAllSubscriptions(pageRequest);
+            return ResponseEntity.ok(subscriptions.getContent());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("")
+    public ResponseEntity<?> getActiveSubscriptions(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "limit", defaultValue = "10") int limit
+
+    ) {
+        try {
+            PageRequest pageRequest = PageRequest.of(
+                    page, limit,
+                    Sort.by("id").ascending()
+            );
+            Page<SubscriptionDTO> subscriptions = subscriptionService.getActiveSubscriptions(pageRequest);
             return ResponseEntity.ok(subscriptions.getContent());
         } catch (Exception e) {
             return ResponseEntity.badRequest()
