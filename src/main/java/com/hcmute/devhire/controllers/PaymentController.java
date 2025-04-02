@@ -92,12 +92,12 @@ public class PaymentController {
     }
 
     @GetMapping("/payment-callback")
-    public ResponseEntity<?> handlePaymentCallback(HttpServletRequest request) {
+    public ResponseEntity<?> handlePaymentCallback(@RequestParam String vnp_ResponseCode,
+                                                   @RequestParam String vnp_OrderInfo) {
         String username = JwtUtil.getAuthenticatedUsername();
-        String status = request.getParameter("vnp_ResponseCode");
-        if (status.equals("00")) {
-            String subscriptionId = request.getParameter("vnp_OrderInfo");
-            paymentService.completePayment(username, Long.valueOf(subscriptionId));
+
+        if (vnp_ResponseCode.equals("00")) {
+            paymentService.completePayment(username, Long.valueOf(vnp_OrderInfo));
             return ResponseEntity.ok("Payment successful and subscription activated.");
         } else {
             return ResponseEntity.badRequest().body("Payment failed.");
