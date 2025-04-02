@@ -16,8 +16,8 @@ public class PaymentDTO {
     @JsonProperty("bank_code")
     private String bankCode; // Mã ngân hàng
 
-    @JsonProperty("subcription_id")
-    private Long subcriptionId; // Mã gói subcription
+    @JsonProperty("subscription_id")
+    private Long subscriptionId; // Mã gói subcription
 
     @JsonProperty("language")
     private String language; // Ngôn ngữ giao diện thanh toán (vd: "vn", "en")
