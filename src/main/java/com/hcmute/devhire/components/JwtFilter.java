@@ -52,9 +52,15 @@ public class JwtFilter extends OncePerRequestFilter {
                     }
                 }
             }
+            if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                System.out.println("Authentication already exists!");
+            }
             filterChain.doFilter(request, response);
+
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Unauthorized: " + e.getMessage());
         }
     }
     private boolean isBypassToken(@NotNull HttpServletRequest request) {
