@@ -22,7 +22,15 @@ public class JobNotificationService implements IJobNotificationService {
     @Override
     public String subscribe(String email) throws Exception {
         if (subscriptionRepository.findByEmail(email).isPresent()) {
-            throw new Exception("Email đã đăng ký nhận thông báo.");
+            if (subscriptionRepository.findByEmail(email).get().isStatus()) {
+                throw new Exception("Email đã đăng ký nhận thông báo.");
+            } else {
+                JobNotificationSubscription subscription = subscriptionRepository.findByEmail(email).get();
+                subscription.setStatus(true);
+                subscription.setCreatedAt(LocalDateTime.now());
+                subscriptionRepository.save(subscription);
+                return "Đăng ký nhận thông báo thành công!";
+            }
         }
 
         JobNotificationSubscription subscription = new JobNotificationSubscription();
