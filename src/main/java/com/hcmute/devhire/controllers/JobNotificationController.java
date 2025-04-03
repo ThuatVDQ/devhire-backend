@@ -20,6 +20,7 @@ public class JobNotificationController {
         String username = JwtUtil.getAuthenticatedUsername();
         try {
             String response = jobNotificationService.subscribe(username);
+            jobNotificationService.sendJobNotifications();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

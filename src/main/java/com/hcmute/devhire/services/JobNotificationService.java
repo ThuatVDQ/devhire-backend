@@ -35,6 +35,7 @@ public class JobNotificationService implements IJobNotificationService {
 
         JobNotificationSubscription subscription = new JobNotificationSubscription();
         subscription.setEmail(email);
+        subscription.setStatus(true);
         subscription.setCreatedAt(LocalDateTime.now());
         subscriptionRepository.save(subscription);
 

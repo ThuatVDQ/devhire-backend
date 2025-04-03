@@ -9,7 +9,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,14 +56,23 @@ public class EmailService implements IEmailService {
                 .append("<h3>Here are some new job opportunities for you:</h3>")
                 .append("<table>")
                 .append("<tr><th>Job Title</th><th>Company</th><th>Salary</th><th>Location</th><th>Deadline</th></tr>");
-
+        DecimalFormat salaryFormat = new DecimalFormat("#,###");
         // Iterate through the jobs list and add them to the table
         for (JobDTO job : jobs) {
+            String salaryStart = job.getSalaryStart() != null ? salaryFormat.format(job.getSalaryStart()) : "N/A";
+            String salaryEnd = job.getSalaryEnd() != null ? salaryFormat.format(job.getSalaryEnd()) : "N/A";
+
             emailContent.append("<tr>")
                     .append("<td>").append(job.getTitle()).append("</td>")
                     .append("<td>").append(job.getCompany().getName()).append("</td>")
-                    .append("<td>").append(job.getSalaryStart()).append(" - ").append(job.getSalaryEnd()).append("</td>")
-                    .append("<td>").append(job.getAddresses().stream().map(AddressDTO::getCity)).append("</td>")
+                    .append("<td>").append(salaryStart).append(" - ").append(salaryEnd).append("</td>")
+                    .append("<td>").append(
+                            job.getAddresses().stream()
+                                    .map(AddressDTO::getCity)
+                                    .filter(Objects::nonNull)
+                                    .distinct()
+                                    .collect(Collectors.joining(", "))
+                    ).append("</td>")
                     .append("<td>").append(job.getDeadline()).append("</td>")
                     .append("</tr>");
         }

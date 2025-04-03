@@ -28,11 +28,11 @@ public class JobDTO {
     @NotNull(message = "Salary start cannot be blank")
     @Min(value = 0, message = "Salary start must be greater than 0")
     @JsonProperty("salary_start")
-    private double salaryStart;
+    private Double salaryStart;
 
     @NotNull(message = "Salary start cannot be blank")
     @JsonProperty("salary_end")
-    private double salaryEnd;
+    private Double salaryEnd;
 
     @NotBlank(message = "Type cannot be blank")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
