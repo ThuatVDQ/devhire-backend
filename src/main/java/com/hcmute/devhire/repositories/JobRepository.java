@@ -1,6 +1,9 @@
 package com.hcmute.devhire.repositories;
 
+import com.hcmute.devhire.entities.Category;
 import com.hcmute.devhire.entities.Job;
+import com.hcmute.devhire.entities.Skill;
+import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.MonthlyCountResponse;
 import com.hcmute.devhire.utils.JobStatus;
 import com.hcmute.devhire.utils.Status;
@@ -63,4 +66,14 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
     @Query("SELECT COUNT(j) FROM Job j WHERE j.category.id = :categoryId")
     Long countJobsByCategoryId(@Param("categoryId") Long categoryId);
+
+    @Query("SELECT j FROM Job j " +
+            "WHERE j.category.id IN (SELECT ja.job.id FROM JobApplication ja WHERE ja.user.id = :userId) " +
+            "OR j.id IN (SELECT js.job.id FROM JobSkill js WHERE js.skill.id IN " +
+            "(SELECT js2.skill.id FROM JobSkill js2 WHERE js2.job.id IN " +
+            "(SELECT ja.job.id FROM JobApplication ja WHERE ja.user.id = :userId))) " +
+            "AND j.deadline >= :recentDate " +
+            "AND (j.status = 'HOT' OR j.status = 'OPEN')")
+    List<Job> findSimilarJobs(@Param("userId") Long userId, @Param("recentDate") LocalDateTime recentDate);
+
 }

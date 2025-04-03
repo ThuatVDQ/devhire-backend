@@ -700,6 +700,27 @@ public class JobService implements IJobService {
         return jobRepository.countJobsByCategoryId(categoryId);
     }
 
+    @Override
+    public List<JobDTO> getNewJobsForUser(String email) throws Exception {
+        User user = userService.findByUserName(email);
+
+        List<Job> jobs = jobRepository.findSimilarJobs(
+                user.getId(),
+                LocalDateTime.now().minusDays(30) // Chỉ lấy job trong 7 ngày gần nhất
+        );
+
+        return jobs.stream()
+                .filter(job -> job.getStatus() == JobStatus.OPEN || job.getStatus() == JobStatus.HOT)
+                .map(job -> {
+                    try {
+                        return convertDTO(job, email);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
     private boolean getIsClose(Job job) {
         if (job.getStatus() == JobStatus.CLOSED)
             return  true;
