@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
+
 public interface ISubscriptionService {
     Subscription addSubscription(SubscriptionDTO subscriptionDTO);
     Page<SubscriptionDTO> getAllSubscriptions(PageRequest pageRequest);
@@ -15,4 +17,5 @@ public interface ISubscriptionService {
     void activeSubscription(Long id);
     boolean isSubscriptionExist(String name);
     String purchaseSubscription(SubscriptionRequestDTO subscriptionRequestDTO, HttpServletRequest request);
+    List<SubscriptionDTO> getUpgradedSubscriptions(String username);
 }

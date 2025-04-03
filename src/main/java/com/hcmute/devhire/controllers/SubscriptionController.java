@@ -2,6 +2,7 @@ package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.SubscriptionDTO;
 import com.hcmute.devhire.DTOs.SubscriptionRequestDTO;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.Subscription;
 import com.hcmute.devhire.services.ISubscriptionService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -105,5 +106,11 @@ public class SubscriptionController {
     @PostMapping("/purchase")
     public ResponseEntity<?> purchaseSubscription(@RequestBody SubscriptionRequestDTO subscriptionRequestDTO, HttpServletRequest request) {
         return ResponseEntity.ok(subscriptionService.purchaseSubscription(subscriptionRequestDTO, request));
+    }
+
+    @GetMapping("/upgraded")
+    public ResponseEntity<?> getUpgradedSubscriptions() {
+        String username = JwtUtil.getAuthenticatedUsername();
+        return ResponseEntity.ok(subscriptionService.getUpgradedSubscriptions(username));
     }
 }

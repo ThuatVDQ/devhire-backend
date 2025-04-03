@@ -3,8 +3,10 @@ package com.hcmute.devhire.services;
 import com.hcmute.devhire.DTOs.SubscriptionDTO;
 import com.hcmute.devhire.DTOs.SubscriptionRequestDTO;
 import com.hcmute.devhire.components.JwtUtil;
+import com.hcmute.devhire.entities.MemberVip;
 import com.hcmute.devhire.entities.Subscription;
 import com.hcmute.devhire.entities.User;
+import com.hcmute.devhire.repositories.MemberVipRepository;
 import com.hcmute.devhire.repositories.SubscriptionRepository;
 import com.hcmute.devhire.repositories.UserRepository;
 import com.hcmute.devhire.utils.Status;
@@ -15,7 +17,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ public class SubscriptionService implements ISubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
     private final IPaymentService paymentService;
+    private final MemberVipRepository memberVipRepository;
     @Override
     public Subscription addSubscription(SubscriptionDTO subscriptionDTO) {
         Subscription newSubscription = new Subscription();
@@ -95,5 +100,23 @@ public class SubscriptionService implements ISubscriptionService {
         }
 
         return paymentService.processPayment(subscription, subscriptionRequestDTO.getPaymentMethod(), request);
+    }
+
+    @Override
+    public List<SubscriptionDTO> getUpgradedSubscriptions(String username) {
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<MemberVip> memberVips = memberVipRepository.findByUserId(user.getId());
+
+        return memberVips.stream()
+                .map(m -> new SubscriptionDTO(
+                        m.getSubscription().getId(),
+                        m.getSubscription().getName(),
+                        m.getSubscription().getBenefit(),
+                        m.getSubscription().getPrice(),
+                        m.getSubscription().getDescription(),
+                        m.getSubscription().getStatus()
+                ))
+                .collect(Collectors.toList());
     }
 }
