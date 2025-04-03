@@ -22,4 +22,7 @@ public class JobNotificationSubscription {
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
+
+    @Column(name= "status")
+    private boolean status = true;
 }

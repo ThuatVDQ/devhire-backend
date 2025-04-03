@@ -20,9 +20,9 @@ public class JobNotificationService implements IJobNotificationService {
     private final JobNotificationSubscriptionRepository jobNotificationSubscriptionRepository;
 
     @Override
-    public String subscribe(String email) {
+    public String subscribe(String email) throws Exception {
         if (subscriptionRepository.findByEmail(email).isPresent()) {
-            return "Email đã đăng ký nhận thông báo.";
+            throw new Exception("Email đã đăng ký nhận thông báo.");
         }
 
         JobNotificationSubscription subscription = new JobNotificationSubscription();
@@ -31,6 +31,26 @@ public class JobNotificationService implements IJobNotificationService {
         subscriptionRepository.save(subscription);
 
         return "Đăng ký nhận thông báo thành công!";
+    }
+
+    @Override
+    public String unsubscribe(String email) throws Exception {
+        JobNotificationSubscription subscription = subscriptionRepository.findByEmail(email).orElse(null);
+        if (subscription != null) {
+            subscription.setStatus(false);
+            subscriptionRepository.save(subscription);
+            return "Hủy đăng ký nhận thông báo thành công!";
+        }
+        throw new Exception("Email không tồn tại trong danh sách đăng ký.");
+    }
+
+    @Override
+    public boolean checkSubscribed(String email) throws Exception {
+        JobNotificationSubscription subscription = subscriptionRepository.findByEmail(email).orElse(null);
+        if (subscription != null && subscription.isStatus()) {
+            return true;
+        }
+        throw new Exception("Email không tồn tại trong danh sách đăng ký.");
     }
 
     @Override
