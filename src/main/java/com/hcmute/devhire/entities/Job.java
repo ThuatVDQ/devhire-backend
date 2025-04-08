@@ -110,4 +110,10 @@ public class Job extends BaseEntity {
     @JsonManagedReference
     private List<JobSkill> jobSkills;
 
+    @Column(name = "highlight_end_time")
+    private LocalDateTime highlightEndTime;
+
+    @Column(name = "highlight_duration_in_days")
+    private Integer highlightDurationInDays;
+
 }

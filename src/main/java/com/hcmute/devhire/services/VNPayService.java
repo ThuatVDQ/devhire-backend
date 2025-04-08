@@ -31,7 +31,7 @@ public class VNPayService implements IVNPayService {
         String version = "2.1.0";
         String command = "pay";
         String orderType = "other";
-        Long amount = (long) (paymentDto.getAmount() * 25000); // Số tiền cần nhân với 100
+        Long amount = (long) (paymentDto.getAmount() * 100); // Số tiền cần nhân với 100
         String bankCode = paymentDto.getBankCode();
 
         String transactionReference = vnPayUtils.getRandomNumber(8); // Mã giao dịch

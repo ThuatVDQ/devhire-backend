@@ -76,4 +76,8 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
             "AND (j.status = 'HOT' OR j.status = 'OPEN')")
     List<Job> findSimilarJobs(@Param("userId") Long userId, @Param("recentDate") LocalDateTime recentDate);
 
+    List<Job> findByHighlightEndTimeBefore(LocalDateTime time);
+
+    List<Job> findByCompanyIdAndStatus(Long companyId, JobStatus status);
+
 }

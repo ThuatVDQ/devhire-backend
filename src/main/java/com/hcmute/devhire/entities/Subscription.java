@@ -36,6 +36,9 @@ public class Subscription extends BaseEntity {
     @Column(name = "status", length = 20)
     private Status status;
 
+    @Column(name = "highlight_duration")
+    private int highlightDuration;
+
     @OneToMany(mappedBy = "subscription",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MemberVip> memberVips;
 }

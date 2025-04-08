@@ -1,20 +1,19 @@
 package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.PaymentDTO;
-import com.hcmute.devhire.entities.MemberVip;
-import com.hcmute.devhire.entities.Subscription;
-import com.hcmute.devhire.entities.User;
-import com.hcmute.devhire.repositories.MemberVipRepository;
-import com.hcmute.devhire.repositories.SubscriptionRepository;
-import com.hcmute.devhire.repositories.UserRepository;
+import com.hcmute.devhire.entities.*;
+import com.hcmute.devhire.repositories.*;
+import com.hcmute.devhire.utils.JobStatus;
 import com.hcmute.devhire.utils.Status;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +23,9 @@ public class PaymentService implements IPaymentService {
     private final SubscriptionRepository subscriptionRepository;
     private final IVNPayService vnPayService;
     private final MemberVipRepository memberVipRepository;
+    private final JobRepository jobRepository;
+    private final CompanyRepository companyRepository;
+
     @Override
     public String processPayment(Subscription subscription, String paymentMethod, HttpServletRequest request) {
         if (paymentMethod.equals("VNPay")) {
@@ -63,5 +65,17 @@ public class PaymentService implements IPaymentService {
                 .build();
 
         memberVipRepository.save(memberVip);
+
+        Company company = companyRepository.findByUser(user.getUsername());
+        List<Job> jobs = jobRepository.findByCompanyId(company.getId());
+
+        for (Job job : jobs) {
+            if (job.getStatus() == JobStatus.OPEN) {
+                job.setStatus(JobStatus.HOT);
+                job.setHighlightEndTime(LocalDateTime.now().plusDays(subscription.getHighlightDuration()));
+            }
+        }
+
+        jobRepository.saveAll(jobs);
     }
 }
