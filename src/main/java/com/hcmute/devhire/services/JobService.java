@@ -194,6 +194,8 @@ public class JobService implements IJobService {
                 applicationStatus = jobApplications.getStatus().name();
             }
         }
+        boolean isClose = job.getHighlightEndTime().isBefore(LocalDateTime.now());
+
         return JobDTO.builder()
                 .id(job.getId())
                 .isClose(getIsClose(job))
@@ -220,6 +222,7 @@ public class JobService implements IJobService {
                 .isFavorite(liked)
                 .applyStatus(applicationStatus)
                 .applyNumber(job.getApplyNumber())
+                .isClose(isClose)
                 .category(CategoryDTO.builder()
                         .id(job.getCategory().getId())
                         .name(job.getCategory().getName())

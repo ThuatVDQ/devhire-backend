@@ -97,6 +97,9 @@ public class JobDTO {
     @JsonProperty("cv_url")
     private String cvUrl;
 
+    @JsonProperty("is_highlight")
+    private boolean isHighlight;
+
     @JsonProperty("date_applied")
     private LocalDateTime dateApplied;
 }
