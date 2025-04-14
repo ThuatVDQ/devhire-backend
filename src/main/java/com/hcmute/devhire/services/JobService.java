@@ -196,7 +196,7 @@ public class JobService implements IJobService {
         }
         boolean isHighLight = false;
         if (job.getHighlightEndTime() != null) {
-            isHighLight = job.getHighlightEndTime().isBefore(LocalDateTime.now());
+            isHighLight = job.getHighlightEndTime().isAfter(LocalDateTime.now());
         }
 
         return JobDTO.builder()
