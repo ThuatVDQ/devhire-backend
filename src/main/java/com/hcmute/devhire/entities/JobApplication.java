@@ -5,6 +5,8 @@ import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "job_application")
 @Getter
@@ -25,6 +27,9 @@ public class JobApplication extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
     private JobApplicationStatus status;
+
+    @OneToMany(mappedBy = "jobApplication", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<InterviewSchedule> interviewSchedules;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")

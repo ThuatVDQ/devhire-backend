@@ -16,6 +16,7 @@ public interface IJobApplicationService {
     List<JobApplicationDTO> findByJobId(Long jobId);
     Page<JobApplication> findByUserId(Long userId, PageRequest pageRequest);
     Page<JobApplicationDTO> getByUserId(Long userId, PageRequest pageRequest);
+    Page<JobApplicationDTO> getAcceptedApplicationsByUserId(Long userId, PageRequest pageRequest);
     JobApplication findByJobIdAndUserId(Long jobId, Long userId);
     void deleteByJobIdAndUserId(Long jobId, Long userId);
     void deleteByJobId(Long jobId);

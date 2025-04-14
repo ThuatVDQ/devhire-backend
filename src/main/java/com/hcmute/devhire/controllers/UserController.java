@@ -401,6 +401,35 @@ public class UserController {
         }
     }
 
+    @GetMapping("/getApplications/accepted")
+    public ResponseEntity<?> getAcceptedApplications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        try {
+            PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("id").descending());
+            String username = JwtUtil.getAuthenticatedUsername();
+            User user = userService.findByUserName(username);
+
+            Page<JobApplicationDTO> applications =
+                    jobApplicationService.getAcceptedApplicationsByUserId(user.getId(), pageRequest);
+
+            if (applications.isEmpty()) {
+                return ResponseEntity.badRequest().body("No applications found");
+            }
+            ApplicationListResponse response = ApplicationListResponse.builder()
+                    .applications(applications.getContent())
+                    .totalPages(applications.getTotalPages())
+                    .currentPage(page)
+                    .pageSize(limit)
+                    .totalElements(applications.getTotalElements())
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     private ResponseEntity<?> loginGoogle(
             @RequestBody UserDTO userDTO,
             HttpServletRequest request

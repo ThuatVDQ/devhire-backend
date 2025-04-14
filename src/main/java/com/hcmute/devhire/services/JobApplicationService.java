@@ -281,6 +281,21 @@ public class JobApplicationService implements IJobApplicationService{
     }
 
     @Override
+    public Page<JobApplicationDTO> getAcceptedApplicationsByUserId(Long userId, PageRequest pageRequest) {
+        return jobApplicationRepository.findByUserIdAndStatus(userId, JobApplicationStatus.ACCEPTED, pageRequest)
+                .map(app -> JobApplicationDTO.builder()
+                        .status(app.getStatus().name())
+                        .jobId(app.getJob().getId())
+                        .jobTitle(app.getJob().getTitle())
+                        .cvId(app.getCv().getId())
+                        .cvUrl(app.getCv().getCvUrl())
+                        .applyDate(app.getCreatedAt())
+                        .id(app.getId())
+                        .build()
+                );
+    }
+
+    @Override
     public JobApplication findByJobIdAndUserId(Long jobId, Long userId) {
         return jobApplicationRepository.findByJobIdAndUserId(jobId, userId);
     }
