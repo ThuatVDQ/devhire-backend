@@ -194,7 +194,10 @@ public class JobService implements IJobService {
                 applicationStatus = jobApplications.getStatus().name();
             }
         }
-        boolean isClose = job.getHighlightEndTime().isBefore(LocalDateTime.now());
+        boolean isClose = false;
+        if (job.getHighlightEndTime() != null) {
+            isClose = job.getHighlightEndTime().isBefore(LocalDateTime.now());
+        }
 
         return JobDTO.builder()
                 .id(job.getId())
