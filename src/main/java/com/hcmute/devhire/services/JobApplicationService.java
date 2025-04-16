@@ -258,6 +258,23 @@ public class JobApplicationService implements IJobApplicationService{
     }
 
     @Override
+    public List<JobApplicationDTO> findByJobIdAndStatus(Long jobId, String status) {
+        List<JobApplication> jobApplications = jobApplicationRepository.findByJobIdAndStatus(jobId, JobApplicationStatus.valueOf(status));
+        return jobApplications.stream().map(app -> JobApplicationDTO.builder()
+                .status(app.getStatus().name())
+                .jobId(app.getJob().getId())
+                .jobTitle(app.getJob().getTitle())
+                .fullName(app.getUser().getFullName())
+                .cvId(app.getCv().getId())
+                .cvUrl(app.getCv().getCvUrl())
+                .applyDate(app.getCreatedAt())
+                .id(app.getId())
+                .email(app.getUser().getEmail())
+                .build()
+        ).collect(Collectors.toList());
+    }
+
+    @Override
     public Page<JobApplication> findByUserId(Long userId, PageRequest pageRequest) {
         return jobApplicationRepository.findByUserId(userId, pageRequest);
     }

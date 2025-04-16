@@ -41,10 +41,13 @@ public class JobApplicationController {
 
     @GetMapping("/{jobId}")
     public ResponseEntity<?> getJobApplicationByJob(
-            @PathVariable("jobId") Long jobId
+            @PathVariable("jobId") Long jobId,
+            @RequestParam(required = false) JobApplicationStatus status
     ) {
         try {
-            List<JobApplicationDTO> jobApplicationDTOS = jobApplicationService.findByJobId(jobId);
+            List<JobApplicationDTO> jobApplicationDTOS =
+                    (status != null) ? jobApplicationService.findByJobIdAndStatus(jobId, String.valueOf(status))
+                    : jobApplicationService.findByJobId(jobId);
             return ResponseEntity.ok(jobApplicationDTOS);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

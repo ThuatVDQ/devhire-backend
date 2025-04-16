@@ -14,6 +14,7 @@ import java.util.Optional;
 
 public interface IJobApplicationService {
     List<JobApplicationDTO> findByJobId(Long jobId);
+    List<JobApplicationDTO> findByJobIdAndStatus(Long jobId, String status);
     Page<JobApplication> findByUserId(Long userId, PageRequest pageRequest);
     Page<JobApplicationDTO> getByUserId(Long userId, PageRequest pageRequest);
     Page<JobApplicationDTO> getAcceptedApplicationsByUserId(Long userId, PageRequest pageRequest);
