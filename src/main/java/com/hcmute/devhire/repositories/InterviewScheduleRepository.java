@@ -1,6 +1,10 @@
 package com.hcmute.devhire.repositories;
 
 import com.hcmute.devhire.entities.InterviewSchedule;
+import com.hcmute.devhire.utils.JobApplicationStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +30,26 @@ public interface InterviewScheduleRepository extends JpaRepository<InterviewSche
             @Param("endTime") LocalDateTime endTime,
             @Param("excludeId") Long excludeId
     );
+
+    @Query("SELECT i FROM InterviewSchedule i WHERE i.jobApplication.status = :status")
+    Page<InterviewSchedule> findByJobApplicationStatus(
+            @Param("status") JobApplicationStatus status,
+            PageRequest pageRequest
+    );
+
+    @Query("SELECT i FROM InterviewSchedule i " +
+            "JOIN i.jobApplication ja " +
+            "JOIN ja.job j " +
+            "JOIN j.company c " +
+            "WHERE c.id = :companyId")
+    Page<InterviewSchedule> findAllByCompanyId(@Param("companyId") Long companyId, PageRequest pageRequest);
+
+    @Query("SELECT i FROM InterviewSchedule i " +
+            "JOIN i.jobApplication ja " +
+            "JOIN ja.job j " +
+            "JOIN j.company c " +
+            "WHERE c.id = :companyId AND ja.status = :status")
+    Page<InterviewSchedule> findAllByCompanyIdAndStatus(@Param("companyId") Long companyId,
+                                                        @Param("status") JobApplicationStatus status,
+                                                        PageRequest pageRequest);
 }

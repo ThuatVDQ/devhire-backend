@@ -1,10 +1,16 @@
 package com.hcmute.devhire.controllers;
 import com.hcmute.devhire.DTOs.InterviewScheduleDTO;
 import com.hcmute.devhire.DTOs.InterviewScheduleUpdateDTO;
+import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.InterviewSchedule;
+import com.hcmute.devhire.responses.PagedResponse;
 import com.hcmute.devhire.services.IInterviewScheduleService;
+import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -18,6 +24,35 @@ import java.util.List;
 @RequestMapping("/api/interview-schedules")
 public class InterviewScheduleController {
     private final IInterviewScheduleService interviewScheduleService;
+
+    @GetMapping()
+    public ResponseEntity<?> getAllInterviewSchedules(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) JobApplicationStatus status
+    ) {
+        try {
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("interviewTime").descending());
+            String username = JwtUtil.getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            }
+
+            Page<InterviewScheduleDTO> schedules = (status != null)
+                    ? interviewScheduleService.getByStatus(username, String.valueOf(status), pageRequest)
+                    : interviewScheduleService.getAllInterviewSchedules(username, pageRequest);
+
+            return ResponseEntity.ok(new PagedResponse<>(
+                    schedules.getContent(),
+                    schedules.getNumber(),
+                    schedules.getSize(),
+                    schedules.getTotalElements(),
+                    schedules.getTotalPages()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
 
     @PostMapping("/create")
     public ResponseEntity<?> createInterviewSchedule(

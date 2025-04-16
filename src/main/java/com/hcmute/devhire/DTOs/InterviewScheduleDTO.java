@@ -1,6 +1,7 @@
 package com.hcmute.devhire.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,4 +40,22 @@ public class InterviewScheduleDTO {
     @JsonProperty("note")
     @Size(max = 1000, message = "Note cannot exceed 1000 characters")
     private String note;
+
+    // Thông tin ứng viên
+    @JsonProperty("candidate_name")
+    private String candidateName;
+
+    @JsonProperty("candidate_email")
+    private String candidateEmail;
+
+    // Thông tin công việc
+    @JsonProperty("job_title")
+    private String jobTitle;
+
+    @JsonProperty("job_id")
+    private Long jobId;
+
+    // Trạng thái ứng tuyển
+    @JsonProperty("application_status")
+    private JobApplicationStatus applicationStatus;
 }

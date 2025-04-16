@@ -2,15 +2,15 @@ package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.InterviewScheduleDTO;
 import com.hcmute.devhire.DTOs.InterviewScheduleUpdateDTO;
-import com.hcmute.devhire.entities.InterviewSchedule;
-import com.hcmute.devhire.entities.Job;
-import com.hcmute.devhire.entities.JobApplication;
-import com.hcmute.devhire.entities.User;
+import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.InterviewScheduleRepository;
 import com.hcmute.devhire.repositories.JobApplicationRepository;
+import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +25,7 @@ public class InterviewScheduleService implements IInterviewScheduleService{
     private final JobApplicationRepository jobApplicationRepository;
     private final INotificationService notificationService;
     private final IEmailService emailService;
+    private final ICompanyService companyService;
 
     @Override
     @Transactional
@@ -118,6 +119,49 @@ public class InterviewScheduleService implements IInterviewScheduleService{
 
         return interviewScheduleRepository.save(existingSchedule);
     }
+
+    @Override
+    public Page<InterviewScheduleDTO> getAllInterviewSchedules(String username, PageRequest pageRequest) throws Exception {
+
+        Company company = companyService.findByUser(username);
+        if (company == null) {
+            throw new Exception("Company not found");
+        }
+
+        return interviewScheduleRepository.findAllByCompanyId(company.getId(), pageRequest)
+                .map(this::convertToDTO);
+    }
+
+    @Override
+    public Page<InterviewScheduleDTO> getByStatus(String username, String status, PageRequest pageRequest) throws Exception {
+        Company company = companyService.findByUser(username);
+        if (company == null) {
+            throw new Exception("Company not found");
+        }
+
+        return interviewScheduleRepository.findAllByCompanyIdAndStatus(company.getId(), JobApplicationStatus.valueOf(status), pageRequest)
+                .map(this::convertToDTO);
+    }
+
+    private InterviewScheduleDTO convertToDTO(InterviewSchedule schedule) {
+        JobApplication jobApp = schedule.getJobApplication();
+        User candidate = jobApp.getUser();
+        Job job = jobApp.getJob();
+
+        return InterviewScheduleDTO.builder()
+                .id(schedule.getId())
+                .interviewTime(schedule.getInterviewTime())
+                .durationMinutes(schedule.getDurationMinutes())
+                .location(schedule.getLocation())
+                .note(schedule.getNote())
+                .candidateName(candidate.getFullName())
+                .candidateEmail(candidate.getEmail())
+                .jobTitle(job.getTitle())
+                .jobId(job.getId())
+                .applicationStatus(jobApp.getStatus())
+                .build();
+    }
+
     private void checkInterviewConflict(Long userId, LocalDateTime newTime, int duration, Long excludeId) throws Exception {
         LocalDateTime endTime = newTime.plusMinutes(duration);
         boolean hasConflict = interviewScheduleRepository.existsByUserAndTimeRange(
