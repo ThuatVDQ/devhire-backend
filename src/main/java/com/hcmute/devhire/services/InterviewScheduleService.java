@@ -229,14 +229,14 @@ public class InterviewScheduleService implements IInterviewScheduleService{
 
     private void checkInterviewConflict(Long userId, LocalDateTime newTime, int duration, Long excludeId) throws Exception {
         LocalDateTime endTime = newTime.plusMinutes(duration);
-        boolean hasConflict = interviewScheduleRepository.existsByUserAndTimeRange(
+        int hasConflict = interviewScheduleRepository.existsByUserAndTimeRange(
                 userId,
                 newTime,
                 endTime,
                 excludeId
         );
 
-        if (hasConflict) {
+        if (hasConflict > 0) {
             throw new Exception("User has conflicting interview schedule");
         }
     }
