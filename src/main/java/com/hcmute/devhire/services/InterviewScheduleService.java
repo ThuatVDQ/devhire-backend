@@ -48,7 +48,7 @@ public class InterviewScheduleService implements IInterviewScheduleService{
                         "**Interviewer:** %s\n" +
                         "**Position:** %s\n" +
                         "**Time:** %s\n" +
-                        "**Duration:** %d phút\n" +
+                        "**Duration:** %d minutes\n" +
                         "**Location:** %s\n\n" +
                         "**Note:**\n%s\n\n" +
                         "Please confirm your participation and double check the information on the DevHire system.\n\n" +
@@ -56,7 +56,6 @@ public class InterviewScheduleService implements IInterviewScheduleService{
                         "DevHire Team",
                 interviewer.getFullName(),
                 jobApplication.getUser().getFullName(),
-                job.getTitle(),
                 job.getTitle(),
                 formattedTime,
                 dto.getDurationMinutes(),
