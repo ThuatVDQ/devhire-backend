@@ -1,4 +1,5 @@
 package com.hcmute.devhire.controllers;
+import com.hcmute.devhire.DTOs.InterviewScheduleBulkDTO;
 import com.hcmute.devhire.DTOs.InterviewScheduleDTO;
 import com.hcmute.devhire.DTOs.InterviewScheduleUpdateDTO;
 import com.hcmute.devhire.components.JwtUtil;
@@ -6,6 +7,7 @@ import com.hcmute.devhire.entities.InterviewSchedule;
 import com.hcmute.devhire.responses.PagedResponse;
 import com.hcmute.devhire.services.IInterviewScheduleService;
 import com.hcmute.devhire.utils.JobApplicationStatus;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -82,5 +84,25 @@ public class InterviewScheduleController {
             return ResponseEntity.badRequest().body(errorMessage);
         }
         return ResponseEntity.ok(interviewScheduleService.updateInterviewSchedule(id, dto));
+    }
+
+    // API tạo nhiều lịch
+    @PostMapping("/create-bulk")
+    public ResponseEntity<?> createBulkSchedules(
+            @Valid @RequestBody InterviewScheduleBulkDTO dto,
+            BindingResult result
+    ) {
+        if (result.hasErrors()) {
+            List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
+        try {
+            List<InterviewSchedule> createdSchedules = interviewScheduleService.createBulkSchedules(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdSchedules);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
     }
 }

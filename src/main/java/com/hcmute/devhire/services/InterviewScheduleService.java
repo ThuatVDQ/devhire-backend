@@ -1,5 +1,6 @@
 package com.hcmute.devhire.services;
 
+import com.hcmute.devhire.DTOs.InterviewScheduleBulkDTO;
 import com.hcmute.devhire.DTOs.InterviewScheduleDTO;
 import com.hcmute.devhire.DTOs.InterviewScheduleUpdateDTO;
 import com.hcmute.devhire.entities.*;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -91,6 +94,63 @@ public class InterviewScheduleService implements IInterviewScheduleService{
             return "Online interview: " + location;
         }
         return "At direction: " + location;
+    }
+
+    @Transactional
+    public List<InterviewSchedule> createBulkSchedules(InterviewScheduleBulkDTO dto) throws Exception {
+        List<InterviewSchedule> schedules = new ArrayList<>();
+
+        for (Long jobAppId : dto.getJobApplicationIds()) {
+            JobApplication jobApp = jobApplicationRepository.findById(jobAppId)
+                    .orElseThrow(() -> new EntityNotFoundException("Job application not found: " + jobAppId));
+
+            InterviewSchedule schedule = InterviewSchedule.builder()
+                    .jobApplication(jobApp)
+                    .interviewTime(dto.getInterviewTime())
+                    .durationMinutes(dto.getDurationMinutes())
+                    .location(dto.getLocation())
+                    .note(dto.getNote())
+                    .build();
+
+            schedules.add(schedule);
+
+            // Gửi thông báo
+            sendNotification(jobApp, dto);
+        }
+
+        return interviewScheduleRepository.saveAll(schedules);
+    }
+
+    private void sendNotification(JobApplication jobApp, InterviewScheduleBulkDTO dto) throws Exception {
+        User interviewer = jobApp.getUser();
+        Job job = jobApp.getJob();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm, dd/MM/yyyy");
+        String formattedTime = dto.getInterviewTime().format(formatter);
+
+        String emailContent = String.format(
+                "Dear %s,\n\n" +
+                        "You have an interview schedule arranged as follows:\n\n" +
+                        "**Interviewer:** %s\n" +
+                        "**Position:** %s\n" +
+                        "**Time:** %s\n" +
+                        "**Duration:** %d minutes\n" +
+                        "**Location:** %s\n\n" +
+                        "**Note:**\n%s\n\n" +
+                        "Please confirm your participation and double check the information on the DevHire system.\n\n" +
+                        "Best regards,\n" +
+                        "DevHire Team",
+                interviewer.getFullName(),
+                jobApp.getUser().getFullName(),
+                job.getTitle(),
+                formattedTime,
+                dto.getDurationMinutes(),
+                formatLocation(dto.getLocation()),
+                dto.getNote() != null ? dto.getNote() : "Empty"
+        );
+
+        notificationService.createAndSendNotification(String.format("Interview schedule %s - %s", job.getTitle(), formattedTime),
+                interviewer.getUsername());
+        emailService.sendEmail(interviewer.getUsername(), "[DevHire] New interview schedule", emailContent);
     }
 
     @Override
