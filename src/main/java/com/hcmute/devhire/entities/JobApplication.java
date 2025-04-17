@@ -28,6 +28,9 @@ public class JobApplication extends BaseEntity {
     @Column(name = "status", length = 20)
     private JobApplicationStatus status;
 
+    @Column(name = "is_scheduled")
+    private boolean isScheduled;
+
     @OneToMany(mappedBy = "jobApplication", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<InterviewSchedule> interviewSchedules;
 

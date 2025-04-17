@@ -36,6 +36,9 @@ public class InterviewScheduleService implements IInterviewScheduleService{
         JobApplication jobApplication = jobApplicationRepository.findById(dto.getJobApplicationId())
                 .orElseThrow(() -> new RuntimeException("Job application not found"));
 
+        jobApplication.setScheduled(true);
+        jobApplicationRepository.save(jobApplication);
+
         User interviewer = jobApplication.getUser();
         Job job = jobApplication.getJob();
 
@@ -103,6 +106,9 @@ public class InterviewScheduleService implements IInterviewScheduleService{
         for (Long jobAppId : dto.getJobApplicationIds()) {
             JobApplication jobApp = jobApplicationRepository.findById(jobAppId)
                     .orElseThrow(() -> new EntityNotFoundException("Job application not found: " + jobAppId));
+
+            jobApp.setScheduled(true);
+            jobApplicationRepository.save(jobApp);
 
             InterviewSchedule schedule = InterviewSchedule.builder()
                     .jobApplication(jobApp)

@@ -36,4 +36,7 @@ public class JobApplicationDTO {
     private String cvUrl;
 
     private LocalDateTime applyDate;
+
+    @JsonProperty("is_scheduled")
+    private Boolean isScheduled;
 }

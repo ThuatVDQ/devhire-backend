@@ -37,6 +37,14 @@ public class JobApplicationService implements IJobApplicationService{
                 .jobId(jobApplication.getJob().getId())
                 .userId(jobApplication.getUser().getId())
                 .cvId(jobApplication.getCv().getId())
+                .jobTitle(jobApplication.getJob().getTitle())
+                .fullName(jobApplication.getUser().getFullName())
+                .email(jobApplication.getUser().getEmail())
+                .phone(jobApplication.getUser().getPhone())
+                .cvUrl(jobApplication.getCv().getCvUrl())
+                .applyDate(jobApplication.getCreatedAt())
+                .id(jobApplication.getId())
+                .isScheduled(jobApplication.isScheduled())
                 .build();
     }
 
@@ -253,6 +261,7 @@ public class JobApplicationService implements IJobApplicationService{
                 .applyDate(app.getCreatedAt())
                 .id(app.getId())
                 .email(app.getUser().getEmail())
+                .isScheduled(app.isScheduled())
                 .build()
         ).collect(Collectors.toList());
     }
@@ -270,6 +279,7 @@ public class JobApplicationService implements IJobApplicationService{
                 .applyDate(app.getCreatedAt())
                 .id(app.getId())
                 .email(app.getUser().getEmail())
+                .isScheduled(app.isScheduled())
                 .build()
         ).collect(Collectors.toList());
     }
@@ -291,6 +301,7 @@ public class JobApplicationService implements IJobApplicationService{
                     .cvUrl(app.getCv().getCvUrl())
                     .applyDate(app.getCreatedAt())
                     .id(app.getId())
+                    .isScheduled(app.isScheduled())
                     .build()
             );
         }
@@ -307,6 +318,7 @@ public class JobApplicationService implements IJobApplicationService{
                         .cvId(app.getCv().getId())
                         .cvUrl(app.getCv().getCvUrl())
                         .applyDate(app.getCreatedAt())
+                        .isScheduled(app.isScheduled())
                         .id(app.getId())
                         .build()
                 );
