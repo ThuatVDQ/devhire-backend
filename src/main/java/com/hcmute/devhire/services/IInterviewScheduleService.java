@@ -13,6 +13,7 @@ public interface IInterviewScheduleService {
     InterviewSchedule createInterviewSchedule(InterviewScheduleDTO dto) throws Exception;
     InterviewSchedule updateInterviewSchedule(Long id, InterviewScheduleUpdateDTO dto) throws Exception;
     Page<InterviewScheduleDTO> getAllInterviewSchedules(String username, PageRequest pageRequest) throws Exception;
+    Page<InterviewScheduleDTO> getUserInterviewSchedules(String username, PageRequest pageRequest) throws Exception;
     Page<InterviewScheduleDTO> getByStatus(String username, String status, PageRequest pageRequest) throws Exception;
     List<InterviewSchedule> createBulkSchedules(InterviewScheduleBulkDTO dto) throws Exception;
 }

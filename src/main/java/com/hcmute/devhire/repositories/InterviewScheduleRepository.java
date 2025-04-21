@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface InterviewScheduleRepository extends JpaRepository<InterviewSchedule, Long> {
     @Query(value = """
@@ -51,4 +52,13 @@ public interface InterviewScheduleRepository extends JpaRepository<InterviewSche
     Page<InterviewSchedule> findAllByCompanyIdAndStatus(@Param("companyId") Long companyId,
                                                         @Param("status") JobApplicationStatus status,
                                                         PageRequest pageRequest);
+
+    @Query("""
+    SELECT i FROM InterviewSchedule i
+    JOIN FETCH i.jobApplication ja
+    JOIN FETCH ja.job j
+    JOIN ja.user u
+    WHERE u.email = :email
+    """)
+    Page<InterviewSchedule> findAllByUserEmail(@Param("email") String email, PageRequest pageRequest);
 }

@@ -56,6 +56,30 @@ public class InterviewScheduleController {
         }
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<?> getInterviewSchedulesByUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        try {
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("interviewTime").descending());
+            String username = JwtUtil.getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            }
+            Page<InterviewScheduleDTO> schedules = interviewScheduleService.getUserInterviewSchedules(username, pageRequest);
+            return ResponseEntity.ok(new PagedResponse<>(
+                    schedules.getContent(),
+                    schedules.getNumber(),
+                    schedules.getSize(),
+                    schedules.getTotalElements(),
+                    schedules.getTotalPages()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
     @PostMapping("/create")
     public ResponseEntity<?> createInterviewSchedule(
             @Valid @RequestBody InterviewScheduleDTO dto,

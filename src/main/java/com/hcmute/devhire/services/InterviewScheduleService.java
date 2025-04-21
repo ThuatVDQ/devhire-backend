@@ -198,6 +198,12 @@ public class InterviewScheduleService implements IInterviewScheduleService{
     }
 
     @Override
+    public Page<InterviewScheduleDTO> getUserInterviewSchedules(String username, PageRequest pageRequest) throws Exception {
+        return interviewScheduleRepository.findAllByUserEmail(username, pageRequest)
+                .map(this::convertToDTO);
+    }
+
+    @Override
     public Page<InterviewScheduleDTO> getByStatus(String username, String status, PageRequest pageRequest) throws Exception {
         Company company = companyService.findByUser(username);
         if (company == null) {
