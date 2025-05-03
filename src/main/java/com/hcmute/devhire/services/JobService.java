@@ -157,6 +157,7 @@ public class JobService implements IJobService {
         });
     }
 
+
     public JobDTO convertDTO(Job job, String username) throws Exception {
 
         List<AddressDTO> addressDTOs = job.getJobAddresses().stream()

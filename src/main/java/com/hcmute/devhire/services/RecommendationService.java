@@ -1,5 +1,6 @@
 package com.hcmute.devhire.services;
 
+import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.JobRepository;
 import com.hcmute.devhire.repositories.UserRepository;
@@ -22,8 +23,9 @@ public class RecommendationService implements IRecommendationService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final UserSkillRepository userSkillRepository;
+    private final IJobService jobService;
     private static final int SKILL_VECTOR_SIZE = 20;
-    public List<Job> recommendJobsForUser(String email, int topK) {
+    public List<JobDTO> recommendJobsForUser(String email, int topK) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -37,7 +39,14 @@ public class RecommendationService implements IRecommendationService {
                         job -> distance.d(userVector, encodeJobFeatures(job))
                 ))
                 .limit(topK)
-                .collect(Collectors.toList());
+               .map(job -> {
+                   try {
+                       return jobService.convertDTO(job, user.getUsername());
+                   } catch (Exception e) {
+                       throw new RuntimeException("Failed to convert job to DTO", e);
+                   }
+               })
+                .collect(Collectors.toList()).reversed();
     }
 
     private double[] encodeJobFeatures(Job job) {

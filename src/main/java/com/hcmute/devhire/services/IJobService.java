@@ -47,4 +47,6 @@ public interface IJobService {
     Page<JobDTO> getJobsByCategoryIds(PageRequest pageRequest, List<Long> categoryIds);
     Long countJobsByCategoryId(Long categoryId);
     List<JobDTO> getNewJobsForUser(String email) throws Exception;
+
+    JobDTO convertDTO(Job job, String username) throws Exception;
 }
