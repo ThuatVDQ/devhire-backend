@@ -3,6 +3,7 @@ package com.hcmute.devhire.services;
 import com.hcmute.devhire.DTOs.CVDTO;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.entities.CV;
+import com.hcmute.devhire.entities.Skill;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.repositories.CVRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,8 @@ import java.util.UUID;
 public class CVService implements ICVService{
     private final CVRepository cvRepository;
     private final IUserService userService;
+    private final ICVSkillExtractorService cvSkillExtractorService;
+    private final IUserSkillService userSkillService;
     private final FileUtil fileUtil;
     @Override
     public CV createCV(CVDTO cvDTO) throws Exception {
@@ -33,7 +36,14 @@ public class CVService implements ICVService{
                 .cvUrl(cvDTO.getCvUrl())
                 .name(cvDTO.getName())
                 .build();
-        return cvRepository.save(cv);
+        cv = cvRepository.save(cv);
+        List<Skill> skills = cvSkillExtractorService.extractSkillsFromCV(cv.getId());
+        if (skills != null && !skills.isEmpty()) {
+            skills.forEach(skill -> {
+                userSkillService.add(user, skill);
+            });
+        }
+        return cv;
     }
 
     @Override

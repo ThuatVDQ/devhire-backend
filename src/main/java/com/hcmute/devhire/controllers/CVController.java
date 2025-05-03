@@ -4,9 +4,11 @@ import com.hcmute.devhire.DTOs.CVDTO;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.CV;
+import com.hcmute.devhire.entities.Skill;
 import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.services.CVService;
 import com.hcmute.devhire.services.ICVService;
+import com.hcmute.devhire.services.ICVSkillExtractorService;
 import com.hcmute.devhire.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
@@ -35,6 +37,7 @@ public class CVController {
     private final ICVService cvService;
     private final FileUtil fileUtil;
     private final IUserService userService;
+    private final ICVSkillExtractorService cvSkillExtractorService;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadCV(
@@ -161,5 +164,9 @@ public class CVController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    @GetMapping("/{cvId}/skills")
+    public ResponseEntity<List<Skill>> extractSkills(@PathVariable Long cvId) throws Exception {
+        return ResponseEntity.ok(cvSkillExtractorService.extractSkillsFromCV(cvId));
     }
 }

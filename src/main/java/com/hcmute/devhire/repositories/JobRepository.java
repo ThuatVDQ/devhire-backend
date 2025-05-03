@@ -20,6 +20,7 @@ import java.util.Optional;
 
 public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
     Page<Job> findByStatusIn(List<JobStatus> statuses, Pageable pageable);
+    List<Job> findByStatusIn(List<JobStatus> statuses);
     Page<Job> findAll(Pageable pageable);
     Optional<Job> findById(Long id);
     List<Job> findByCompanyId(Long companyId);

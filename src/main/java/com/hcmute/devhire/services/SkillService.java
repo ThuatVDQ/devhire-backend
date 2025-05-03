@@ -24,4 +24,14 @@ public class SkillService implements ISkillService {
         }
     }
 
+    @Override
+    public Skill findSkillById(Long id) {
+        return skillRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Skill findSkillByName(String name) {
+        return skillRepository.findSkillByName(name);
+    }
+
 }
