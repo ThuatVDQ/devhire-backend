@@ -2,13 +2,16 @@ package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.EmailRequestDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
+import com.hcmute.devhire.DTOs.JobApplicationWithScoreDTO;
 import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.exceptions.DataNotFoundException;
 import com.hcmute.devhire.responses.CountPerJobResponse;
 import com.hcmute.devhire.responses.MonthlyCountResponse;
+import com.hcmute.devhire.utils.JobApplicationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,4 +40,5 @@ public interface IJobApplicationService {
     List<MonthlyCountResponse> countJobApplicationByMonth(int year, String username);
     List<CountPerJobResponse> countJobApplicationPerJob();
     List<MonthlyCountResponse> countJobApplicationByMonth(int year);
+    List<JobApplicationWithScoreDTO> getScoredApplicationsByJob(Long jobId, JobApplicationStatus status) throws IOException;
 }

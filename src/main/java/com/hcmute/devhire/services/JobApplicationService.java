@@ -2,10 +2,12 @@ package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.EmailRequestDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
+import com.hcmute.devhire.DTOs.JobApplicationWithScoreDTO;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.exceptions.DataNotFoundException;
 import com.hcmute.devhire.repositories.JobApplicationRepository;
 import com.hcmute.devhire.responses.CountPerJobResponse;
+import com.hcmute.devhire.responses.CvScoreResponse;
 import com.hcmute.devhire.responses.MonthlyCountResponse;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.mail.MessagingException;
@@ -13,10 +15,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +32,7 @@ public class JobApplicationService implements IJobApplicationService{
     private final IEmailService emailService;
     private final INotificationService notificationService;
     private final ICompanyService companyService;
+    private final ICvScoringService cvScoringService;
 
     @Override
     public JobApplicationDTO getJobApplication(Long jobApplicationId) throws DataNotFoundException {
@@ -246,6 +253,41 @@ public class JobApplicationService implements IJobApplicationService{
     @Override
     public List<MonthlyCountResponse> countJobApplicationByMonth(int year) {
         return jobApplicationRepository.countApplicationsByMonthForCompany(year);
+    }
+
+    @Override
+    public List<JobApplicationWithScoreDTO> getScoredApplicationsByJob(Long jobId, JobApplicationStatus status) throws IOException {
+        List<JobApplication> applications = (status != null)
+                ? jobApplicationRepository.findByJobIdAndStatus(jobId, status)
+                : jobApplicationRepository.findByJobId(jobId);
+
+        List<JobApplicationWithScoreDTO> result = new ArrayList<>();
+
+        for (JobApplication app : applications) {
+            if (app.getCv() == null || app.getCv().getCvUrl() == null) continue;
+
+            Path path = Paths.get("uploads", app.getCv().getCvUrl());
+            if (!Files.exists(path)) continue;
+
+            MultipartFile multipartFile = new MockMultipartFile(
+                    app.getCv().getCvUrl(),
+                    Files.readAllBytes(path)
+            );
+
+            CvScoreResponse scoreResponse = cvScoringService.calculateCvScore(multipartFile, jobId);
+
+            result.add(JobApplicationWithScoreDTO.builder()
+                    .applicationId(app.getId())
+                    .applicantName(app.getUser().getFullName())
+                    .applicantEmail(app.getUser().getEmail())
+                    .score(scoreResponse.getTotalScore())
+                    .scoreDetails(scoreResponse.getScoreDetails())
+                    .build());
+        }
+
+        return result.stream()
+                .sorted(Comparator.comparingDouble(JobApplicationWithScoreDTO::getScore).reversed())
+                .toList();
     }
 
     @Override

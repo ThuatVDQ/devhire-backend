@@ -2,6 +2,7 @@ package com.hcmute.devhire.controllers;
 
 import com.hcmute.devhire.DTOs.EmailRequestDTO;
 import com.hcmute.devhire.DTOs.JobApplicationDTO;
+import com.hcmute.devhire.DTOs.JobApplicationWithScoreDTO;
 import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.JobApplication;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -51,6 +53,20 @@ public class JobApplicationController {
             return ResponseEntity.ok(jobApplicationDTOS);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{jobId}/scored")
+    public ResponseEntity<?> getJobApplicationsWithScore(
+            @PathVariable("jobId") Long jobId,
+            @RequestParam(required = false) JobApplicationStatus status
+    ) {
+        try {
+            List<JobApplicationWithScoreDTO> result =
+                    jobApplicationService.getScoredApplicationsByJob(jobId, status);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
