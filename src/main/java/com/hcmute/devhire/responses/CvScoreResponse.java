@@ -14,6 +14,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CvScoreResponse {
     private CvAnalysisResult cvAnalysis;
-    private double totalScore; // Điểm tổng (0-100)
+    private double totalScore; // Điểm tổng (0-1)
     private Map<String, Double> scoreDetails; // Điểm chi tiết các mục
 }

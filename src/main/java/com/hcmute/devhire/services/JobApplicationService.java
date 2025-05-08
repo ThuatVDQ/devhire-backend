@@ -280,7 +280,7 @@ public class JobApplicationService implements IJobApplicationService{
                     .applicationId(app.getId())
                     .applicantName(app.getUser().getFullName())
                     .applicantEmail(app.getUser().getEmail())
-                    .score(scoreResponse.getTotalScore())
+                    .score(scoreResponse.getTotalScore() * 100)
                     .scoreDetails(scoreResponse.getScoreDetails())
                     .build());
         }
