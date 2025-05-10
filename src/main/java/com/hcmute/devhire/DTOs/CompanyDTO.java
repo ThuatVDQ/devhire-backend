@@ -50,7 +50,7 @@ public class CompanyDTO {
 
     @JsonProperty("images")
     private List<String> images;
-
+    private double score;
     private String status;
     private UserDTO createBy;
     private List<JobDTO> jobs;

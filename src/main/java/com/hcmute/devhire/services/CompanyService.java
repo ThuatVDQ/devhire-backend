@@ -1,30 +1,29 @@
 package com.hcmute.devhire.services;
 
-import com.hcmute.devhire.DTOs.CategoryDTO;
 import com.hcmute.devhire.DTOs.CompanyDTO;
-import com.hcmute.devhire.DTOs.JobDTO;
 import com.hcmute.devhire.DTOs.UserDTO;
+import com.hcmute.devhire.components.CompanyScoreCalculator;
 import com.hcmute.devhire.components.FileUtil;
 import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.CompanyImageRepository;
 import com.hcmute.devhire.repositories.CompanyRepository;
+import com.hcmute.devhire.repositories.CompanyReviewRepository;
 import com.hcmute.devhire.repositories.JobRepository;
 import com.hcmute.devhire.repositories.specification.CompanySpecifications;
-import com.hcmute.devhire.repositories.specification.JobSpecifications;
 import com.hcmute.devhire.utils.CompanyStatus;
 import com.hcmute.devhire.utils.JobStatus;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Objects;
 
 import java.util.List;
@@ -41,7 +40,8 @@ public class CompanyService implements ICompanyService {
     private final FileUtil fileUtil;
     private final ICompanyImageService companyImageService;
     private final INotificationService notificationService;
-
+    private final CompanyScoreCalculator companyScoreCalculator;
+    private final CompanyReviewRepository companyReviewRepository;
     @Override
     public Company createCompany(CompanyDTO companyDTO, String username) throws Exception {
         UserDTO user = userService.findByUsername(username);
@@ -72,17 +72,36 @@ public class CompanyService implements ICompanyService {
     @Override
     public Page<CompanyDTO> getAllCompanies(PageRequest pageRequest) throws Exception {
         try {
-            Page<Company> companies = companyRepository.findAll(pageRequest);
+            List<Company> companies = companyRepository.findAll(); // Lấy toàn bộ để tính điểm
+
             if (companies.isEmpty()) {
                 throw new Exception("No company found");
             }
-            return companies.map(company -> {
-                try {
-                    return convertDTO(company);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+
+            // Tính điểm và map sang DTO
+            List<CompanyDTO> scoredCompanies = companies.stream()
+                    .map(company -> {
+                        try {
+                            CompanyDTO dto = convertDTO(company);
+                            List<Job> jobs = jobRepository.findByCompanyId(company.getId());
+                            List<CompanyReview> reviews = companyReviewRepository.findByCompanyId(company.getId());
+                            double score = companyScoreCalculator.calculateScore(company, reviews, jobs);
+                            dto.setScore(score); // Yêu cầu: CompanyDTO phải có trường score
+                            return dto;
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .sorted(Comparator.comparingDouble(CompanyDTO::getScore).reversed()) // Sắp xếp giảm dần
+                    .toList();
+
+            // Thực hiện phân trang thủ công
+            int start = (int) pageRequest.getOffset();
+            int end = Math.min(start + pageRequest.getPageSize(), scoredCompanies.size());
+
+            List<CompanyDTO> pageContent = scoredCompanies.subList(start, end);
+            return new PageImpl<>(pageContent, pageRequest, scoredCompanies.size());
+
         } catch (Exception e) {
             throw new Exception("Error when get all companies");
         }
