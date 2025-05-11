@@ -237,25 +237,44 @@ public class CompanyService implements ICompanyService {
     @Override
     public Page<CompanyDTO> searchCompanies(Pageable pageable, String keyword) throws Exception {
         Specification<Company> spec = Specification.where(null);
-        if (!Objects.isNull(keyword) && !keyword.isEmpty()) {
+        if (keyword != null && !keyword.isEmpty()) {
             spec = spec.and(CompanySpecifications.hasKeyword(keyword));
         }
+
         try {
             Page<Company> companies = companyRepository.findAll(spec, pageable);
             if (companies.isEmpty()) {
                 throw new Exception("No company found");
             }
-            return companies.map(company -> {
-                try {
-                    return convertDTO(company);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+
+            List<CompanyDTO> companyDTOs = companies.stream()
+                    .map(company -> {
+                        try {
+                            List<Job> jobs = jobRepository.findByCompanyId(company.getId());
+                            List<CompanyReview> reviews = companyReviewRepository.findByCompanyId(company.getId());
+                            double score = companyScoreCalculator.calculateScore(company, reviews, jobs);
+
+                            CompanyDTO dto = convertDTO(company);
+                            dto.setScore(score);
+                            return dto;
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .sorted(Comparator.comparingDouble(CompanyDTO::getScore).reversed())
+                    .toList();
+
+            int start = Math.min((int) pageable.getOffset(), companyDTOs.size());
+            int end = Math.min((start + pageable.getPageSize()), companyDTOs.size());
+            List<CompanyDTO> pageContent = companyDTOs.subList(start, end);
+
+            return new PageImpl<>(pageContent, pageable, companyDTOs.size());
+
         } catch (Exception e) {
             throw new Exception("Error when search companies");
         }
     }
+
 
     @Override
     public int countCompanies() throws Exception {
