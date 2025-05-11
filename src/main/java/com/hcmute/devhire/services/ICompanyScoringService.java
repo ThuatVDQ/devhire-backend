@@ -5,4 +5,5 @@ import com.hcmute.devhire.responses.CompanyScoreResponse;
 
 public interface ICompanyScoringService {
     CompanyScoreResponse calculateCompanyScore(Long companyId) throws DataNotFoundException;
+    CompanyScoreResponse calculateCompanyScore(String username) throws DataNotFoundException;
 }

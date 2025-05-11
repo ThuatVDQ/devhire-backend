@@ -67,6 +67,50 @@ public class CompanyScoringService implements ICompanyScoringService {
         return response;
     }
 
+    @Override
+    public CompanyScoreResponse calculateCompanyScore(String username) throws DataNotFoundException {
+        Company company = companyRepository.findByUser(username);
+        if (company == null) {
+            throw new DataNotFoundException("Company not found");
+        }
+
+        CompanyScoreResponse response = new CompanyScoreResponse();
+        Long companyId = company.getId();
+        response.setCompanyId(companyId);
+        response.setCompanyName(company.getName());
+
+        // Tính điểm tổng
+        double totalScore = 0;
+        Map<String, Double> scoreDetails = new HashMap<>();
+
+        // 1. Điểm đánh giá (40%)
+        double reviewScore = calculateReviewScore(companyId);
+        scoreDetails.put("reviews", reviewScore);
+        totalScore += reviewScore * 0.4;
+
+        // 2. Điểm quy mô (20%)
+        double scaleScore = calculateScaleScore(company.getScale());
+        scoreDetails.put("scale", scaleScore);
+        totalScore += scaleScore * 0.2;
+
+        // 3. Điểm công việc (20%)
+        double jobScore = calculateJobScore(companyId);
+        scoreDetails.put("jobs", jobScore);
+        totalScore += jobScore * 0.2;
+
+        // 4. Điểm lương (20%)
+        double salaryScore = calculateSalaryScore(companyId);
+        scoreDetails.put("salary", salaryScore);
+        totalScore += salaryScore * 0.2;
+
+
+        response.setTotalScore(totalScore * 100); // Chuyển về thang 100
+        response.setScoreDetails(scoreDetails);
+        response.setStarRating(reviewScore * 5); // Chuyển về thang 5 sao
+
+        return response;
+    }
+
     private double calculateReviewScore(Long companyId) {
         List<CompanyReview> reviews = companyReviewRepository.findByCompanyId(companyId);
         if (reviews.isEmpty()) {
