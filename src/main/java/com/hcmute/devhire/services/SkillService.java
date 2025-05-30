@@ -6,6 +6,9 @@ import com.hcmute.devhire.repositories.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class SkillService implements ISkillService {
@@ -22,6 +25,14 @@ public class SkillService implements ISkillService {
                     .build();
             return skillRepository.save(skill);
         }
+    }
+
+    @Override
+    public List<SkillDTO> getTrendingSkills() {
+        return skillRepository.findTop8TrendingSkills()
+                .stream()
+                .map(s -> new SkillDTO(s.getName(), s.getFrequency()))
+                .collect(Collectors.toList());
     }
 
     @Override

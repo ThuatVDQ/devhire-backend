@@ -8,4 +8,5 @@ import lombok.*;
 @Builder
 public class SkillDTO {
     private String name;
+    private int frequency;
 }

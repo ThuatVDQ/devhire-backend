@@ -1,12 +1,8 @@
 package com.hcmute.devhire.repositories;
 
-import com.hcmute.devhire.entities.Category;
 import com.hcmute.devhire.entities.Job;
-import com.hcmute.devhire.entities.Skill;
-import com.hcmute.devhire.entities.User;
 import com.hcmute.devhire.responses.MonthlyCountResponse;
 import com.hcmute.devhire.utils.JobStatus;
-import com.hcmute.devhire.utils.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
