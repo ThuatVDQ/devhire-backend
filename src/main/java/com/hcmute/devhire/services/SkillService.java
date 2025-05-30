@@ -25,6 +25,15 @@ public class SkillService implements ISkillService {
     }
 
     @Override
+    public void increaseSkillFrequency(Long skillId) {
+        Skill skill = skillRepository.findById(skillId).orElse(null);
+        if (skill != null) {
+            skill.setFrequency(skill.getFrequency() + 1);
+            skillRepository.save(skill);
+        }
+    }
+
+    @Override
     public Skill findSkillById(Long id) {
         return skillRepository.findById(id).orElse(null);
     }

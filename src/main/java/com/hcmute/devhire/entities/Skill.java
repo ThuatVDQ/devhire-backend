@@ -24,6 +24,8 @@ public class Skill {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "frequency", nullable = false, columnDefinition = "int default 0")
+    private int frequency;
 //    @ManyToOne
 //    @JoinColumn(name = "job_id", referencedColumnName = "id")
 //    @JsonBackReference

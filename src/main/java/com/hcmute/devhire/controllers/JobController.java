@@ -33,9 +33,10 @@ public class JobController {
     private final IUserService userService;
     private final FileUtil fileUtil;
     private final IJobApplicationService jobApplicationService;
-    private final FavoriteJobService favoriteJobService;
+    private final IFavoriteJobService favoriteJobService;
     private final IEmailService emailService;
     private final INotificationService notificationService;
+    private final ISkillService skillService;
 
     @GetMapping("")
     public ResponseEntity<?> getAllJobs(
@@ -138,9 +139,19 @@ public class JobController {
                     .category(CategoryDTO.builder().name(job.getCategory().getName()).id(job.getCategory().getId()).build())
                     .build();
             jobService.increaseView(jobId);
+            increaseFrequencyByViewedJob(job);
             return ResponseEntity.ok(jobDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    public void increaseFrequencyByViewedJob(Job job) {
+        if (job.getJobSkills() != null) {
+            for (JobSkill jobSkill : job.getJobSkills()) {
+                Skill skill = jobSkill.getSkill();
+                skillService.increaseSkillFrequency(skill.getId());
+            }
         }
     }
 
@@ -368,6 +379,7 @@ public class JobController {
             }
 
             jobService.likeJob(jobId, username);
+            increaseFrequencyByViewedJob(jobService.findById(jobId));
             return ResponseEntity.ok().body("Liked job successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
