@@ -7,21 +7,20 @@ import com.hcmute.devhire.repositories.specification.JobSpecifications;
 import com.hcmute.devhire.responses.JobListResponse;
 import com.hcmute.devhire.responses.MonthlyCountResponse;
 import com.hcmute.devhire.utils.*;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -232,6 +231,37 @@ public class JobService implements IJobService {
                         .name(job.getCategory().getName())
                         .build())
                 .build();
+    }
+
+    @Override
+    public Page<JobDTO> filterJobs(PageRequest pageRequest, JobFilterDTO jobFilterDTO, String username) {
+        // Áp dụng sort theo createdAt DESC luôn trong truy vấn
+        Sort sort = Sort.by(
+                Sort.Order.desc("status"),
+                Sort.Order.desc("createdAt")
+        );
+
+        PageRequest sortedPageRequest = PageRequest.of(
+                pageRequest.getPageNumber(),
+                pageRequest.getPageSize(),
+                sort
+        );
+
+        // Gọi Specification filter
+        Page<Job> jobs = jobRepository.findAll(JobSpecifications.withCriteria(jobFilterDTO), sortedPageRequest);
+
+        if (jobs.isEmpty()) {
+            throw new EntityNotFoundException("No jobs found with the given filter.");
+        }
+
+        // Map từ Job sang JobDTO
+        return jobs.map(job -> {
+            try {
+                return convertDTO(job, username);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to convert Job to JobDTO", e);
+            }
+        });
     }
 
     @Override

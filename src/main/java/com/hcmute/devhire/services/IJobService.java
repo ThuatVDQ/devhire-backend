@@ -2,6 +2,7 @@ package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.ApplyJobRequestDTO;
 import com.hcmute.devhire.DTOs.JobDTO;
+import com.hcmute.devhire.DTOs.JobFilterDTO;
 import com.hcmute.devhire.entities.Job;
 import com.hcmute.devhire.entities.JobApplication;
 import com.hcmute.devhire.entities.User;
@@ -49,4 +50,5 @@ public interface IJobService {
     List<JobDTO> getNewJobsForUser(String email) throws Exception;
 
     JobDTO convertDTO(Job job, String username) throws Exception;
+    Page<JobDTO> filterJobs(PageRequest pageRequest, JobFilterDTO jobFilterDTO, String username) throws Exception;
 }

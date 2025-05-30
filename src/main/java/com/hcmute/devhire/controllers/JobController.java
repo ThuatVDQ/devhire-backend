@@ -562,6 +562,35 @@ public class JobController {
         }
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<?> filterJobs(
+            @Valid @RequestBody JobFilterDTO jobFilterDTO,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        if (page < 0 || limit <= 0) {
+            return ResponseEntity.badRequest().body("Page must be >= 0 and limit must be > 0.");
+        }
+        String username = JwtUtil.getAuthenticatedUsername();
+        try {
+            PageRequest pageRequest = PageRequest.of(
+                    page, limit
+            );
+            Page<JobDTO> jobDTOPage = jobService.filterJobs(pageRequest, jobFilterDTO, username);
+            JobListResponse response = JobListResponse.builder()
+                    .jobs(jobDTOPage.getContent())
+                    .currentPage(page)
+                    .pageSize(limit)
+                    .totalPages(jobDTOPage.getTotalPages())
+                    .totalElements(jobDTOPage.getTotalElements())
+                    .build();
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/applied")
     public ResponseEntity<?> getAppliedJobs(
             @RequestParam(defaultValue = "0") int page,
