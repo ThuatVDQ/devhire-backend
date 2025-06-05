@@ -35,4 +35,6 @@ public class JobFilterDTO {
 
     @JsonProperty("company_name")
     private String companyName;
+
+    private String keyword;
 }

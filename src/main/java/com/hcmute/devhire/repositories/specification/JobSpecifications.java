@@ -134,6 +134,23 @@ public class JobSpecifications {
                 predicates.add(cb.like(cb.lower(companyJoin.get("name")), "%" + criteria.getCompanyName().toLowerCase() + "%"));
             }
 
+            if (criteria.getKeyword() != null && !criteria.getKeyword().isEmpty()) {
+                String keyword = "%" + criteria.getKeyword().toLowerCase() + "%";
+
+                Predicate keywordPredicate = cb.or(
+                        cb.like(cb.lower(root.get("title")), keyword),
+                        cb.like(cb.lower(companyJoin.get("name")), keyword),
+                        cb.like(cb.lower(addressJoin.get("city")), keyword),
+                        cb.like(cb.lower(addressJoin.get("district")), keyword),
+                        cb.like(cb.lower(root.get("level")), keyword),
+                        cb.like(cb.lower(root.get("experience")), keyword),
+                        cb.like(cb.lower(root.get("position")), keyword),
+                        cb.like(cb.lower(categoryJoin.get("name")), keyword)
+                );
+
+                predicates.add(keywordPredicate);
+            }
+
             // Only status OPEN or HOT
             predicates.add(root.get("status").in(JobStatus.HOT, JobStatus.OPEN));
 
