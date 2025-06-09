@@ -22,7 +22,7 @@ public class JobFilterDTO {
 
     @JsonProperty("salary_max")
     private Double salaryMax;
-    private String currency;
+    private List<String> currency;
     private List<JobType> types;
     private List<String> levels;
     private List<String> experiences;

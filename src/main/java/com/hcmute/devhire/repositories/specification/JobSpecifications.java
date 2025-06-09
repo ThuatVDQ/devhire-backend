@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class JobSpecifications {
     public static Specification<Job> hasKeyword(String keyword) {
@@ -92,10 +93,19 @@ public class JobSpecifications {
 
             // Currency
             if (criteria.getCurrency() != null && !criteria.getCurrency().isEmpty()) {
-                try {
-                    predicates.add(cb.equal(root.get("currency"), Currency.valueOf(criteria.getCurrency())));
-                } catch (IllegalArgumentException e) {
-                    // Skip invalid enum value
+                List<Currency> currencies = criteria.getCurrency().stream()
+                        .map(s -> {
+                            try {
+                                return Currency.valueOf(s);
+                            } catch (IllegalArgumentException e) {
+                                return null;
+                            }
+                        })
+                        .filter(Objects::nonNull)
+                        .toList();
+
+                if (!currencies.isEmpty()) {
+                    predicates.add(root.get("currency").in(currencies));
                 }
             }
 
