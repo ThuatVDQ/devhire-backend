@@ -574,7 +574,7 @@ public class JobController {
         }
     }
 
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public ResponseEntity<?> filterJobs(
             @Valid @RequestBody JobFilterDTO jobFilterDTO,
             @RequestParam(defaultValue = "0") int page,
