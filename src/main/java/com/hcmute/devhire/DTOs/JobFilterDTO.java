@@ -30,8 +30,7 @@ public class JobFilterDTO {
 
     private List<String> categories;
 
-    @JsonProperty("skills")
-    private List<String> skills;
+    private String skills;
 
     @JsonProperty("company_name")
     private String companyName;

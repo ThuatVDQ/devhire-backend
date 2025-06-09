@@ -61,7 +61,7 @@ public class JobSpecifications {
         };
     }
 
-    public static Specification<Job> withCriteria(JobFilterDTO criteria) {
+    public static Specification<Job> withCriteria(JobFilterDTO criteria, List<Long> jobIdsBySkill) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -72,6 +72,11 @@ public class JobSpecifications {
             Join<JobSkill, Skill> skillJoin = jobSkillJoin.join("skill", JoinType.LEFT);
             Join<Job, Company> companyJoin = root.join("company", JoinType.LEFT);
             Join<Job, Category> categoryJoin = root.join("category", JoinType.LEFT);
+
+            // Skills
+            if (jobIdsBySkill != null && !jobIdsBySkill.isEmpty()) {
+                predicates.add(root.get("id").in(jobIdsBySkill));
+            }
 
             // Filter by city
             if (criteria.getCities() != null && !criteria.getCities().isEmpty()) {
@@ -134,10 +139,7 @@ public class JobSpecifications {
                 predicates.add(categoryJoin.get("name").in(criteria.getCategories()));
             }
 
-            // Skills
-            if (criteria.getSkills() != null && !criteria.getSkills().isEmpty()) {
-                predicates.add(skillJoin.get("name").in(criteria.getSkills()));
-            }
+
 
             // Company name (partial match, ignore case)
             if (criteria.getCompanyName() != null && !criteria.getCompanyName().isEmpty()) {

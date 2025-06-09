@@ -81,4 +81,15 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     @Query("SELECT COUNT(j) FROM Job j WHERE j.company.id = :companyId AND j.status IN :statuses")
     long countByCompanyIdAndStatuses(@Param("companyId") Long companyId,
                                      @Param("statuses") Collection<JobStatus> statuses);
+
+    @Query(value = """
+    SELECT DISTINCT j.id
+    FROM job j
+    JOIN job_skill js ON js.job_id = j.id
+    JOIN skill s ON s.id = js.skill_id
+    WHERE LOWER(s.name) LIKE %:keyword%
+      AND j.status IN (:statuses)
+    """, nativeQuery = true)
+    List<Long> findJobIdsBySkillKeywordNative(@Param("keyword") String keyword,
+                                              @Param("statuses") List<JobStatus> statuses);
 }

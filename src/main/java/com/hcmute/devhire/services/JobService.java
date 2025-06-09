@@ -246,9 +246,17 @@ public class JobService implements IJobService {
                 pageRequest.getPageSize(),
                 sort
         );
-
+        List<Long> jobIdsBySkill = null;
+        if (jobFilterDTO.getSkills() != null && !jobFilterDTO.getSkills().isEmpty()) {
+            String skillNames = jobFilterDTO.getSkills().toLowerCase();
+            List<JobStatus> statuses = List.of(JobStatus.OPEN, JobStatus.HOT);
+            jobIdsBySkill = jobRepository.findJobIdsBySkillKeywordNative(skillNames, statuses);
+            if (jobIdsBySkill.isEmpty()) {
+                throw new EntityNotFoundException("No jobs found with the given skills.");
+            }
+        }
         // Gọi Specification filter
-        Page<Job> jobs = jobRepository.findAll(JobSpecifications.withCriteria(jobFilterDTO), sortedPageRequest);
+        Page<Job> jobs = jobRepository.findAll(JobSpecifications.withCriteria(jobFilterDTO, jobIdsBySkill), sortedPageRequest);
 
         if (jobs.isEmpty()) {
             throw new EntityNotFoundException("No jobs found with the given filter.");
