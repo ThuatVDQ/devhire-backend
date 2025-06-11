@@ -23,11 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.Objects;
+import java.util.*;
 
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -242,7 +239,8 @@ public class CompanyService implements ICompanyService {
         }
 
         try {
-            Page<Company> companies = companyRepository.findAll(spec, pageable);
+            List<Company> companies = companyRepository.findAll(spec);
+
             if (companies.isEmpty()) {
                 throw new Exception("No company found");
             }
@@ -264,14 +262,18 @@ public class CompanyService implements ICompanyService {
                     .sorted(Comparator.comparingDouble(CompanyDTO::getScore).reversed())
                     .toList();
 
-            int start = Math.min((int) pageable.getOffset(), companyDTOs.size());
-            int end = Math.min((start + pageable.getPageSize()), companyDTOs.size());
-            List<CompanyDTO> pageContent = companyDTOs.subList(start, end);
+            // Phân trang thủ công theo Pageable
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), companyDTOs.size());
+            if (start > end) {
+                return new PageImpl<>(Collections.emptyList(), pageable, companyDTOs.size());
+            }
 
+            List<CompanyDTO> pageContent = companyDTOs.subList(start, end);
             return new PageImpl<>(pageContent, pageable, companyDTOs.size());
 
         } catch (Exception e) {
-            throw new Exception("Error when search companies");
+            throw new Exception("Error when searching companies", e);
         }
     }
 
