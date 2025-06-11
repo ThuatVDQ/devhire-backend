@@ -15,8 +15,14 @@ import java.util.Objects;
 public class JobSpecifications {
     public static Specification<Job> hasKeyword(String keyword) {
         return (root, query, criteriaBuilder) -> {
-            Predicate titleCondition = criteriaBuilder.like(root.get("title"), "%" + keyword + "%");
-            return criteriaBuilder.or(titleCondition);
+            Join<Job, Company> companyJoin = root.join("company", JoinType.LEFT);
+
+            String pattern = "%" + keyword.toLowerCase() + "%";
+
+            Predicate titleCondition = criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), pattern);
+            Predicate companyNameCondition = criteriaBuilder.like(criteriaBuilder.lower(companyJoin.get("name")), pattern);
+
+            return criteriaBuilder.or(titleCondition, companyNameCondition);
         };
     }
 
