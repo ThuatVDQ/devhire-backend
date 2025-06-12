@@ -9,10 +9,7 @@ import com.hcmute.devhire.responses.MonthlyCountResponse;
 import com.hcmute.devhire.utils.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -20,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -235,17 +233,14 @@ public class JobService implements IJobService {
 
     @Override
     public Page<JobDTO> filterJobs(PageRequest pageRequest, JobFilterDTO jobFilterDTO, String username) {
-        // Áp dụng sort theo createdAt DESC luôn trong truy vấn
-        Sort sort = Sort.by(
-                Sort.Order.desc("status"),
-                Sort.Order.desc("createdAt")
-        );
-
+        // Tạm thời sort theo createdAt DESC
+        Sort sort = Sort.by(Sort.Order.desc("createdAt"));
         PageRequest sortedPageRequest = PageRequest.of(
                 pageRequest.getPageNumber(),
                 pageRequest.getPageSize(),
                 sort
         );
+
         List<Long> jobIdsBySkill = null;
         if (jobFilterDTO.getSkills() != null && !jobFilterDTO.getSkills().isEmpty()) {
             String skillNames = jobFilterDTO.getSkills().toLowerCase();
@@ -255,21 +250,33 @@ public class JobService implements IJobService {
                 throw new EntityNotFoundException("No jobs found with the given skills.");
             }
         }
-        // Gọi Specification filter
-        Page<Job> jobs = jobRepository.findAll(JobSpecifications.withCriteria(jobFilterDTO, jobIdsBySkill), sortedPageRequest);
 
-        if (jobs.isEmpty()) {
+        Page<Job> jobPage = jobRepository.findAll(JobSpecifications.withCriteria(jobFilterDTO, jobIdsBySkill), sortedPageRequest);
+        if (jobPage.isEmpty()) {
             throw new EntityNotFoundException("No jobs found with the given filter.");
         }
 
-        // Map từ Job sang JobDTO
-        return jobs.map(job -> {
-            try {
-                return convertDTO(job, username);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to convert Job to JobDTO", e);
-            }
-        });
+        List<JobDTO> sortedJobDTOs = jobPage.getContent().stream()
+                .sorted(Comparator
+                        .comparingInt((Job job) -> {
+                            return switch (job.getStatus()) {
+                                case HOT -> 0;
+                                case OPEN -> 1;
+                                default -> 2;
+                            };
+                        })
+                        .thenComparing(Job::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder()))
+                )
+                .map(job -> {
+                    try {
+                        return convertDTO(job, username);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to convert Job to JobDTO", e);
+                    }
+                })
+                .toList();
+
+        return new PageImpl<>(sortedJobDTOs, pageRequest, jobPage.getTotalElements());
     }
 
     @Override

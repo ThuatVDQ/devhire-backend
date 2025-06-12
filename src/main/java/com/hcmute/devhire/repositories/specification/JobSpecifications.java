@@ -91,10 +91,10 @@ public class JobSpecifications {
 
             // Salary range
             if (criteria.getSalaryMin() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("salaryStart"), criteria.getSalaryMin()));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("salaryEnd"), criteria.getSalaryMin()));
             }
             if (criteria.getSalaryMax() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("salaryEnd"), criteria.getSalaryMax()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("salaryStart"), criteria.getSalaryMax()));
             }
 
             // Currency
