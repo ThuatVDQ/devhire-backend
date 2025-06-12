@@ -531,7 +531,7 @@ public class JobController {
             if (job == null) {
                 return ResponseEntity.badRequest().body("Job not found");
             }
-            if (job.getStatus() != JobStatus.OPEN) {
+            if (job.getStatus() != JobStatus.OPEN && job.getStatus() != JobStatus.HOT) {
                 return ResponseEntity.badRequest().body("Job is not open");
             }
             jobService.expiredJob(jobId);
