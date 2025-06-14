@@ -1,11 +1,10 @@
 package com.hcmute.devhire.services;
 
-import com.hcmute.devhire.DTOs.InterviewScheduleBulkDTO;
-import com.hcmute.devhire.DTOs.InterviewScheduleDTO;
-import com.hcmute.devhire.DTOs.InterviewScheduleUpdateDTO;
+import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.InterviewScheduleRepository;
 import com.hcmute.devhire.repositories.JobApplicationRepository;
+import com.hcmute.devhire.utils.InterviewResult;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -49,17 +48,18 @@ public class InterviewScheduleService implements IInterviewScheduleService{
         String emailSubject = String.format("[DevHire] Interview schedule for position %s", job.getTitle());
 
         String emailContent = String.format(
-                "Dear %s,\n\n" +
-                        "You have an interview schedule arranged as follows:\n\n" +
-                        "**Interviewer:** %s\n" +
-                        "**Position:** %s\n" +
-                        "**Time:** %s\n" +
-                        "**Duration:** %d minutes\n" +
-                        "**Location:** %s\n\n" +
-                        "**Note:**\n%s\n\n" +
-                        "Please confirm your participation and double check the information on the DevHire system.\n\n" +
-                        "Best regards,\n" +
-                        "DevHire Team",
+                "<p>Dear %s,</p>" +
+                        "<p>You have an interview schedule arranged as follows:</p>" +
+                        "<ul>" +
+                        "<li><strong>Interviewer:</strong> %s</li>" +
+                        "<li><strong>Position:</strong> %s</li>" +
+                        "<li><strong>Time:</strong> %s</li>" +
+                        "<li><strong>Duration:</strong> %d minutes</li>" +
+                        "<li><strong>Location:</strong> %s</li>" +
+                        "</ul>" +
+                        "<p><strong>Note:</strong><br>%s</p>" +
+                        "<p>Please confirm your participation and double check the information on the DevHire system.</p>" +
+                        "<p>Best regards,<br>DevHire Team</p>",
                 interviewer.getFullName(),
                 jobApplication.getUser().getFullName(),
                 job.getTitle(),
@@ -88,6 +88,7 @@ public class InterviewScheduleService implements IInterviewScheduleService{
                         .durationMinutes(dto.getDurationMinutes())
                         .location(dto.getLocation())
                         .note(dto.getNote())
+                        .result(InterviewResult.WAITING)
                         .build()
         );
     }
@@ -125,6 +126,132 @@ public class InterviewScheduleService implements IInterviewScheduleService{
         }
 
         return interviewScheduleRepository.saveAll(schedules);
+    }
+
+    @Override
+    public Page<InterviewScheduleDTO> getInterviewResults(String username, InterviewResult status, PageRequest pageRequest) {
+        Company company = companyService.findByUser(username);
+        if (company == null) {
+            throw new RuntimeException("Company not found");
+        }
+
+        return interviewScheduleRepository.findAllByCompanyIdAndInterviewStatus(
+                company.getId(),
+                status,
+                pageRequest
+        ).map(this::convertToDTO);
+    }
+
+    @Override
+    public InterviewSchedule updateInterviewResult(Long id, InterviewResultDTO dto) throws Exception {
+        InterviewSchedule schedule = interviewScheduleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Interview schedule not found"));
+        schedule.setResult(dto.getResult());
+        schedule.setRecruiterNote(dto.getRecruiterNote());
+        sendNotification(schedule, dto.getRecruiterNote());
+        return interviewScheduleRepository.save(schedule);
+    }
+
+    @Override
+    public void sendEmail(Long id, EmailRequestDTO emailRequestDTO) throws Exception {
+        String htmlMessage = String.format("""
+    <!DOCTYPE html>
+    <html lang='en'>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>CV Acceptance Notification</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 0;
+            }
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                text-align: center;
+                padding: 10px;
+                background-color: #4CAF50;
+                color: #ffffff;
+                border-radius: 8px 8px 0 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .content h1 {
+                color: #333333;
+            }
+            .content p {
+                color: #666666;
+                line-height: 1.6;
+            }
+            .button {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 5px;
+            }
+            .footer {
+                margin-top: 30px;
+                text-align: center;
+                font-size: 12px;
+                color: #aaaaaa;
+            }
+        </style>
+    </head>
+    <body>
+        <div class='email-container'>
+            <div class='header'>
+                <h2>Job Application Update</h2>
+            </div>
+            <div class='content'>
+                <h1>Congratulations, %s!</h1>
+                <p>%s</p>
+                <p>Thank you for your interest in joining our team!</p>
+            </div>
+            <div class='footer'>
+                <p>&copy; 2024 Our Company, Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """, emailRequestDTO.getName(), emailRequestDTO.getContent());
+        InterviewSchedule schedule = interviewScheduleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Interview schedule not found"));
+
+        if (schedule.isEmailSent()) {
+            throw new Exception("Email already sent for this schedule");
+        }
+        // Gửi thông báo và email
+        emailService.sendEmail(emailRequestDTO.getEmail(), emailRequestDTO.getSubject(), htmlMessage);
+        schedule.setEmailSent(true);
+        interviewScheduleRepository.save(schedule);
+    }
+
+    private void sendNotification(InterviewSchedule schedule, String note) throws Exception {
+        User candidate = schedule.getJobApplication().getUser();
+        Job job = schedule.getJobApplication().getJob();
+
+        String result = schedule.getResult().name();
+        String title = String.format("Interview result for %s", job.getTitle());
+        String message = String.format(
+                "Interview result for %s: %s", job.getTitle(),
+                result
+        );
+
+        // Gửi notification trong hệ thống
+        notificationService.createAndSendNotification(message, candidate.getUsername());
     }
 
     private void sendNotification(JobApplication jobApp, InterviewScheduleBulkDTO dto) throws Exception {
@@ -230,6 +357,9 @@ public class InterviewScheduleService implements IInterviewScheduleService{
                 .jobTitle(job.getTitle())
                 .jobId(job.getId())
                 .applicationStatus(jobApp.getStatus())
+                .result(schedule.getResult())
+                .recruiterNote(schedule.getRecruiterNote())
+                .emailSent(schedule.isEmailSent())
                 .build();
     }
 

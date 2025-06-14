@@ -22,7 +22,7 @@ public class EmailService implements IEmailService {
     @Override
     public void sendEmail(String to, String subject, String text) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         helper.setTo(to);
         helper.setSubject(subject);

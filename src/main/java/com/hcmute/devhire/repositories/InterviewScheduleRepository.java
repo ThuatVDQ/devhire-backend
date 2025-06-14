@@ -1,6 +1,7 @@
 package com.hcmute.devhire.repositories;
 
 import com.hcmute.devhire.entities.InterviewSchedule;
+import com.hcmute.devhire.utils.InterviewResult;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -61,4 +62,13 @@ public interface InterviewScheduleRepository extends JpaRepository<InterviewSche
     WHERE u.email = :email
     """)
     Page<InterviewSchedule> findAllByUserEmail(@Param("email") String email, PageRequest pageRequest);
+
+    @Query("SELECT i FROM InterviewSchedule i " +
+            "JOIN i.jobApplication ja " +
+            "JOIN ja.job j " +
+            "JOIN j.company c " +
+            "WHERE c.id = :companyId AND i.result = :status")
+    Page<InterviewSchedule> findAllByCompanyIdAndInterviewStatus(@Param("companyId") Long companyId,
+                                                                 @Param("status") InterviewResult status,
+                                                                 PageRequest pageRequest);
 }

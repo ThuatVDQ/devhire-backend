@@ -1,6 +1,7 @@
 package com.hcmute.devhire.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.hcmute.devhire.utils.InterviewResult;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -58,4 +59,12 @@ public class InterviewScheduleDTO {
     // Trạng thái ứng tuyển
     @JsonProperty("application_status")
     private JobApplicationStatus applicationStatus;
+
+    @JsonProperty("recruiter_note")
+    private String recruiterNote;
+
+    @JsonProperty("email_sent")
+    private boolean emailSent;
+
+    private InterviewResult result;
 }

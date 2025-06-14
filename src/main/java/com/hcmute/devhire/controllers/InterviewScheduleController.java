@@ -1,11 +1,10 @@
 package com.hcmute.devhire.controllers;
-import com.hcmute.devhire.DTOs.InterviewScheduleBulkDTO;
-import com.hcmute.devhire.DTOs.InterviewScheduleDTO;
-import com.hcmute.devhire.DTOs.InterviewScheduleUpdateDTO;
+import com.hcmute.devhire.DTOs.*;
 import com.hcmute.devhire.components.JwtUtil;
 import com.hcmute.devhire.entities.InterviewSchedule;
 import com.hcmute.devhire.responses.PagedResponse;
 import com.hcmute.devhire.services.IInterviewScheduleService;
+import com.hcmute.devhire.utils.InterviewResult;
 import com.hcmute.devhire.utils.JobApplicationStatus;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -123,6 +122,69 @@ public class InterviewScheduleController {
         try {
             List<InterviewSchedule> createdSchedules = interviewScheduleService.createBulkSchedules(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdSchedules);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/result")
+    public ResponseEntity<?> getInterviewResults(
+            @RequestParam(required = false) InterviewResult status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        try {
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("interviewTime").descending());
+            String username = JwtUtil.getAuthenticatedUsername();
+            if (username == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            }
+            Page<InterviewScheduleDTO> schedules = (status != null)
+                    ? interviewScheduleService.getInterviewResults(username, status, pageRequest)
+                    : interviewScheduleService.getAllInterviewSchedules(username, pageRequest);
+            return ResponseEntity.ok(new PagedResponse<>(
+                    schedules.getContent(),
+                    schedules.getNumber(),
+                    schedules.getSize(),
+                    schedules.getTotalElements(),
+                    schedules.getTotalPages()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/result")
+    public ResponseEntity<?> updateInterviewResult(
+            @PathVariable Long id,
+            @RequestBody InterviewResultDTO dto
+    ) {
+        try {
+            InterviewSchedule updatedSchedule = interviewScheduleService.updateInterviewResult(id, dto);
+            return ResponseEntity.ok(updatedSchedule);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/send-email")
+    public ResponseEntity<?> notifyInterviewSchedule(
+            @PathVariable Long id,
+            @Valid @RequestBody EmailRequestDTO emailRequestDTO,
+            BindingResult result
+    ) {
+        try {
+            if (result.hasErrors()) {
+                List<String> errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+                return ResponseEntity.badRequest().body(errorMessage);
+            }
+
+            interviewScheduleService.sendEmail(id, emailRequestDTO);
+            return ResponseEntity.ok("Email sent successfully.");
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
