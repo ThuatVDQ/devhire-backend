@@ -411,7 +411,7 @@ public class JobService implements IJobService {
                     .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
             job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, "OPEN"));
             job.setCreatedAt(LocalDateTime.now());
-            notificationService.createAndSendNotification("Congratulations! Your job listing for " + job.getTitle() + " has been approved and is now visible to applicants.", job.getCompany().getCreatedBy().getUsername());
+            notificationService.createAndSendNotification("Congratulations! Your job listing for " + job.getTitle() + " has been approved and is now visible to applicants.", job.getCompany().getCreatedBy().getUsername(), "/recruiter/job-detail/" + job.getId());
             jobRepository.save(job);
         } catch (Exception e) {
             throw new Exception("Error approving job: " + e.getMessage());
@@ -424,7 +424,7 @@ public class JobService implements IJobService {
             Job job = jobRepository.findById(jobId)
                     .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
             job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, "REJECTED"));
-            notificationService.createAndSendNotification("Unfortunately, your job listing for " + job.getTitle() + " has been rejected. Please review and update the job listing if necessary.", job.getCompany().getCreatedBy().getUsername());
+            notificationService.createAndSendNotification("Unfortunately, your job listing for " + job.getTitle() + " has been rejected. Please review and update the job listing if necessary.", job.getCompany().getCreatedBy().getUsername(), "/recruiter/job-detail/" + job.getId());
             jobRepository.save(job);
         } catch (Exception e) {
             throw new Exception("Error rejecting job: " + e.getMessage());
@@ -437,7 +437,7 @@ public class JobService implements IJobService {
             Job job = jobRepository.findById(jobId)
                     .orElseThrow(() -> new Exception("Job not found with id: " + jobId));
             job.setStatus(EnumUtil.getEnumFromString(JobStatus.class, "CLOSED"));
-            notificationService.createAndSendNotification("Your job listing for " + job.getTitle() + " has expired. You may choose to renew or update the job listing to make it visible to applicants again.", job.getCompany().getCreatedBy().getUsername());
+            notificationService.createAndSendNotification("Your job listing for " + job.getTitle() + " has expired. You may choose to renew or update the job listing to make it visible to applicants again.", job.getCompany().getCreatedBy().getUsername(), "/recruiter/job-detail/" + job.getId());
             jobRepository.save(job);
         } catch (Exception e) {
             throw new Exception("Error expiring job: " + e.getMessage());

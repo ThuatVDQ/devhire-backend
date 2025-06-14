@@ -89,7 +89,8 @@ public class CompanyController {
                 return ResponseEntity.badRequest().body("User not found");
             }
             Company newCompany = companyService.createCompany(companyDTO, username);
-            notificationService.sendNotificationToAdmin("New company: " + newCompany.getName() + " has been created");
+            notificationService.sendNotificationToAdmin("New company: " + newCompany.getName() + " has been created",
+                    "/admin/companies/" + newCompany.getId());
             return ResponseEntity.ok(newCompany);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -129,7 +130,8 @@ public class CompanyController {
                 return ResponseEntity.status(401).body("Unauthorized: No user found.");
             }
             Company company = companyService.updateCompany(companyDTO, username);
-            notificationService.sendNotificationToAdmin(company.getName() + " has been updated");
+            notificationService.sendNotificationToAdmin(company.getName() + " has been updated",
+                    "/admin/companies/" + company.getId());
             return ResponseEntity.ok(company);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

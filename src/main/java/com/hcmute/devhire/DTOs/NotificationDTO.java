@@ -1,6 +1,7 @@
 package com.hcmute.devhire.DTOs;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,4 +19,7 @@ public class NotificationDTO {
 
     @NotBlank(message = "Username cannot be blank")
     private String username;
+
+    @JsonProperty("target_url")
+    private String targetUrl;
 }

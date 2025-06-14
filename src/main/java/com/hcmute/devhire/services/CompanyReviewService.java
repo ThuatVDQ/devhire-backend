@@ -30,8 +30,8 @@ public class CompanyReviewService implements ICompanyReviewService {
                 .rating(companyReviewDTO.getRating())
                 .comment(companyReviewDTO.getComment())
                 .build();
-        notificationService.createAndSendNotification("User " + user.getFullName() + " just reviewed your company", company.getCreatedBy().getUsername());
-        notificationService.sendNotificationToAdmin("User " + user.getFullName() + " just reviewed company " + company.getName());
+        notificationService.createAndSendNotification("User " + user.getFullName() + " just reviewed your company", company.getCreatedBy().getUsername(), "/companies/" + company.getId());
+        notificationService.sendNotificationToAdmin("User " + user.getFullName() + " just reviewed company " + company.getName(), "/admin/companies/" + company.getId());
         return companyReviewRepository.save(companyReview);
     }
 

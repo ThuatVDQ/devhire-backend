@@ -369,7 +369,7 @@ public class CompanyService implements ICompanyService {
         if (company != null && user.getRole().getId() == 1) {
             company.setCompanyStatus(String.valueOf(CompanyStatus.ACTIVE));
             companyRepository.save(company);
-            notificationService.createAndSendNotification("Your company has been approved", company.getCreatedBy().getUsername());
+            notificationService.createAndSendNotification("Your company has been approved", company.getCreatedBy().getUsername(), "/");
         } else {
             throw new RuntimeException("Company not found or you are not authorized to approve company");
         }
@@ -383,7 +383,7 @@ public class CompanyService implements ICompanyService {
         if (company != null && user.getRole().getId() == 1) {
             company.setCompanyStatus(String.valueOf(CompanyStatus.REJECTED));
             companyRepository.save(company);
-            notificationService.createAndSendNotification("Your company has been rejected with reason: " + reason, company.getCreatedBy().getUsername());
+            notificationService.createAndSendNotification("Your company has been rejected with reason: " + reason, company.getCreatedBy().getUsername(), "/");
         } else {
             throw new RuntimeException("Company not found");
         }

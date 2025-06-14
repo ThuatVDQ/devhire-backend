@@ -18,7 +18,7 @@ public class NotificationService implements INotificationService {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public Notification createNotification(String message, String username) throws Exception {
+    public Notification createNotification(String message, String username, String targetUrl) throws Exception {
         User user = userService.findByUserName(username);
         if (user == null) {
             throw new Exception("User not found");
@@ -28,13 +28,14 @@ public class NotificationService implements INotificationService {
                 .isRead(false)
                 .sendAt(Instant.ofEpochSecond(Instant.now().getEpochSecond()))
                 .user(user)
+                .targetUrl(targetUrl)
                 .build();
         return notificationRepository.save(notification);
     }
 
     @Override
-    public void createAndSendNotification(String message, String username) throws Exception {
-        Notification notification = createNotification(message, username);
+    public void createAndSendNotification(String message, String username, String targetUrl) throws Exception {
+        Notification notification = createNotification(message, username, targetUrl);
 
         messagingTemplate.convertAndSend("/topic/notifications/" + username, notification);
 
@@ -79,13 +80,13 @@ public class NotificationService implements INotificationService {
     }
 
     @Override
-    public void sendNotificationToAdmin(String message) throws Exception {
+    public void sendNotificationToAdmin(String message, String targetUrl) throws Exception {
         List<User> admins = userService.findAdmins();
         if (admins.isEmpty()) {
             return;
         }
         for (User admin : admins) {
-            Notification notification = createNotification(message, admin.getUsername());
+            Notification notification = createNotification(message, admin.getUsername(), targetUrl);
             messagingTemplate.convertAndSend("/topic/notifications/" + admin.getUsername(), notification);
         }
     }

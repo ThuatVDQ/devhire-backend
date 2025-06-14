@@ -39,7 +39,7 @@ public class JobStatusUpdater {
             job.setStatus(JobStatus.CLOSED);
             jobRepository.save(job);
             emailService.sendEmail(job.getCompany().getCreatedBy().getUsername(), "Job " + job.getTitle() + " has been closed", "Your job has been closed because the deadline has passed.");
-            notificationService.createAndSendNotification("Your job " + job.getTitle() + " has been closed because the deadline has passed.", job.getCompany().getCreatedBy().getUsername());
+            notificationService.createAndSendNotification("Your job " + job.getTitle() + " has been closed because the deadline has passed.", job.getCompany().getCreatedBy().getUsername(), "/recruiter/job-detail/" + job.getId());
         }
     }
 

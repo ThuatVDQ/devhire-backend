@@ -72,7 +72,7 @@ public class InterviewScheduleService implements IInterviewScheduleService{
         // Gửi thông báo và email
         notificationService.createAndSendNotification(
                 String.format("Interview schedule %s - %s", job.getTitle(), formattedTime),
-                interviewer.getUsername()
+                interviewer.getUsername(), "/settings"
         );
 
         emailService.sendEmail(
@@ -251,7 +251,7 @@ public class InterviewScheduleService implements IInterviewScheduleService{
         );
 
         // Gửi notification trong hệ thống
-        notificationService.createAndSendNotification(message, candidate.getUsername());
+        notificationService.createAndSendNotification(message, candidate.getUsername(), "/settings");
     }
 
     private void sendNotification(JobApplication jobApp, InterviewScheduleBulkDTO dto) throws Exception {
@@ -282,7 +282,7 @@ public class InterviewScheduleService implements IInterviewScheduleService{
         );
 
         notificationService.createAndSendNotification(String.format("Interview schedule %s - %s", job.getTitle(), formattedTime),
-                interviewer.getUsername());
+                interviewer.getUsername(), "/settings");
         emailService.sendEmail(interviewer.getUsername(), "[DevHire] New interview schedule", emailContent);
     }
 
@@ -395,7 +395,7 @@ public class InterviewScheduleService implements IInterviewScheduleService{
 
         notificationService.createAndSendNotification(
                 "Interview schedule updated: " + content,
-                interviewer.getUsername()
+                interviewer.getUsername(), "/settings"
         );
 
         emailService.sendEmail(

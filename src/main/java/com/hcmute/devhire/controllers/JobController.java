@@ -168,7 +168,7 @@ public class JobController {
 
         try {
             Job newJob = jobService.createJob(jobDTO, username);
-            notificationService.sendNotificationToAdmin(newJob.getCompany().getName() + " has created a new job");
+            notificationService.sendNotificationToAdmin(newJob.getCompany().getName() + " has created a new job", "/admin/job/" + newJob.getId());
             return ResponseEntity.ok(newJob);
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
@@ -216,8 +216,8 @@ public class JobController {
                     jobApplication.setLetter(letter == null ? "" : letter);
                     jobApplicationService.updateJobApplication(jobApplication);
                     Job job = jobService.findById(jobId);
-                    notificationService.createAndSendNotification("New CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
-                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has updated CV for job " + job.getTitle());
+                    notificationService.createAndSendNotification("New CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername(), "/recruiter/jobs/" + jobId);
+                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has updated CV for job " + job.getTitle(), "/admin/job/" + jobId);
                     return ResponseEntity.ok().body("Updated CV for existing application");
                 } else {
                     ApplyJobRequestDTO applyJobRequestDTO = ApplyJobRequestDTO.builder()
@@ -229,7 +229,7 @@ public class JobController {
                     jobService.applyForJob(jobId, applyJobRequestDTO);
                     sendNewApplicationNotification(jobId, letter, userDTO);
                     Job job = jobService.findById(jobId);
-                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has applied for job " + job.getTitle());
+                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has applied for job " + job.getTitle(), "/admin/job/" + jobId);
                     return ResponseEntity.ok().body("Applied successfully with uploaded CV");
                 }
             } else if (cvId != null) {
@@ -245,8 +245,8 @@ public class JobController {
                     jobApplication.setLetter(letter == null ? "" : letter);
                     jobApplicationService.updateJobApplication(jobApplication);
                     Job job = jobService.findById(jobId);
-                    notificationService.createAndSendNotification("CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
-                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has updated CV for job " + job.getTitle());
+                    notificationService.createAndSendNotification("CV updated for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername(), "/recruiter/jobs/" + jobId);
+                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has updated CV for job " + job.getTitle(), "/admin/job/" + jobId);
                     return ResponseEntity.ok().body("Updated CV for existing application using old CV");
                 } else {
                     // Tạo mới một đơn ứng tuyển nếu chưa ứng tuyển
@@ -259,7 +259,7 @@ public class JobController {
                     jobService.applyForJob(jobId, applyJobRequestDTO);
                     sendNewApplicationNotification(jobId, letter, userDTO);
                     Job job = jobService.findById(jobId);
-                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has applied for job " + job.getTitle());
+                    notificationService.sendNotificationToAdmin("User " + userDTO.getFullName() + " has applied for job " + job.getTitle(), "/admin/job/" + jobId);
                     return ResponseEntity.ok().body("Applied successfully with old CV");
                 }
             } else {
@@ -275,7 +275,7 @@ public class JobController {
         String recruiterEmail = job.getCompany().getCreatedBy().getEmail();
         String recruiterName = job.getCompany().getName();
 
-        notificationService.createAndSendNotification("New CV submitted for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername());
+        notificationService.createAndSendNotification("New CV submitted for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername(), "/recruiter/jobs/" + jobId);
 
         String subject = "New CV Submitted for " + job.getTitle();
 
@@ -714,7 +714,7 @@ public class JobController {
                 return ResponseEntity.badRequest().body("Cannot edit job that is open or hot");
             }
             jobService.editJob(jobId, jobDTO);
-            notificationService.sendNotificationToAdmin("Company: " + job.getCompany().getName() + " has edited a job: " + job.getTitle());
+            notificationService.sendNotificationToAdmin("Company: " + job.getCompany().getName() + " has edited a job: " + job.getTitle(), "/admin/job/" + jobId);
             return ResponseEntity.ok().body("Job updated successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

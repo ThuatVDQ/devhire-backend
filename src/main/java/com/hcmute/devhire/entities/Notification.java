@@ -31,6 +31,9 @@ public class Notification extends BaseEntity {
     @JsonProperty("is_read")
     private Boolean isRead = false;
 
+    @Column(name = "target_url")
+    private String targetUrl;
+
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonBackReference

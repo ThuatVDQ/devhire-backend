@@ -7,9 +7,6 @@ import com.hcmute.devhire.services.INotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,7 +44,7 @@ public class NotificationController {
     @PostMapping("/create")
     public ResponseEntity<?> createNotification(@Valid @RequestBody NotificationDTO notificationDTO) {
         try {
-            notificationService.createAndSendNotification(notificationDTO.getMessage(), notificationDTO.getUsername());
+            notificationService.createAndSendNotification(notificationDTO.getMessage(), notificationDTO.getUsername(), notificationDTO.getTargetUrl());
             return ResponseEntity.ok("Notification created successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("An error occurred: " + e.getMessage());
