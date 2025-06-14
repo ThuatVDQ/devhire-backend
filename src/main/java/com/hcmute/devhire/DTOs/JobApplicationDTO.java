@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 public class JobApplicationDTO {
     private Long id;
     private String status;
+    @JsonProperty("job_status")
+    private String jobStatus;
     @JsonProperty("job_id")
     private Long jobId;
 

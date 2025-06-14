@@ -313,6 +313,7 @@ public class JobApplicationService implements IJobApplicationService{
         List<JobApplication> jobApplications = jobApplicationRepository.findByJobIdAndStatus(jobId, JobApplicationStatus.valueOf(status));
         return jobApplications.stream().map(app -> JobApplicationDTO.builder()
                 .status(app.getStatus().name())
+                .jobStatus(String.valueOf(app.getJob().getStatus()))
                 .jobId(app.getJob().getId())
                 .jobTitle(app.getJob().getTitle())
                 .fullName(app.getUser().getFullName())
