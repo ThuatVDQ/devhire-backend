@@ -498,6 +498,7 @@ public class JobService implements IJobService {
         if (jobApplications.isEmpty()) {
             throw new Exception("You have not applied for any jobs");
         }
+
         return jobApplications.map(jobApplication -> JobDTO.builder()
                 .id(jobApplication.getJob().getId())
                 .isClose(getIsClose(jobApplication.getJob()))
