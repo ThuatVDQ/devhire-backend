@@ -41,7 +41,7 @@ public class JobApplicationController {
     private final IJobApplicationService jobApplicationService;
     private final INotificationService notificationService;
 
-    @GetMapping("/{jobId}")
+    @GetMapping("/{jobId:\\d+}")
     public ResponseEntity<?> getJobApplicationByJob(
             @PathVariable("jobId") Long jobId,
             @RequestParam(required = false) JobApplicationStatus status

@@ -295,6 +295,7 @@ public class JobApplicationService implements IJobApplicationService{
                 .status(app.getStatus().name())
                 .jobId(app.getJob().getId())
                 .jobTitle(app.getJob().getTitle())
+                .jobStatus(String.valueOf(app.getJob().getStatus()))
                 .fullName(app.getUser().getFullName())
                 .cvId(app.getCv().getId())
                 .cvUrl(app.getCv().getCvUrl())
