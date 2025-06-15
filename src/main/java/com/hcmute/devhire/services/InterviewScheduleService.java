@@ -117,6 +117,7 @@ public class InterviewScheduleService implements IInterviewScheduleService{
                     .durationMinutes(dto.getDurationMinutes())
                     .location(dto.getLocation())
                     .note(dto.getNote())
+                    .result(InterviewResult.WAITING)
                     .build();
 
             schedules.add(schedule);
