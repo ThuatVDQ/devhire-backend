@@ -275,7 +275,7 @@ public class JobController {
         String recruiterEmail = job.getCompany().getCreatedBy().getEmail();
         String recruiterName = job.getCompany().getName();
 
-        notificationService.createAndSendNotification("New CV submitted for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername(), "/recruiter/jobs/" + jobId);
+        notificationService.createAndSendNotification("New CV submitted for job " + job.getTitle(), job.getCompany().getCreatedBy().getUsername(), "/recruiter/job-detail/" + jobId);
 
         String subject = "New CV Submitted for " + job.getTitle();
 
