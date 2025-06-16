@@ -28,6 +28,9 @@ public class Subscription extends BaseEntity {
     @Column(name = "price")
     private Double price;
 
+    @Column(name="amount")
+    private Integer amount;
+
     @Lob
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;

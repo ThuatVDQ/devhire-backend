@@ -107,6 +107,9 @@ public class SubscriptionService implements ISubscriptionService {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         List<MemberVip> memberVips = memberVipRepository.findByUserId(user.getId());
+        if (memberVips.isEmpty()) {
+            throw new RuntimeException("No upgraded subscriptions found for user");
+        }
 
         return memberVips.stream()
                 .map(m -> new SubscriptionDTO(
@@ -115,8 +118,14 @@ public class SubscriptionService implements ISubscriptionService {
                         m.getSubscription().getBenefit(),
                         m.getSubscription().getPrice(),
                         m.getSubscription().getDescription(),
-                        m.getSubscription().getStatus()
+                        m.getSubscription().getStatus(),
+                        m.getSubscription().getAmount()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public SubscriptionDTO getSubscriptionAmountJobs(String username) {
+        return null;
     }
 }

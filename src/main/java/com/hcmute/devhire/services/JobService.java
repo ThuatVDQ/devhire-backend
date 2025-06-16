@@ -15,6 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
@@ -527,6 +528,21 @@ public class JobService implements IJobService {
     public int countJobsByCompanyId(String username) throws Exception {
         Company company = companyService.findByUser(username);
         return jobRepository.countJobsByCompany(company.getId());
+    }
+
+    public long countJobsThisMonth(String username) throws Exception {
+        LocalDate now = LocalDate.now();
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).atStartOfDay();
+        User user = userService.findByUserName(username);
+        if (user == null) {
+            throw new Exception("User not found");
+        }
+        Company company = companyService.findByUser(user.getUsername());
+        if (company == null) {
+            throw new Exception("Company not found for user: " + user.getUsername());
+        }
+        List<JobStatus> statuses = List.of(JobStatus.OPEN, JobStatus.HOT);
+        return jobRepository.countJobsByCompanyIdAndCreatedAtAfterAndStatuses(company.getId(), startOfMonth, statuses);
     }
 
     @Override

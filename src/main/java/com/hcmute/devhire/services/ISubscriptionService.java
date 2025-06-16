@@ -18,4 +18,6 @@ public interface ISubscriptionService {
     boolean isSubscriptionExist(String name);
     String purchaseSubscription(SubscriptionRequestDTO subscriptionRequestDTO, HttpServletRequest request);
     List<SubscriptionDTO> getUpgradedSubscriptions(String username);
+    SubscriptionDTO getSubscriptionAmountJobs(String username);
+
 }

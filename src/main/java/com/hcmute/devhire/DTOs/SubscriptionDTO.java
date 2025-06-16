@@ -1,5 +1,6 @@
 package com.hcmute.devhire.DTOs;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hcmute.devhire.utils.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +24,6 @@ public class SubscriptionDTO {
     private String description;
 
     private Status status;
+
+    private Integer amount;
 }

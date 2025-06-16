@@ -32,6 +32,7 @@ public interface IJobService {
     Page<JobDTO> searchJobs(PageRequest pageRequest, String keyword, String location, String jobType, String username);
     Page<JobDTO> getAppliedJobs(PageRequest pageRequest, String username) throws Exception;
     int countJobsByCompanyId(String username) throws Exception;
+    long countJobsThisMonth(String username) throws Exception;
     int countPendingJobsByCompanyId(String username);
     List<JobDTO> getLatestJobs(String username) throws Exception;
     void editJob(Long jobId, JobDTO jobDTO) throws Exception;

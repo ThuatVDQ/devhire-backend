@@ -27,6 +27,13 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     @Query("SELECT COUNT(j) FROM Job j WHERE j.company.id = ?1")
     int countJobsByCompany(Long companyId);
 
+    @Query("SELECT COUNT(j) FROM Job j WHERE j.company.id = :companyId AND j.createdAt >= :startDate AND j.status IN :statuses")
+    long countJobsByCompanyIdAndCreatedAtAfterAndStatuses(
+            @Param("companyId") Long companyId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("statuses") Collection<JobStatus> statuses
+    );
+
     @Query("SELECT COUNT(j) FROM Job j WHERE j.company.id = ?1 AND j.status = 'PENDING'")
     int countPendingJobsByCompanyId(Long companyId);
 

@@ -655,6 +655,20 @@ public class JobController {
         }
     }
 
+    @GetMapping("/total-posted-month")
+    public ResponseEntity<?> getTotalPostedJobsOpen() {
+        String username = JwtUtil.getAuthenticatedUsername();
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        }
+        try {
+            long totalJobs = jobService.countJobsThisMonth(username);
+            return ResponseEntity.ok(totalJobs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/total-pending")
     public ResponseEntity<?> getTotalPendingJobs() {
         String username = JwtUtil.getAuthenticatedUsername();
