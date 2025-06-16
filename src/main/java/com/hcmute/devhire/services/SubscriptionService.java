@@ -112,6 +112,7 @@ public class SubscriptionService implements ISubscriptionService {
         }
 
         return memberVips.stream()
+                .filter(m -> m.getStatus() == Status.ACTIVE)
                 .map(m -> new SubscriptionDTO(
                         m.getSubscription().getId(),
                         m.getSubscription().getName(),

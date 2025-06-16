@@ -10,6 +10,7 @@ import com.hcmute.devhire.repositories.MemberVipRepository;
 import com.hcmute.devhire.services.IEmailService;
 import com.hcmute.devhire.services.INotificationService;
 import com.hcmute.devhire.utils.JobStatus;
+import com.hcmute.devhire.utils.Status;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -63,7 +64,8 @@ public class JobStatusUpdater {
         for (MemberVip memberVip : expiredVips) {
             User user = memberVip.getUser();
             Company company = companyRepository.findByUser(String.valueOf(user));
-
+            memberVip.setStatus(Status.INACTIVE);
+            memberVipRepository.save(memberVip);
             if (company != null) {
                 List<Job> jobs = jobRepository.findByCompanyIdAndStatus(company.getId(), JobStatus.HOT);
                 for (Job job : jobs) {
