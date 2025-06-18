@@ -2,10 +2,7 @@ package com.hcmute.devhire.services;
 
 import com.hcmute.devhire.DTOs.CvAnalysisResult;
 import com.hcmute.devhire.DTOs.MatchingCandidateDTO;
-import com.hcmute.devhire.entities.CV;
-import com.hcmute.devhire.entities.Job;
-import com.hcmute.devhire.entities.JobApplication;
-import com.hcmute.devhire.entities.User;
+import com.hcmute.devhire.entities.*;
 import com.hcmute.devhire.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mock.web.MockMultipartFile;
@@ -29,7 +26,7 @@ public class CandidateMatchingService implements ICandidateMatchingService {
     private final UserRepository userRepository;
     private final JobSkillRepository jobSkillRepository;
     private final SkillRepository skillRepository;
-    private final ICvAnalysisService cvAnalysisService;
+    private final UserSkillRepository userSkillRepository;
     @Override
     public List<MatchingCandidateDTO> findMatchingCandidates(Long jobId, double threshold) throws IOException {
         Optional<Job> jobOpt = jobRepository.findById(jobId);
@@ -48,21 +45,13 @@ public class CandidateMatchingService implements ICandidateMatchingService {
         List<MatchingCandidateDTO> result = new ArrayList<>();
 
         for (Long userId : userIds) {
+            List<UserSkill> userSkills = userSkillRepository.findByUserId(userId);
             CV cv = cvRepository.findTopByUserIdOrderByUpdatedAtDesc(userId);
-            if (cv == null) continue;
-
-            Path path = Paths.get("uploads", cv.getCvUrl());
-            if (!Files.exists(path)) continue;
-
-            MultipartFile multipartFile = new MockMultipartFile(
-                    cv.getCvUrl(),
-                    Files.readAllBytes(path)
-            );
-            CvAnalysisResult analysisResult = cvAnalysisService.analyzeCv(multipartFile);
-            Set<String> cvSkills = analysisResult.getSkills();
-
-            Set<String> lowerCvSkills = cvSkills.stream()
-                    .map(String::toLowerCase)
+            Set<String> lowerCvSkills = userSkills.stream()
+                    .map(userSkill -> {
+                        Skill skill = userSkill.getSkill();
+                        return skill != null ? skill.getName().toLowerCase() : "";
+                    })
                     .collect(Collectors.toSet());
 
             List<String> matchedSkills = jobSkills.stream()
