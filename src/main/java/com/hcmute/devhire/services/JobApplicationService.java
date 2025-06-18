@@ -132,8 +132,82 @@ public class JobApplicationService implements IJobApplicationService{
 
     @Override
     public void sendEmailToApplicant(EmailRequestDTO emailRequestDTO) {
-
-        String htmlMessage = String.format("""
+        String htmlMessage;
+        if (emailRequestDTO.isConfirmation()) {
+            htmlMessage = String.format("""
+    <!DOCTYPE html>
+    <html lang='en'>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>CV Acceptance Notification</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 0;
+            }
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                text-align: center;
+                padding: 10px;
+                background-color: #4CAF50;
+                color: #ffffff;
+                border-radius: 8px 8px 0 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .content h1 {
+                color: #333333;
+            }
+            .content p {
+                color: #666666;
+                line-height: 1.6;
+            }
+            .button {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 5px;
+            }
+            .footer {
+                margin-top: 30px;
+                text-align: center;
+                font-size: 12px;
+                color: #aaaaaa;
+            }
+        </style>
+    </head>
+    <body>
+        <div class='email-container'>
+            <div class='header'>
+                <h2>CV accepted</h2>
+            </div>
+            <div class='content'>
+                <h1>Congratulations, %s!</h1>
+                <p>%s</p>
+            </div>
+            <div class='footer'>
+                <p>&copy; 2024 Our Company, Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """, emailRequestDTO.getName(), emailRequestDTO.getContent());
+        } else {
+            htmlMessage = String.format("""
     <!DOCTYPE html>
     <html lang='en'>
     <head>
@@ -206,6 +280,8 @@ public class JobApplicationService implements IJobApplicationService{
     </body>
     </html>
     """, emailRequestDTO.getName(), emailRequestDTO.getContent());
+        }
+        
         try {
             emailService.sendEmail(emailRequestDTO.getEmail(), emailRequestDTO.getSubject(), htmlMessage);
         } catch (MessagingException e) {

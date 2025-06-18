@@ -22,4 +22,6 @@ public class EmailRequestDTO {
 
     @NotBlank(message = "Content cannot be blank")
     private String content;
+
+    private boolean confirmation;
 }
