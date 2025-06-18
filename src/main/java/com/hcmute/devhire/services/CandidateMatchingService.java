@@ -79,6 +79,7 @@ public class CandidateMatchingService implements ICandidateMatchingService {
                         .cvFileUrl(cv.getCvUrl())
                         .matchedSkills(matchedSkills)
                         .latestApplyDate(latestApplyDate)
+                        .emailSent(user.getEmailSent())
                         .build();
                 result.add(dto);
             }
