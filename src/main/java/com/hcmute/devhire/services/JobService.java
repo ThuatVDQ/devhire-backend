@@ -39,6 +39,7 @@ public class JobService implements IJobService {
     private final FavoriteJobRepository favoriteJobRepository;
     private final IJobApplicationService jobApplicationService;
     private final INotificationService notificationService;
+    private final IEmailService emailService;
 
     @Override
     @Transactional
@@ -278,6 +279,86 @@ public class JobService implements IJobService {
                 .toList();
 
         return new PageImpl<>(sortedJobDTOs, pageRequest, jobPage.getTotalElements());
+    }
+
+    @Override
+    public void sendNotificationToUser(EmailRequestDTO emailRequestDTO, Long jobId) throws Exception {
+        try {
+            User user = userService.findByUserName(emailRequestDTO.getEmail());
+            if (user == null) {
+                throw new Exception("User not found");
+            }
+            String htmlMessage = String.format("""
+                <!DOCTYPE html>
+                <html lang='en'>
+                <head>
+                    <meta charset='UTF-8'>
+                    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <title>CV Match Notification</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background-color: #f4f4f4;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .email-container {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #ffffff;
+                            padding: 20px;
+                            border-radius: 8px;
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            text-align: center;
+                            padding: 10px;
+                            background-color: #4CAF50;
+                            color: #ffffff;
+                            border-radius: 8px 8px 0 0;
+                        }
+                        .content {
+                            padding: 20px;
+                        }
+                        .content h1 {
+                            color: #333333;
+                        }
+                        .content p {
+                            color: #666666;
+                            line-height: 1.6;
+                        }
+                        .footer {
+                            margin-top: 30px;
+                            text-align: center;
+                            font-size: 12px;
+                            color: #aaaaaa;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class='email-container'>
+                        <div class='header'>
+                            <h2>Your CV Matches a Job Opportunity!</h2>
+                        </div>
+                        <div class='content'>
+                            <h1>Congratulations, %s!</h1>
+                            <p>%s</p>
+                            <p>Thank you for your interest in joining our team!</p>
+                        </div>
+                        <div class='footer'>
+                            <p>&copy; 2024 Our Company, Inc. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """, emailRequestDTO.getName(), emailRequestDTO.getContent());
+            emailService.sendEmail(emailRequestDTO.getEmail(), emailRequestDTO.getSubject(), htmlMessage);
+            notificationService.createAndSendNotification(emailRequestDTO.getContent(), user.getUsername(), "/jobs/" + jobId);
+            user.setEmailSent(true);
+            userService.updateUser(user);
+        } catch (Exception e) {
+            throw new Exception("Error sending notification: " + e.getMessage());
+        }
     }
 
     @Override

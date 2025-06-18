@@ -284,6 +284,19 @@ public class JobController {
         }
     }
 
+    @PostMapping("/{jobId}/send-notification")
+    public ResponseEntity<?> sendNotificationToUser(
+            @PathVariable Long jobId,
+            @RequestBody EmailRequestDTO emailRequestDTO
+    ) {
+        try {
+            jobService.sendNotificationToUser(emailRequestDTO, jobId);
+            return ResponseEntity.ok().body("Notification sent to user successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     public void sendNewApplicationNotification(Long jobId, String letter, UserDTO applicant) throws Exception {
         Job job = jobService.findById(jobId);
         String recruiterEmail = job.getCompany().getCreatedBy().getEmail();

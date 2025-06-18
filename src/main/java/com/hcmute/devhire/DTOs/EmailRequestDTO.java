@@ -1,5 +1,6 @@
 package com.hcmute.devhire.DTOs;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,4 @@ public class EmailRequestDTO {
 
     @NotBlank(message = "Content cannot be blank")
     private String content;
-
-    private Boolean confirmation;
 }

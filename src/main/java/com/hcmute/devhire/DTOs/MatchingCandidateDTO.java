@@ -17,6 +17,9 @@ public class MatchingCandidateDTO {
     private String fullName;
     private String email;
 
+    @JsonProperty("email_sent")
+    private Boolean emailSent;
+
     @JsonProperty("match_percentage")
     private double matchPercentage;
     @JsonProperty("cv_file_name")

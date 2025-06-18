@@ -1,7 +1,6 @@
 package com.hcmute.devhire.services;
 
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
@@ -461,6 +460,11 @@ public class UserService implements IUserService{
         User user = optionalUser.get();
 
         return this.login(user.getEmail(), "", user.getRole().getId());
+    }
+
+    @Override
+    public User updateUser(User user) {
+        return userRepository.save(user);
     }
 
     private String generateHtmlMessage(EmailRequestDTO emailRequestDTO) {

@@ -36,4 +36,5 @@ public interface IUserService {
     String loginGoogle(UserDTO userDTO) throws Exception;
     void contactAdmin(EmailRequestDTO emailRequestDTO) throws Exception;
     String loginFacebook(UserDTO userDTO) throws Exception;
+    User updateUser(User user);
 }
