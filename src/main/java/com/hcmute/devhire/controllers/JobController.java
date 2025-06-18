@@ -298,7 +298,7 @@ public class JobController {
     @GetMapping("/company")
     public ResponseEntity<?> getJobsByRecruiterCompany(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String status,
+            @RequestParam(required = false) List<String> status,
             @RequestParam(required = false) String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit

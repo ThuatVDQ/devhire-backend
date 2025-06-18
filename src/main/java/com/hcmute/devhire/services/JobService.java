@@ -308,7 +308,7 @@ public class JobService implements IJobService {
     }
 
     @Override
-    public Page<JobDTO> getJobsByCompany(PageRequest pageRequest, String title, String status, String type, String username) throws Exception {
+    public Page<JobDTO> getJobsByCompany(PageRequest pageRequest, String title, List<String> status, String type, String username) throws Exception {
         try {
             Company company = companyService.findByUser(username);
             if (company == null) {
@@ -319,8 +319,12 @@ public class JobService implements IJobService {
                 spec = spec.and(JobSpecifications.hasKeyword(title));
             }
             if (status != null && !status.isEmpty()) {
-                spec = spec.and(JobSpecifications.hasStatus(status));
+                List<JobStatus> jobStatuses = status.stream()
+                        .map(s -> EnumUtil.getEnumFromString(JobStatus.class, s))
+                        .collect(Collectors.toList());
+                spec = spec.and(JobSpecifications.hasStatuses(jobStatuses));
             }
+
             if (type != null && !type.isEmpty()) {
                 spec = spec.and(JobSpecifications.hasJobType(type));
             }

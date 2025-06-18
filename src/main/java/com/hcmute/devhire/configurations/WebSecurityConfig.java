@@ -63,7 +63,7 @@ public class WebSecurityConfig {
         config.setAllowCredentials(true);
         config.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:*",
-                "http://116.110.41.77"
+                "http://devhire.io.vn"
         ));
         config.setAllowedMethods(Collections.singletonList("*"));
         config.setAllowedHeaders(Collections.singletonList("*"));
