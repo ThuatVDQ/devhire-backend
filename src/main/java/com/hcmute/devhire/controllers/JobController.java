@@ -37,6 +37,7 @@ public class JobController {
     private final IEmailService emailService;
     private final INotificationService notificationService;
     private final ISkillService skillService;
+    private final ICandidateMatchingService candidateMatchingService;
 
     @GetMapping("")
     public ResponseEntity<?> getAllJobs(
@@ -265,6 +266,19 @@ public class JobController {
             } else {
                 return ResponseEntity.badRequest().body("Please upload a file or provide a cvId");
             }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{jobId}/candidates/match")
+    public ResponseEntity<?> getMatchingCandidates(
+            @PathVariable Long jobId,
+            @RequestParam(defaultValue = "70") double threshold
+    ) {
+        try {
+            List<MatchingCandidateDTO> matches = candidateMatchingService.findMatchingCandidates(jobId, threshold);
+            return ResponseEntity.ok(matches);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

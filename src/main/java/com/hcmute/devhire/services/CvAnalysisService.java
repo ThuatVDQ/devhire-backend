@@ -34,15 +34,6 @@ public class CvAnalysisService implements ICvAnalysisService {
             // 4. Trích xuất kỹ năng
             result.setSkills(extractSkills(normalizedText));
 
-            // 5. Trích xuất kinh nghiệm (số năm)
-            result.setYearsOfExperience(nlpTextProcessor.estimateExperienceFromDates(normalizedText));
-
-            // 6. Trích xuất học vấn
-            result.setEducation(extractEducation(rawText));
-
-            // 7. Trích xuất chứng chỉ
-            result.setCertifications(extractCertifications(rawText));
-
             return result;
 
         } catch (IOException e) {
@@ -63,37 +54,5 @@ public class CvAnalysisService implements ICvAnalysisService {
         // Gộp thêm danh từ từ NLP
         //found.addAll(nlpTextProcessor.extractNouns(text));
         return found;
-    }
-
-    private List<String> extractEducation(String text) {
-        List<String> educations = new ArrayList<>();
-        List<String> keywords = Arrays.asList("bachelor", "master", "phd", "university", "college", "degree");
-
-        for (String line : text.split("\n")) {
-            for (String keyword : keywords) {
-                if (line.toLowerCase().contains(keyword)) {
-                    educations.add(line.trim());
-                    break;
-                }
-            }
-        }
-
-        return educations;
-    }
-
-    private List<String> extractCertifications(String text) {
-        List<String> certs = new ArrayList<>();
-        List<String> keywords = Arrays.asList("certificate", "certified", "certification", "AWS", "Azure", "PMP");
-
-        for (String line : text.split("\n")) {
-            for (String keyword : keywords) {
-                if (line.toLowerCase().contains(keyword)) {
-                    certs.add(line.trim());
-                    break;
-                }
-            }
-        }
-
-        return certs;
     }
 }

@@ -2,6 +2,7 @@ package com.hcmute.devhire.DTOs;
 
 import lombok.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -13,5 +14,5 @@ public class JobApplicationWithScoreDTO {
     private String applicantName;
     private String applicantEmail;
     private double score;
-    private Map<String, Double> scoreDetails;
+    private List<String> matchedSkills;
 }

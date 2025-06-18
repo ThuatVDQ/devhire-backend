@@ -272,14 +272,14 @@ public class JobApplicationService implements IJobApplicationService{
                     Files.readAllBytes(path)
             );
 
-            CvScoreResponse scoreResponse = cvScoringService.calculateCvScore(multipartFile, jobId);
+            CvScoreResponse scoreResponse = cvScoringService.calculateCvSkillMatch(multipartFile, jobId);
 
             result.add(JobApplicationWithScoreDTO.builder()
                     .applicationId(app.getId())
                     .applicantName(app.getUser().getFullName())
                     .applicantEmail(app.getUser().getEmail())
-                    .score(scoreResponse.getTotalScore() * 100)
-                    .scoreDetails(scoreResponse.getScoreDetails())
+                    .score(scoreResponse.getTotalScore())
+                    .matchedSkills(scoreResponse.getMatchedSkills())
                     .build());
         }
 

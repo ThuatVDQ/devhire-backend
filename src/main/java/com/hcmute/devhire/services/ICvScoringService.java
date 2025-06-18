@@ -6,5 +6,5 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 public interface ICvScoringService {
-    CvScoreResponse calculateCvScore(MultipartFile cvFile, Long jobId) throws IOException;
+    CvScoreResponse calculateCvSkillMatch(MultipartFile cvFile, Long jobId) throws IOException;
 }

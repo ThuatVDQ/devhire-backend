@@ -10,7 +10,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
     List<JobApplication> findByJobId(Long jobId);
@@ -59,4 +61,7 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
             Long jobId,
             JobApplicationStatus status
     );
+
+    @Query("SELECT MAX(j.updatedAt) FROM JobApplication j WHERE j.user.id = :userId")
+    Optional<LocalDateTime> findLatestApplyDateByUserId(@Param("userId") Long userId);
 }

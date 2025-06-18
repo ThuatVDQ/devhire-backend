@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -14,6 +15,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CvScoreResponse {
     private CvAnalysisResult cvAnalysis;
-    private double totalScore; // Điểm tổng (0-1)
-    private Map<String, Double> scoreDetails; // Điểm chi tiết các mục
+    private double totalScore; // phần trăm kỹ năng phù hợp
+    private List<String> matchedSkills; // Điểm chi tiết các mục
 }
