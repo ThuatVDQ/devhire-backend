@@ -185,6 +185,9 @@ public class JobApplicationController {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
         try {
+            if (emailRequestDTO.getConfirmation() == null) {
+                emailRequestDTO.setConfirmation(false);
+            }
             jobApplicationService.sendEmailToApplicant(emailRequestDTO);
             return ResponseEntity.ok("Email sent successfully.");
         } catch (Exception e) {
