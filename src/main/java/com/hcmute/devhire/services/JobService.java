@@ -353,7 +353,7 @@ public class JobService implements IJobService {
                 </html>
                 """, emailRequestDTO.getName(), emailRequestDTO.getContent());
             emailService.sendEmail(emailRequestDTO.getEmail(), emailRequestDTO.getSubject(), htmlMessage);
-            notificationService.createAndSendNotification(emailRequestDTO.getContent(), user.getUsername(), "/jobs/" + jobId);
+            notificationService.createAndSendNotification("A recruiter has found your profile suitable for a job!", user.getUsername(), "/jobs/" + jobId);
             user.setEmailSent(true);
             userService.updateUser(user);
         } catch (Exception e) {
