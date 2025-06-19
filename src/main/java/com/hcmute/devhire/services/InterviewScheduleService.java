@@ -47,19 +47,78 @@ public class InterviewScheduleService implements IInterviewScheduleService{
 
         String emailSubject = String.format("[DevHire] Interview schedule for position %s", job.getTitle());
 
-        String emailContent = String.format(
-                "<p>Dear %s,</p>" +
-                        "<p>You have an interview schedule arranged as follows:</p>" +
-                        "<ul>" +
-                        "<li><strong>Interviewer:</strong> %s</li>" +
-                        "<li><strong>Position:</strong> %s</li>" +
-                        "<li><strong>Time:</strong> %s</li>" +
-                        "<li><strong>Duration:</strong> %d minutes</li>" +
-                        "<li><strong>Location:</strong> %s</li>" +
-                        "</ul>" +
-                        "<p><strong>Note:</strong><br>%s</p>" +
-                        "<p>Please confirm your participation and double check the information on the DevHire system.</p>" +
-                        "<p>Best regards,<br>DevHire Team</p>",
+        String htmlMessage = String.format("""
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Interview Invitation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            padding: 20px;
+        }
+        .content h1 {
+            color: #333333;
+        }
+        .content p, .content li {
+            color: #666666;
+            line-height: 1.6;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+    </style>
+</head>
+<body>
+    <div class='email-container'>
+        <div class='header'>
+            <h2>Interview Invitation</h2>
+        </div>
+        <div class='content'>
+            <h1>Hello %s,</h1>
+            <p>You have been invited to an interview for the following position:</p>
+            <ul>
+                <li><strong>Interviewer:</strong> %s</li>
+                <li><strong>Position:</strong> %s</li>
+                <li><strong>Time:</strong> %s</li>
+                <li><strong>Duration:</strong> %d minutes</li>
+                <li><strong>Location:</strong> %s</li>
+            </ul>
+            <p><strong>Note:</strong><br>%s</p>
+            <p>Please confirm your participation and check details on the DevHire platform.</p>
+        </div>
+        <div class='footer'>
+            <p>&copy; 2024 DevHire. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+""",
                 interviewer.getFullName(),
                 jobApplication.getUser().getFullName(),
                 job.getTitle(),
@@ -78,7 +137,7 @@ public class InterviewScheduleService implements IInterviewScheduleService{
         emailService.sendEmail(
                 interviewer.getUsername(),
                 emailSubject,
-                emailContent
+                htmlMessage
         );
 
         return interviewScheduleRepository.save(
@@ -214,7 +273,7 @@ public class InterviewScheduleService implements IInterviewScheduleService{
     <body>
         <div class='email-container'>
             <div class='header'>
-                <h2>Job Application Update</h2>
+                <h2>Your interview result</h2>
             </div>
             <div class='content'>
                 <h1>Congratulations, %s!</h1>
